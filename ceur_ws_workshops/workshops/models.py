@@ -1,5 +1,8 @@
 from django.db import models
 import uuid
+from django.utils import timezone
+import datetime
+from django.contrib import admin
 
 class Editor(models.Model):
     volume_editor = models.CharField(max_length=100)
@@ -22,6 +25,16 @@ class Workshop(models.Model):
     regular_accepted_papers = models.ManyToManyField('Paper', related_name='regular_accepted_papers')
     short_accepted_papers = models.ManyToManyField('Paper', related_name='short_accepted_papers')
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    # pub_date = models.DateTimeField("date published")
+    # @admin.display(
+    #     boolean=True,
+    #     ordering="pub_date",
+    #     description="Published recently?",
+    # )
+    # def was_published_recently(self):
+    #     now = timezone.now()
+    #     return now - datetime.timedelta(days=1) <= self.pub_date <= now
+    
     def __str__(self):
         return self.workshop_title   
 
@@ -30,8 +43,8 @@ class Paper(models.Model):
     paper_title = models.CharField(max_length=200)
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     pages = models.CharField(max_length=10)
-    metadata = models.JSONField()  # Assuming metadata is stored as JSON
-    uploaded_file = models.FileField(upload_to='papers/')
+    # metadata = models.JSONField()  # Assuming metadata is stored as JSON
+    # uploaded_file = models.FileField(upload_to='papers/')
     # Licensing information fields
 
     def __str__(self):
