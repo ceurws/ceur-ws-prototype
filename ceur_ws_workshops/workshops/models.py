@@ -8,7 +8,8 @@ class Editor(models.Model):
     volume_editor = models.CharField(max_length=100)
 
 class Author(models.Model):
-    author = models.CharField(max_length=100)
+    name = models.CharField(max_length=100)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
 class Workshop(models.Model):
     volume_number = models.CharField(max_length=10)
