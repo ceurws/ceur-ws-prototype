@@ -1,0 +1,31 @@
+{% extends "workshops/create_workshop.html" %}
+
+{% block content %}
+  <h2>Preview Your Workshop</h2>
+  <div class="workshop-preview">
+    <form action="{% url 'workshops:edit_workshop' workshop.id %}" method="post">
+      {% csrf_token %}
+      <label for="workshop_title">Workshop Title:</label>
+      <input type="text" id="workshop_title" name="workshop_title" value="{{ workshop.workshop_title }}" required><br><br>
+
+      <label for="volume_number">Volume Number:</label>
+      <input type="text" id="volume_number" name="volume_number" value="{{ workshop.volume_number }}" required><br><br>
+
+      <label for="urn">URN:</label>
+      <input type="text" id="urn" name="urn" value="{{ workshop.urn }}" required><br><br>
+
+      <label for="publication_year">Publication Year:</label>
+      <input type="number" id="publication_year" name="publication_year" value="{{ workshop.publication_year }}" required><br><br>
+
+      <label for="license">License:</label>
+      <input type="text" id="license" name="license" value="{{ workshop.license }}" required><br><br>
+
+      <label for="location_time">Location and Time:</label>
+      <input type="text" id="location_time" name="location_time" value="{{ workshop.location_time }}" required><br><br>
+
+      <!-- Add other necessary fields here, prefilled with values from the workshop -->
+
+      <input type="submit" value="Confirm Changes">
+    </form>
+  </div>
+{% endblock %}

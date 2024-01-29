@@ -1,0 +1,46 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    height: 100vh; 
+}
+
+form {
+    margin: 20px auto; 
+    width: 50%; 
+}
+
+.workshop-preview {
+    background-color: #f2f2f2; /* Light grey background */
+    border: 1px solid #ddd; /* Grey border */
+    border-radius: 4px; /* Rounded borders */
+    padding: 8px; /* Some padding */
+    font-style: italic; /* Italic font style */
+}
+
+.workshop-preview input, 
+.workshop-preview select, 
+.workshop-preview textarea {
+    background-color: #e9e9e9; /* Even lighter grey for input fields */
+    border: none; /* No border for input fields */
+    box-shadow: none; /* No shadow */
+    font-size: 16px; /* Adjust font size as needed */
+}
