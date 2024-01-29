@@ -1,0 +1,7 @@
+{% extends 'workshops/create_workshop.html' %}
+
+{% block content %}
+  <h2>Workshop Created Successfully</h2>
+  <p>The workshop has been added to the database.</p>
+  <a href="{% url 'workshops:create_workshop' %}">Create Another Workshop</a>
+{% endblock %}

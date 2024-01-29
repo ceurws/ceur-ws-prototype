@@ -1,0 +1,15 @@
+{%extends 'workshops/index.html'%}
+
+
+{% block content %}
+
+<h1>Add Author</h1>
+
+<form action="{% url 'workshops:add_author' %}" method="post">
+    {% csrf_token %}
+    <label for="author_name">Author name:</label>
+    <input type="text" id="author_name" name="author_name"><br><br>
+    <input type="submit" value="Add Author">
+</form>
+
+{% endblock %}
