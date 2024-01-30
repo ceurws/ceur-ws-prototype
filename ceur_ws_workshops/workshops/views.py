@@ -5,23 +5,21 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 def index(request):
-    """"
-    View function for home page of site.
+    """
+    Renders the home page of the workshop site.
     """
     return render(request, 'workshops/index.html')
 
 def editor_added_success(request):
     """
-    View function for editor added success page.
+    Displays a success message after an editor has been successfully added.
     """
     return render(request, 'workshops/editor_added_success.html')
 
 def add_editor(request):
     """
-    View function for adding an editor.
-    db values: 
-    editor_name: name of the editor 
-
+    Handles the submission of the 'Add Editor' form. On POST, it saves the new editor to the database.
+    If the request is GET, it renders the form for adding a new editor.
     """
     if request.method == "POST":
         editor_name = request.POST.get("editor_name")
@@ -30,12 +28,18 @@ def add_editor(request):
         return redirect('workshops:editor_added_success')
     else:
         return render(request, "workshops/editor_form.html")
-    # return render(request, "workshops/editor_form.html")
 
 def paper_added_success(request):
+    """
+    Displays a success message after a paper has been successfully added.
+    """
     return render(request, 'workshops/paper_added_success.html')
 
 def add_paper(request):
+    """
+    Handles the submission of the 'Add Paper' form. On POST, it saves the new paper to the database.
+    If the request is GET, it renders the form for adding a new paper, along with the list of available workshops and authors.
+    """
     if request.method == "POST":
         paper_title = request.POST.get("paper_title")
         workshop_id = request.POST.get("workshop")
@@ -56,9 +60,16 @@ def add_paper(request):
         return render(request, "workshops/paper_form.html", {'workshops': workshops, 'authors': authors})
 
 def author_added_success(request):
+    """
+    Displays a success message after an author has been successfully added.
+    """
     return render(request, 'workshops/author_added_success.html')
 
 def add_author(request):
+    """
+    Handles the submission of the 'Add Author' form. On POST, it saves the new author to the database.
+    If the request is GET, it renders the form for adding a new author.
+    """
     if request.method == "POST":
         author_name = request.POST.get("author_name")
         if author_name:  # Check if author_name is not empty
@@ -70,9 +81,16 @@ def add_author(request):
 
 
 def workshop_created_success(request):
+    """
+    Displays a success message after a workshop has been successfully created.
+    """
     return render(request, "workshops/workshop_created_success.html")
 
 def create_workshop(request):
+    """
+    Handles the submission of the 'Create Workshop' form. On POST, it saves the new workshop to the database.
+    If the request is GET, it renders the form for creating a new workshop.
+    """
     if request.method == "POST":
         workshop_title = request.POST.get("workshop_title")
         volume_number = request.POST.get("volume_number")
@@ -105,6 +123,10 @@ def create_workshop(request):
 
 
 def edit_workshop(request, workshop_id):
+    """
+    Handles the editing of an existing workshop. On POST, it updates the workshop details in the database.
+    If the request is GET, it renders the form pre-filled with the existing workshop details for editing.
+    """
     workshop = get_object_or_404(Workshop, id=workshop_id)
 
     if request.method == "POST":
@@ -122,14 +144,7 @@ def edit_workshop(request, workshop_id):
 
         # Redirect to a confirmation page or pass the URLs to the template
         return render(request, "workshops/workshop_edit_success.html", {'organizer_url': organizer_url, 'author_url': author_url})
-        # Generate URLs or any other logic after updating
-        # For example:
-        # organizer_url = "/organizer_dashboard/{}".format(workshop.id)
-        # author_url = "/author_submission/{}".format(workshop.id)
-
-        # Redirect to a success page or pass the URLs to the template
-        # return redirect('workshops:workshop_edit_success')
-
+    
     return render(request, "workshops/edit_workshop.html", {'workshop': workshop})
 
 
