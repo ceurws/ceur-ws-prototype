@@ -1,5 +1,8 @@
+
 {% extends 'workshops/index.html' %}
+{% load static %}
 {% block content %}
+
   <h2>Create Workshop Volume</h2>
   <div class="form-container">
     <form action="{% url 'workshops:create_workshop' %}" method="post">
@@ -24,7 +27,8 @@
 
       <!-- Add other necessary fields here -->
 
-      <input type="submit" value="Create Workshop">
+      <input type="submit" value="Create Workshop" class="button-17">
     </form>
   </div>
 {% endblock %}
+

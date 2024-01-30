@@ -1,10 +1,13 @@
-{% extends "workshops/create_workshop.html" %}
 
+{% extends "workshops/create_workshop.html" %}
+{% load static %}
 {% block content %}
   <h2>Preview Your Workshop</h2>
+  <p>Are all the details correct?</p>
   <div class="workshop-preview">
     <form action="{% url 'workshops:edit_workshop' workshop.id %}" method="post">
       {% csrf_token %}
+      <!-- Make all input fields readonly to gray them out -->
       <label for="workshop_title">Workshop Title:</label>
       <input type="text" id="workshop_title" name="workshop_title" value="{{ workshop.workshop_title }}" required><br><br>
 
@@ -23,9 +26,13 @@
       <label for="location_time">Location and Time:</label>
       <input type="text" id="location_time" name="location_time" value="{{ workshop.location_time }}" required><br><br>
 
-      <!-- Add other necessary fields here, prefilled with values from the workshop -->
-
-      <input type="submit" value="Confirm Changes">
+      
+      <!-- <input type="submit" class="large-button" value="Confirm Changes"> -->
+     
+      <button class="button-17" role="button">Confirm Changes</button>
     </form>
   </div>
 {% endblock %}
+
+
+
