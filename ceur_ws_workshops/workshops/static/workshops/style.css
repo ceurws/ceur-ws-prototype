@@ -13,7 +13,7 @@ body {
     margin-bottom: 20px; 
 }
 
-input[type="text"] {
+.input-field {
     background: #FFFFFF;
     border: 1px solid #DADCE0;
     box-sizing: border-box;
@@ -28,14 +28,51 @@ input[type="text"] {
     transition: border-color 300ms, box-shadow 300ms;
 }
 
-input[type="text"]:focus {
+.input-field:focus {
     outline: none;
     border-color: #174ea6;
     box-shadow: 0 0 0 3px rgba(66,133,244,0.5); /* This adds a blue glow effect on focus */
 }
 
-input[type="text"]:hover {
+.input-field:hover {
     border-color: #174ea6;
+}
+
+.preview-field {
+    background: #eee9e9;
+    border: 1px solid #636466;
+    box-sizing: border-box;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 10px 0;
+    font-size: 16px;
+    line-height: 24px;
+    display: block;
+    width: 100%;
+    box-shadow: none; /* Remove any existing box-shadow */
+    transition: border-color 300ms, box-shadow 300ms;
+}
+
+.preview-field:focus {
+    outline: none;
+    border-color: #174ea6;
+    box-shadow: 0 0 0 3px rgba(66,133,244,0.5); /* This adds a blue glow effect on focus */
+}
+
+.preview-field:hover {
+    border-color: #174ea6;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between; /* Adjust as needed */
+  align-items: center; /* This will vertically align the buttons */
+  padding: 10px 0; /* Add some padding if necessary */
+}
+
+.button-77, .button-17 {
+  flex: 1; /* This will cause the buttons to share the available space */
+  margin: 0 5px; /* This adds a little space between the buttons */
 }
 
 /* Style the label to look similar to Stripe's design */
@@ -100,21 +137,6 @@ form {
     margin-top: 20px; /* Add some margin on the top */
 }
 
-.workshop-preview {
-    background-color: #f2f2f2; /* Light grey background */
-    border: 1px solid #ddd; /* Grey border */
-    border-radius: 4px; /* Rounded borders */
-    padding: 8px; /* Some padding */
-    font-style: italic; /* Italic font style */
-}
-
-.workshop-preview input[readonly], 
-.workshop-preview select[readonly], 
-.workshop-preview textarea[readonly] {
-    background-color: #ffffff; 
-    color: #686868; 
-    cursor: not-allowed;
-}
 
 .large-button:hover {
     background-color: #45a049; /* Slightly darker green on hover for feedback */
@@ -187,5 +209,107 @@ form {
 
 .button-17:disabled {
   box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0, rgba(60, 64, 67, .15) 0 4px 8px 3px;
+}
+
+
+.button-77 {
+  align-items: center;
+  appearance: none;
+  background-clip: padding-box;
+  background-color: initial;
+  background-image: none;
+  border-style: none;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  flex-direction: row;
+  flex-shrink: 0;
+  font-family: Eina01,sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  justify-content: center;
+  line-height: 24px;
+  margin: 0;
+  min-height: 64px;
+  outline: none;
+  overflow: visible;
+  padding: 19px 26px;
+  pointer-events: auto;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  text-transform: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  width: auto;
+  word-break: keep-all;
+  z-index: 0;
+}
+
+@media (min-width: 768px) {
+  .button-77 {
+    padding: 19px 32px;
+  }
+}
+
+.button-77:before,
+.button-77:after {
+  border-radius: 80px;
+}
+
+.button-77:before {
+  background-color: rgba(249, 58, 19, .32);
+  content: "";
+  display: block;
+  height: 100%;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: -2;
+}
+
+.button-77:after {
+  background-color: initial;
+  background-image: linear-gradient(92.83deg, #ff7426 0, #f93a13 100%);
+  bottom: 4px;
+  content: "";
+  display: block;
+  left: 4px;
+  overflow: hidden;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  transition: all 100ms ease-out;
+  z-index: -1;
+}
+
+.button-77:hover:not(:disabled):after {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  transition-timing-function: ease-in;
+}
+
+.button-77:active:not(:disabled) {
+  color: #ccc;
+}
+
+.button-77:active:not(:disabled):after {
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, .2), rgba(0, 0, 0, .2)), linear-gradient(92.83deg, #ff7426 0, #f93a13 100%);
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  top: 4px;
+}
+
+.button-77:disabled {
+  cursor: default;
+  opacity: .24;
 }
 
