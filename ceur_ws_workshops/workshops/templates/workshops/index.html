@@ -10,8 +10,8 @@
     <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
 </head>
 <body>
-    <header>
-        <!-- Header Content -->Submit your workshop here
+    <header class="header-title">
+        <!-- Header Content -->CEUR-WS Submission
     </header>
 
     <nav>
@@ -20,7 +20,20 @@
 
     <main>
         {% block content %}
-        <!-- Main content will be here -->
+        <form action="{% url 'workshops:create_workshop' %}" method="get">
+            <button type="submit" class="button-17">Create New Workshop</button>
+          </form>
+        
+          <form action="{% url 'workshops:add_paper' %}" method="get">
+            <button type="submit" class="button-17">Add New Paper</button>
+          </form>
+          <!-- Button to add a new editor -->
+          <form action="{% url 'workshops:add_editor' %}" method="get">
+            <button type="submit" class="button-17">Add New Editor</button>
+          </form>
+
+          <form action = "{% url 'workshops:add_author' %}" method="get">
+            <button type="submit" class="button-17">Add New Author</button>
         {% endblock %}
     </main>
 
