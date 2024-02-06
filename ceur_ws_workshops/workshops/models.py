@@ -8,7 +8,7 @@ class Editor(models.Model):
     volume_editor = models.CharField(max_length=100)
 
 class Author(models.Model):
-    name = models.CharField(max_length=100)
+    author_name = models.CharField(max_length=100, null= True, blank=True)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
 class Workshop(models.Model):
@@ -18,7 +18,7 @@ class Workshop(models.Model):
     license = models.CharField(max_length=50)
     workshop_title = models.CharField(max_length=200)
     location_time = models.CharField(max_length=200)
-    editors = models.ForeignKey(Editor, on_delete=models.CASCADE)
+    editors = models.ForeignKey(Editor, on_delete=models.CASCADE, null=True, blank=True)
     # need to include table of contents 
     # need to include submitted papers 
     submitted_papers = models.ManyToManyField('Paper', related_name='submitted_papers')

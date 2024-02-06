@@ -1,0 +1,315 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.header-title {
+    font-family: Arial, sans-serif; 
+    font-size: 32px;
+    color: #333; 
+    text-align: center; 
+    letter-spacing: 1px; 
+    line-height: 1.2; 
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px; 
+}
+
+.input-field {
+    background: #FFFFFF;
+    border: 1px solid #DADCE0;
+    box-sizing: border-box;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 10px 0;
+    font-size: 16px;
+    line-height: 24px;
+    display: block;
+    width: 100%;
+    box-shadow: none; /* Remove any existing box-shadow */
+    transition: border-color 300ms, box-shadow 300ms;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #174ea6;
+    box-shadow: 0 0 0 3px rgba(66,133,244,0.5); /* This adds a blue glow effect on focus */
+}
+
+.input-field:hover {
+    border-color: #174ea6;
+}
+
+.preview-field {
+    background: #eee9e9;
+    border: 1px solid #636466;
+    box-sizing: border-box;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 10px 0;
+    font-size: 16px;
+    line-height: 24px;
+    display: block;
+    width: 100%;
+    box-shadow: none; /* Remove any existing box-shadow */
+    transition: border-color 300ms, box-shadow 300ms;
+}
+
+.preview-field:focus {
+    outline: none;
+    border-color: #174ea6;
+    box-shadow: 0 0 0 3px rgba(66,133,244,0.5); /* This adds a blue glow effect on focus */
+}
+
+.preview-field:hover {
+    border-color: #174ea6;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between; /* Adjust as needed */
+  align-items: center; /* This will vertically align the buttons */
+  padding: 10px 0; /* Add some padding if necessary */
+}
+
+.button-77, .button-17 {
+  flex: 1; /* This will cause the buttons to share the available space */
+  margin: 0 5px; /* This adds a little space between the buttons */
+}
+
+/* Style the label to look similar to Stripe's design */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 16px;
+    line-height: 24px;
+}
+
+/* Adjust the button size and alignment as required */
+.button-17 {
+    font-size: 16px; 
+    padding: 10px 24px; 
+
+}
+
+
+form {
+    margin: 0;
+    padding: 0;
+}
+
+/* Align the form items */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%; 
+}
+
+.form-container form {
+    width: auto; 
+}
+
+.form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    height: 100vh; 
+}
+
+
+
+form {
+    margin: 20px auto; 
+    width: 50%; 
+    
+}
+.large-button {
+    background-color: #4CAF50; /* Green background for visibility */
+    color: white; /* White text for contrast */
+    padding: 15px 30px; /* Larger padding for a bigger button */
+    font-size: 18px; /* Larger font size for the button text */
+    border-radius: 5px; /* Rounded corners for the button */
+    border: none; /* Remove border */
+    cursor: pointer; /* Cursor as pointer to indicate it's clickable */
+    display: block; /* Make the button a block to fit width */
+    width: 100%; /* Full width of the container */
+    box-sizing: border-box; /* Adjust box-sizing */
+    margin-top: 20px; /* Add some margin on the top */
+}
+
+
+.large-button:hover {
+    background-color: #45a049; /* Slightly darker green on hover for feedback */
+} 
+
+.button-17 {
+  align-items: center;
+  appearance: none;
+  background-color: #fff;
+  border-radius: 24px;
+  border-style: none;
+  box-shadow: rgba(0, 0, 0, .2) 0 3px 5px -1px,rgba(0, 0, 0, .14) 0 6px 10px 0,rgba(0, 0, 0, .12) 0 1px 18px 0;
+  box-sizing: border-box;
+  color: #3c4043;
+  cursor: pointer;
+  display: inline-flex;
+  fill: currentcolor;
+  font-family: "Google Sans",Roboto,Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  height: 48px;
+  justify-content: center;
+  letter-spacing: .25px;
+  line-height: normal;
+  max-width: 100%;
+  overflow: visible;
+  padding: 2px 24px;
+  position: relative;
+  text-align: center;
+  text-transform: none;
+  transition: box-shadow 280ms cubic-bezier(.4, 0, .2, 1),opacity 15ms linear 30ms,transform 270ms cubic-bezier(0, 0, .2, 1) 0ms;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: auto;
+  will-change: transform,opacity;
+  z-index: 0;
+}
+
+.button-17:hover {
+  background: #F6F9FE;
+  color: #174ea6;
+}
+
+.button-17:active {
+  box-shadow: 0 4px 4px 0 rgb(60 64 67 / 30%), 0 8px 12px 6px rgb(60 64 67 / 15%);
+  outline: none;
+}
+
+.button-17:focus {
+  outline: none;
+  border: 2px solid #4285f4;
+}
+
+.button-17:not(:disabled) {
+  box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0, rgba(60, 64, 67, .15) 0 4px 8px 3px;
+}
+
+.button-17:not(:disabled):hover {
+  box-shadow: rgba(60, 64, 67, .3) 0 2px 3px 0, rgba(60, 64, 67, .15) 0 6px 10px 4px;
+}
+
+.button-17:not(:disabled):focus {
+  box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0, rgba(60, 64, 67, .15) 0 4px 8px 3px;
+}
+
+.button-17:not(:disabled):active {
+  box-shadow: rgba(60, 64, 67, .3) 0 4px 4px 0, rgba(60, 64, 67, .15) 0 8px 12px 6px;
+}
+
+.button-17:disabled {
+  box-shadow: rgba(60, 64, 67, .3) 0 1px 3px 0, rgba(60, 64, 67, .15) 0 4px 8px 3px;
+}
+
+
+.button-77 {
+  align-items: center;
+  appearance: none;
+  background-clip: padding-box;
+  background-color: initial;
+  background-image: none;
+  border-style: none;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  flex-direction: row;
+  flex-shrink: 0;
+  font-family: Eina01,sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  justify-content: center;
+  line-height: 24px;
+  margin: 0;
+  min-height: 64px;
+  outline: none;
+  overflow: visible;
+  padding: 19px 26px;
+  pointer-events: auto;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  text-transform: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: middle;
+  width: auto;
+  word-break: keep-all;
+  z-index: 0;
+}
+
+@media (min-width: 768px) {
+  .button-77 {
+    padding: 19px 32px;
+  }
+}
+
+.button-77:before,
+.button-77:after {
+  border-radius: 80px;
+}
+
+.button-77:before {
+  background-color: rgba(249, 58, 19, .32);
+  content: "";
+  display: block;
+  height: 100%;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  z-index: -2;
+}
+
+.button-77:after {
+  background-color: initial;
+  background-image: linear-gradient(92.83deg, #ff7426 0, #f93a13 100%);
+  bottom: 4px;
+  content: "";
+  display: block;
+  left: 4px;
+  overflow: hidden;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  transition: all 100ms ease-out;
+  z-index: -1;
+}
+
+.button-77:hover:not(:disabled):after {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  transition-timing-function: ease-in;
+}
+
+.button-77:active:not(:disabled) {
+  color: #ccc;
+}
+
+.button-77:active:not(:disabled):after {
+  background-image: linear-gradient(0deg, rgba(0, 0, 0, .2), rgba(0, 0, 0, .2)), linear-gradient(92.83deg, #ff7426 0, #f93a13 100%);
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  top: 4px;
+}
+
+.button-77:disabled {
+  cursor: default;
+  opacity: .24;
+}
+
