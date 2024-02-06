@@ -139,8 +139,12 @@ def edit_workshop(request, workshop_id):
         # Update other fields as necessary
 
         workshop.save()
-        organizer_url = "workshops:workshop_overview/{}".format(workshop.id)
+
+        organizer_url = reverse('workshops:workshop_overview', args=[workshop.id])
         author_url = "workshops:author_upload/{}".format(workshop.id)
+
+        # add in the following later:
+        # author_url = reverse('workshops:author_upload', args=[workshop.id])
 
         # Redirect to a confirmation page or pass the URLs to the template
         return render(request, "workshops/workshop_edit_success.html", {'organizer_url': organizer_url, 'author_url': author_url})
@@ -148,3 +152,6 @@ def edit_workshop(request, workshop_id):
     return render(request, "workshops/edit_workshop.html", {'workshop': workshop})
 
 
+def workshop_overview(request, workshop_id):
+    workshop = get_object_or_404(Workshop, id=workshop_id)
+    return render(request, 'workshops/workshop_overview.html', {'workshop': workshop})   
