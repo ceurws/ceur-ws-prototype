@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-from .views import add_editor, editor_added_success, create_workshop, workshop_created_success, edit_workshop
+from .views import add_editor, editor_added_success, create_workshop, workshop_created_success, edit_workshop, workshop_overview
 
 app_name = "workshops"
 
@@ -17,4 +17,6 @@ urlpatterns = [
     path ('paper_added_success/', views.paper_added_success, name='paper_added_success'),
     path('edit_workshop/<int:workshop_id>/', edit_workshop, name='edit_workshop'),
     path('create_workshop/<int:workshop_id>/', create_workshop, name='create_workshop'),
+    path('workshop_overview/<int:workshop_id>/', workshop_overview, name='workshop_overview')
+
 ]
