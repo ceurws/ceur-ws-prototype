@@ -4,9 +4,12 @@
 {% block content %}
   <p class = "header-title">Are all the details correct?</p>
   <div class="workshop-preview">
+    {% if workshop.id %}
     <form action="{% url 'workshops:edit_workshop' workshop.id %}" method="post">
+    {% else %}
+        <form action="{% url 'workshops:edit_workshop' %}" method="post">
+    {% endif %}
       {% csrf_token %}
-      <!-- Make all input fields readonly to gray them out -->
       <label for="workshop_title">Workshop Title:</label>
       <input type="text" id="workshop_title" name="workshop_title" value="{{ workshop.workshop_title }}" required class="preview-field" readonly><br><br>
 

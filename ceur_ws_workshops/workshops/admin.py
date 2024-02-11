@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Workshop, Author, Editor, Paper
 
 class WorkshopAdmin(admin.ModelAdmin):
-    list_display = ('workshop_title', 'publication_year')
+    list_display = ('workshop_title', 'publication_year', 'volume_number')
     search_fields = ['workshop_title']
 
 class PaperAdmin(admin.ModelAdmin):

@@ -16,6 +16,7 @@ urlpatterns = [
     path ('add_paper/', views.add_paper, name='add_paper'),
     path ('paper_added_success/', views.paper_added_success, name='paper_added_success'),
     path('edit_workshop/<int:workshop_id>/', edit_workshop, name='edit_workshop'),
+    path('edit_workshop', edit_workshop, name='edit_workshop'),
     path('create_workshop/<int:workshop_id>/', create_workshop, name='create_workshop'),
     path('workshop_overview/<int:workshop_id>/', workshop_overview, name='workshop_overview')
 
