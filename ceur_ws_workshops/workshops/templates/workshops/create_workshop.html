@@ -1,4 +1,3 @@
-
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
@@ -6,24 +5,51 @@
   <div class="form-container">
     <form action="{% url 'workshops:create_workshop' %}" method="post">
       {% csrf_token %}
-      <br>
-      <label for="workshop_title">Workshop Title:</label>
-      <input type="text" id="workshop_title" name="workshop_title" required class="input-field"><br><br>
 
-      <label for="volume_number">Volume Number:</label>
-      <input type="text" id="volume_number" name="volume_number" required class="input-field"><br><br>
+      <div class="form-field">
+        <label for="workshop_title">Workshop Title:</label>
+        <input type="text" id="workshop_title" name="workshop_title" required class="input-field">
+      </div>
 
-      <label for="urn">URN:</label>
-      <input type="text" id="urn" name="urn" required class="input-field"><br><br>
+      <div class="form-field">
+        <label for="volume_number">Volume Number:</label>
+        <input type="text" id="volume_number" name="volume_number" required class="input-field">
+      </div>
 
-      <label for="publication_year">Publication Year:</label>
-      <input type="number" id="publication_year" name="publication_year" required class="input-field"><br><br>
+      <div class="form-field">
+        <label for="urn">URN:</label>
+        <input type="text" id="urn" name="urn" required class="input-field">
+      </div>
 
-      <label for="license">License:</label>
-      <input type="text" id="license" name="license" required class="input-field"><br><br>
+      <div class="form-field">
+        <label for="publication_year">Publication Year:</label>
+        <input type="number" id="publication_year" name="publication_year" required class="input-field">
+      </div>
 
-      <label for="location_time">Location and Time:</label>
-      <input type="text" id="location_time" name="location_time" required class="input-field"><br><br>
+      <div class="form-field">
+        <label for="license">License:</label>
+        <input type="text" id="license" name="license" required class="input-field">
+      </div>
+
+      <div class="form-field">
+        <label for="location_time">Location and Time:</label>
+        <input type="text" id="location_time" name="location_time" required class="input-field">
+      </div>
+
+      <div class="form-field">
+        <label for="editor1">Workshop Editor 1:</label>
+        <input type="text" id="editor_1" name="editor_1" required class="input-field">
+      </div>
+
+      <div class="form-field">
+        <label for="editor2">Workshop Editor 2:</label>
+        <input type="text" id="editor_2" name="editor_2" required class="input-field">
+      </div>
+
+      <div class="form-field">
+        <label for="editor3">Workshop Editor 3:</label>
+        <input type="text" id="editor_3" name="editor_3" required class="input-field">
+      </div>
 
       <!-- Add other necessary fields here -->
 
@@ -31,4 +57,3 @@
     </form>
   </div>
 {% endblock %}
-
