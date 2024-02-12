@@ -1,0 +1,24 @@
+
+{% block content %}
+    <h1>Author Upload</h1>
+
+    <form action="{% url 'workshops:author_upload' workshop.id %}" method="post">
+        {% csrf_token %}
+
+        <label for="author_name">Author Name:</label>
+        <input type="text" id="author_name" name="author_name" required><br><br>
+
+        <label for="paper_title">Paper Title:</label>
+        <input type="text" id="paper_title" name="paper_title" required><br><br>
+
+        <label for="pages">Pages:</label>
+        <input type="number" id="pages" name="pages" required><br><br>
+
+        <label for="uploaded_file">Upload Paper:</label>
+        <input type="file" id="uploaded_file" name="uploaded_file" accept=".pdf, .doc, .docx" required><br><br>
+        
+        <input type="submit" value="Upload Author and Metadata">
+
+
+    </form>
+{% endblock %}

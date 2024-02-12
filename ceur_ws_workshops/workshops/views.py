@@ -9,82 +9,12 @@ def index(request):
     Renders the home page of the workshop site.
     """
     return render(request, 'workshops/index.html')
-
-def editor_added_success(request):
+    
+def metadata_added_success(request):
     """
-    Displays a success message after an editor has been successfully added.
+    Displays a success message after metadata has been successfully added.
     """
-    return render(request, 'workshops/editor_added_success.html')
-
-def add_editor(request):
-    """
-    Handles the submission of the 'Add Editor' form. On POST, it saves the new editor to the database.
-    If the request is GET, it renders the form for adding a new editor.
-    """
-    if request.method == "POST":
-        editor_name = request.POST.get("editor_name")
-        editor = Editor(volume_editor=editor_name)
-        editor.save()
-        return redirect('workshops:editor_added_success')
-    else:
-        return render(request, "workshops/editor_form.html")
-
-def paper_added_success(request):
-    """
-    Displays a success message after a paper has been successfully added.
-    """
-    return render(request, 'workshops/paper_added_success.html')
-
-def add_paper(request):
-    """
-    Handles the submission of the 'Add Paper' form. On POST, it saves the new paper to the database.
-    If the request is GET, it renders the form for adding a new paper, along with the list of available workshops and authors.
-    """
-    if request.method == "POST":
-        paper_title = request.POST.get("paper_title")
-        workshop_id = request.POST.get("workshop")
-        author_id = request.POST.get("author")
-        pages = request.POST.get("pages")
-
-        workshop = Workshop.objects.get(id=workshop_id)
-        author = Author.objects.get(id=author_id)
-
-        paper = Paper(paper_title=paper_title, workshop=workshop, author=author, pages=pages)
-        paper.save()
-
-        return redirect('workshops:paper_added_success')  # Redirect to a success page
-
-    else:
-        workshops = Workshop.objects.all()
-        authors = Author.objects.all()
-        return render(request, "workshops/paper_form.html", {'workshops': workshops, 'authors': authors})
-
-def author_added_success(request):
-    """
-    Displays a success message after an author has been successfully added.
-    """
-    return render(request, 'workshops/author_added_success.html')
-
-def add_author(request):
-    """
-    Handles the submission of the 'Add Author' form. On POST, it saves the new author to the database.
-    If the request is GET, it renders the form for adding a new author.
-    """
-    if request.method == "POST":
-        author_name = request.POST.get("author_name")
-        if author_name:  # Check if author_name is not empty
-            author = Author(author_name=author_name)
-            author.save()
-            return redirect('workshops:author_added_success')
-
-    return render(request, "workshops/author_form.html")
-
-
-def workshop_created_success(request):
-    """
-    Displays a success message after a workshop has been successfully created.
-    """
-    return render(request, "workshops/workshop_created_success.html")
+    return render(request, 'workshops/author_upload_success.html')
 
 def create_workshop(request):
     """
@@ -98,10 +28,16 @@ def create_workshop(request):
         publication_year = request.POST.get("publication_year")
         license = request.POST.get("license")
         location_time = request.POST.get("location_time")
-        # Fetch other fields similarly
+        
+        # Fetch editors (change later to something more pretty)
+        editor_1 = request.POST.get("editor_1")
+        editor_2 = request.POST.get("editor_2")
+        editor_3 = request.POST.get("editor_3")
 
-        # Handle the editor. Here, we allow null for simplicity.
-        editor = Editor.objects.first()  # Or handle editor selection differently
+        # Create new Editors for each editor name
+        editor_1 = Editor.objects.create(name=editor_1)
+        editor_2 = Editor.objects.create(name=editor_2)
+        editor_3 = Editor.objects.create(name=editor_3)
 
         # Create Workshop instance with a generated secret token
         new_workshop = Workshop(
@@ -111,11 +47,12 @@ def create_workshop(request):
             publication_year=publication_year,
             license=license,
             location_time=location_time,
-            editors=editor,
             secret_token=uuid.uuid4(),
             # Set other fields as necessary
         )
         new_workshop.save()
+        
+        new_workshop.editors.add(editor_1, editor_2, editor_3)
 
         return redirect(reverse('workshops:edit_workshop', args=(new_workshop.id,)))
 
@@ -141,10 +78,7 @@ def edit_workshop(request, workshop_id):
         workshop.save()
 
         organizer_url = reverse('workshops:workshop_overview', args=[workshop.id])
-        author_url = "workshops:author_upload/{}".format(workshop.id)
-
-        # add in the following later:
-        # author_url = reverse('workshops:author_upload', args=[workshop.id])
+        author_url = reverse('workshops:author_upload', args=[workshop.id])
 
         # Redirect to a confirmation page or pass the URLs to the template
         return render(request, "workshops/workshop_edit_success.html", {'organizer_url': organizer_url, 'author_url': author_url})
@@ -155,3 +89,28 @@ def edit_workshop(request, workshop_id):
 def workshop_overview(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
     return render(request, 'workshops/workshop_overview.html', {'workshop': workshop})   
+
+def author_upload(request, workshop_id):
+    workshop = get_object_or_404(Workshop, id=workshop_id)
+
+    if request.method == "POST":
+        author_name = request.POST.get("author_name")
+        paper_title = request.POST.get("paper_title")
+        pages = request.POST.get("pages")
+        uploaded_file = request.FILES.get("uploaded_file")
+
+        if author_name:
+            author = Author.objects.create(author_name=author_name)
+
+            # Create the paper with the provided metadata and file
+            paper = Paper.objects.create(
+                paper_title=paper_title,
+                workshop=workshop,
+                author=author,
+                pages=pages,
+                uploaded_file=uploaded_file
+            )
+
+            return redirect('workshops:metadata_added_success')
+
+    return render(request, "workshops/author_upload.html", {'workshop': workshop})
