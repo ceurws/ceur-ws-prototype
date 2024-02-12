@@ -18,5 +18,11 @@
     <p><strong>License:</strong> {{ workshop.license }}</p>
     <p><strong>Location and Time:</strong> {{ workshop.location_time }}</p>
 
+    <!-- Display editor names -->
+    <p><strong>Editors:</strong></p>
+    {% for editor in workshop.editors.all %}
+        <p>{{ editor.name }}</p>
+    {% endfor %}
+
 </body>
 </html>
