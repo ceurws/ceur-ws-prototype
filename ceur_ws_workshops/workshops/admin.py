@@ -10,9 +10,15 @@ class PaperAdmin(admin.ModelAdmin):
     search_fields = ['paper_title', 'author__author']
 
 class AuthorAdmin(admin.ModelAdmin):
+    list_display = ('author_name', 'id')
     search_fields = ['author']
+
+class EditorAdmin(admin.ModelAdmin):
+    list_display = ('name', 'id')
+    search_fields = ['name']
+    
 # Register your models here.
 admin.site.register(Workshop, WorkshopAdmin)
 admin.site.register(Author, AuthorAdmin)
-admin.site.register(Editor)
+admin.site.register(Editor, EditorAdmin)
 admin.site.register(Paper, PaperAdmin)
