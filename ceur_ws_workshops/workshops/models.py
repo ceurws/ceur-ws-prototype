@@ -17,7 +17,7 @@ class Workshop(models.Model):
     license = models.CharField(max_length=50)
     workshop_title = models.CharField(max_length=200)
     location_time = models.CharField(max_length=200)
-    editors = models.ManyToManyField(Editor, blank=True)  # Change this line to ManyToManyField
+    editors = models.ManyToManyField(Editor, blank=True)  
 
     # need to include table of contents 
     # need to include submitted papers 
