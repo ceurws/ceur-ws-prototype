@@ -1,6 +1,18 @@
 
 {% block content %}
     <h1>Metadata Upload Successful</h1>
-    <p>Your author and metadata have been successfully uploaded.</p>
+    <p>Your author and metadata have been successfully uploaded to <strong>{{ paper.workshop.workshop_title }}</strong> workshop</p>
+
+    <p><strong>Author Name:</strong> {{ paper.author.author_name }}</p>
+    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+    <p><strong>Pages:</strong> {{ paper.pages }}</p>
+
+    <p><strong>Paper uploaded:</strong>{{paper.uploaded_file}}</p>
+    <!-- href="{% url 'workshops:author_upload' workshop_id %}" -->
+    
+    <div class="button-group">
+        <input type = button value = "Back" onclick="javascript:history.go(-1)" >
+        <input type="submit" value="Confirm">
+      </div>
     <!-- You can provide additional content or links here as needed. -->
 {% endblock %}
