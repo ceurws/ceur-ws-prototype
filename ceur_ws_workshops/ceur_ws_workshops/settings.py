@@ -28,6 +28,12 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+# Add these lines to specify the base directory for media files
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+
+
+
 # Application definition
 
 INSTALLED_APPS = [
