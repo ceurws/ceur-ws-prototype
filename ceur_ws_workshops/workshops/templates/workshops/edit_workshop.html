@@ -3,7 +3,7 @@
 {% block content %}
   <p class="header-title">Are all the details correct?</p>
   <div class="workshop-preview">
-    <form action="{% url 'workshops:edit_workshop' workshop.id %}" method="post">
+    <form action="{% url 'workshops:edit_workshop' %}" method="post">
       {% csrf_token %}
       <!-- Make all input fields readonly to gray them out -->
       <label for="workshop_title">Workshop Title:</label>
@@ -26,7 +26,7 @@
 
       <!-- Display editor names -->
       <label for="editors">Editors:</label>
-      {% for editor in workshop.editors.all %}
+      {% for editor in editors %}
         <input type="text" id="editor_{{ forloop.counter }}" name="editor_{{ forloop.counter }}" value="{{ editor.name }}" class="preview-field" readonly><br><br>
       {% endfor %}
 
