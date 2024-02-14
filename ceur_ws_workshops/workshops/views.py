@@ -17,9 +17,11 @@ def metadata_added_success(request, paper_id):
     Displays a success message after metadata has been successfully added.
     """
     paper = get_object_or_404(Paper, id = paper_id)
+    editors = paper.workshop.editors.all()  
 
     return render(request, 'workshops/author_upload_success.html', {
         'paper': paper,
+        'editors': editors,
         'workshop_id': paper.workshop.id
     })
 
@@ -111,4 +113,17 @@ def author_upload(request, workshop_id):
     return render(request, "workshops/author_upload.html", {
         'workshop': workshop,
     })
+
+def author_overview(request, paper_id):
+    # Fetch the paper based on `paper_id`
+    paper = get_object_or_404(Paper, id=paper_id)
+    # Assuming Paper model has a relation to Workshop and Author
+    editors = paper.workshop.editors.all() if paper.workshop else []
+
+    return render(request, 'workshops/author_overview.html', {
+        'paper': paper,
+        'editors': editors
+    })
+
+
     
