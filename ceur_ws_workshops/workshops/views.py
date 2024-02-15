@@ -38,7 +38,8 @@ def edit_workshop(request, workshop_id=None):
         if request.method == "POST":
             workshop_data = request.session.pop('workshop_data')
             clean_data = {key: value for key, value in workshop_data.items() if key not in ['csrfmiddlewaretoken', 'editor_1', 'editor_2', 'editor_3']}
-
+            print('CLEAN DATA:\n',clean_data)
+            print()
             # Create the workshop instance
             workshop = Workshop.objects.create(**clean_data, secret_token=uuid.uuid4())
 
@@ -82,9 +83,15 @@ def workshop_edit_success(request, workshop_id):
         'author_url': author_url
     })
 
-def workshop_overview(request, workshop_id):
+def workshop_overview(request, workshop_id):    
     workshop = get_object_or_404(Workshop, id=workshop_id)
-    return render(request, 'workshops/workshop_overview.html', {'workshop': workshop})   
+
+    context = {
+        'papers' : [paper for paper in Paper.objects.filter(workshop=workshop)],
+        'workshop' : workshop
+    }
+
+    return render(request, 'workshops/workshop_overview.html', context)
 
 def author_upload(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
@@ -101,12 +108,11 @@ def author_upload(request, workshop_id):
             # Create the paper with the provided metadata and file
             paper = Paper.objects.create(
                 paper_title=paper_title,
-                workshop=workshop,
+                workshop=workshop,  
                 author=author,
                 pages=pages,
                 uploaded_file=uploaded_file
             )
-            
             return redirect('workshops:metadata_added_success', paper_id=paper.id)
     
 

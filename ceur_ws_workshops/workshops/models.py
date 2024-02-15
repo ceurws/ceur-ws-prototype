@@ -17,15 +17,13 @@ class Workshop(models.Model):
     license = models.CharField(max_length=50)
     workshop_title = models.CharField(max_length=200)
     location_time = models.CharField(max_length=200)
-    editors = models.ManyToManyField(Editor, blank=True)  
 
     # need to include table of contents 
     # need to include submitted papers 
-    
-    submitted_papers = models.ManyToManyField('Paper', related_name='submitted_papers')
+    editors = models.ManyToManyField(Editor, blank=True)  
+    authors = models.ManyToManyField(Author, related_name='workshops_authored')  # Many-to-Many with Author directly
     accepted_papers = models.ManyToManyField('Paper', related_name='accepted_papers')
-    regular_accepted_papers = models.ManyToManyField('Paper', related_name='regular_accepted_papers')
-    short_accepted_papers = models.ManyToManyField('Paper', related_name='short_accepted_papers')
+
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     def __str__(self):
