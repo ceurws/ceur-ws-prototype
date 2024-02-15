@@ -1,12 +1,17 @@
-
 {% block content %}
     <h1>Author Upload</h1>
 
-    <form action="{% url 'workshops:author_upload' workshop.id %}" method="post" enctype="multipart/form-data">
+    <form id="authorForm" action="{% url 'workshops:author_upload' workshop.id %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <label for="author_name">Author Name:</label>
-        <input type="text" id="author_name" name="author_name" required><br><br>
+        <input type="text" name="author_name" required><br><br>
+
+        <div id="additionalAuthors">
+            <!-- Additional author fields will be added here dynamically -->
+        </div>
+
+        <button type="button" onclick="addAuthorField()">Add Additional Author</button><br><br>
 
         <label for="paper_title">Paper Title:</label>
         <input type="text" id="paper_title" name="paper_title" required><br><br>
@@ -18,7 +23,23 @@
         <input type="file" id="uploaded_file" name="uploaded_file" accept=".pdf, .doc, .docx" required><br><br>
         
         <input type="submit" value="Upload Author and Metadata">
-
-
     </form>
+
+    <script>
+        function addAuthorField() {
+            var additionalAuthorsDiv = document.getElementById('additionalAuthors');
+            
+            var newLabel = document.createElement('label');
+            newLabel.innerHTML = 'Author Name:';
+            additionalAuthorsDiv.appendChild(newLabel);
+
+            var newAuthorField = document.createElement('input');
+            newAuthorField.type = 'text';
+            newAuthorField.name = 'author_name';
+            newAuthorField.required = true;
+
+            additionalAuthorsDiv.appendChild(newAuthorField);
+            additionalAuthorsDiv.appendChild(document.createElement('br'));
+        }
+    </script>
 {% endblock %}

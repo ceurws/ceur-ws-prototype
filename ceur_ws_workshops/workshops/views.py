@@ -97,22 +97,25 @@ def author_upload(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
     if request.method == "POST":
         
-        author_name = request.POST.get("author_name")
+        author_names = request.POST.getlist("author_name")
         paper_title = request.POST.get("paper_title")
         pages = request.POST.get("pages")
         uploaded_file = request.FILES.get("uploaded_file")
 
-        if author_name:
-            author = Author.objects.create(author_name=author_name)
+        if author_names:
 
+            authors = [Author.objects.create(author_name=author_name)for author_name in author_names]
+            print(author_names)
             # Create the paper with the provided metadata and file
             paper = Paper.objects.create(
                 paper_title=paper_title,
                 workshop=workshop,  
-                author=author,
                 pages=pages,
                 uploaded_file=uploaded_file
             )
+
+            paper.authors.add(*authors)
+
             return redirect('workshops:metadata_added_success', paper_id=paper.id)
     
 
