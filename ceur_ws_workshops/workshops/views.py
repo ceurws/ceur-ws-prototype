@@ -12,11 +12,18 @@ def index(request):
     """
     return render(request, 'workshops/index.html')
     
-def metadata_added_success(request):
+def metadata_added_success(request, paper_id):
     """
     Displays a success message after metadata has been successfully added.
     """
-    return render(request, 'workshops/author_upload_success.html')
+    paper = get_object_or_404(Paper, id = paper_id)
+    editors = paper.workshop.editors.all()  
+
+    return render(request, 'workshops/author_upload_success.html', {
+        'paper': paper,
+        'editors': editors,
+        'workshop_id': paper.workshop.id
+    })
 
 def create_workshop(request):
     if request.method == "POST":
@@ -62,7 +69,8 @@ def edit_workshop(request, workshop_id=None):
         if request.method == "POST":
             workshop.save()
             return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
-        return render(request, "workshops/edit_workshop.html", {'workshop': workshop, 'confirming': False})
+        return render(request, "workshops/edit_workshop.html", {'workshop': workshop, 
+                                                                'confirming': False})
 
 def workshop_edit_success(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
@@ -80,8 +88,8 @@ def workshop_overview(request, workshop_id):
 
 def author_upload(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
-
     if request.method == "POST":
+        
         author_name = request.POST.get("author_name")
         paper_title = request.POST.get("paper_title")
         pages = request.POST.get("pages")
@@ -98,7 +106,24 @@ def author_upload(request, workshop_id):
                 pages=pages,
                 uploaded_file=uploaded_file
             )
+            
+            return redirect('workshops:metadata_added_success', paper_id=paper.id)
+    
 
-            return redirect('workshops:metadata_added_success')
+    return render(request, "workshops/author_upload.html", {
+        'workshop': workshop,
+    })
 
-    return render(request, "workshops/author_upload.html", {'workshop': workshop})
+def author_overview(request, paper_id):
+    # Fetch the paper based on `paper_id`
+    paper = get_object_or_404(Paper, id=paper_id)
+    # Assuming Paper model has a relation to Workshop and Author
+    editors = paper.workshop.editors.all() if paper.workshop else []
+
+    return render(request, 'workshops/author_overview.html', {
+        'paper': paper,
+        'editors': editors
+    })
+
+
+    
