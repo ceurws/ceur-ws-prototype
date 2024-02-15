@@ -32,10 +32,10 @@ class Workshop(models.Model):
 class Paper(models.Model):
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE)
     paper_title = models.CharField(max_length=200)
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    authors = models.ManyToManyField(Author)  # Use ManyToManyField for multiple authors
     pages = models.CharField(max_length=10)
-    uploaded_file = models.FileField(upload_to='papers/')  # Add this line for file upload
-    
+    uploaded_file = models.FileField(upload_to='papers/')
+
     # Add other fields as needed (JSON?)
 
     def __str__(self):
