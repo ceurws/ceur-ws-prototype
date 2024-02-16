@@ -12,7 +12,7 @@ def index(request):
     """
     return render(request, 'workshops/index.html')
     
-def metadata_added_success(request, paper_id):
+def author_upload_check(request, paper_id):
     """
     Displays a success message after metadata has been successfully added.
     """
@@ -75,9 +75,9 @@ def edit_workshop(request, workshop_id=None):
 
 def workshop_edit_success(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
-    editors = workshop.editors.all()
     organizer_url = reverse('workshops:workshop_overview', args=[workshop.id])
     author_url = reverse('workshops:author_upload', args=[workshop.id])
+
     return render(request, "workshops/workshop_edit_success.html", {
         'organizer_url': organizer_url,
         'author_url': author_url
@@ -105,7 +105,7 @@ def author_upload(request, workshop_id):
         if author_names:
 
             authors = [Author.objects.create(author_name=author_name)for author_name in author_names]
-            print(author_names)
+
             # Create the paper with the provided metadata and file
             paper = Paper.objects.create(
                 paper_title=paper_title,
@@ -116,7 +116,7 @@ def author_upload(request, workshop_id):
 
             paper.authors.add(*authors)
 
-            return redirect('workshops:metadata_added_success', paper_id=paper.id)
+            return redirect('workshops:author_upload_check', paper_id=paper.id)
     
 
     return render(request, "workshops/author_upload.html", {
