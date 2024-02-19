@@ -5,6 +5,9 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.core.exceptions import MultipleObjectsReturned
+from django.core.files.storage import FileSystemStorage
+import os
+from django.conf import settings
 
 def index(request):
     """
@@ -12,19 +15,36 @@ def index(request):
     """
     return render(request, 'workshops/index.html')
     
-def metadata_added_success(request, paper_id):
-    """
-    Displays a success message after metadata has been successfully added.
-    """
-    paper = get_object_or_404(Paper, id = paper_id)
-    editors = paper.workshop.editors.all()  
+# def metadata_added_success(request, paper_id):
+#     """
+#     Displays a success message after metadata has been successfully added.
+#     """
+#     paper = get_object_or_404(Paper, id = paper_id)
+#     editors = paper.workshop.editors.all()  
 
+#     return render(request, 'workshops/author_upload_success.html', {
+#         'paper': paper,
+#         'editors': editors,
+#         'workshop_id': paper.workshop.id
+#     })
+def metadata_added_success(request):
+    # Fetch data from session
+    author_data = request.session.get('author_data')
+    if not author_data:
+        # If session data is missing, redirect to author upload page
+        return redirect('workshops:author_upload')
+
+    # Extract workshop ID from the session and fetch workshop and editors
+    workshop_id = author_data.get('workshop_id')
+    workshop = get_object_or_404(Workshop, id=workshop_id)
+    editors = workshop.editors.all()
+
+    # Pass the session data to the template
     return render(request, 'workshops/author_upload_success.html', {
-        'paper': paper,
+        'author_data': author_data,
+        'workshop': workshop,
         'editors': editors,
-        'workshop_id': paper.workshop.id
     })
-
 
 def create_workshop(request):
     if request.method == "POST":
@@ -134,34 +154,77 @@ def workshop_overview(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
     return render(request, 'workshops/workshop_overview.html', {'workshop': workshop})   
 
+# def author_upload(request, workshop_id):
+#     workshop = get_object_or_404(Workshop, id=workshop_id)
+#     if request.method == "POST":
+        
+#         author_name = request.POST.get("author_name")
+#         paper_title = request.POST.get("paper_title")
+#         pages = request.POST.get("pages")
+#         uploaded_file = request.FILES.get("uploaded_file")
+
+#         if author_name:
+#             author = Author.objects.create(author_name=author_name)
+
+#             # Create the paper with the provided metadata and file
+#             paper = Paper.objects.create(
+#                 paper_title=paper_title,
+#                 workshop=workshop,
+#                 author=author,
+#                 pages=pages,
+#                 uploaded_file=uploaded_file
+#             )
+            
+#             return redirect('workshops:metadata_added_success', paper_id=paper.id)
+    
+#     return render(request, "workshops/author_upload.html", {
+#         'workshop': workshop,
+#     })
 def author_upload(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
-    if request.method == "POST":
-        
-        author_name = request.POST.get("author_name")
-        paper_title = request.POST.get("paper_title")
-        pages = request.POST.get("pages")
-        uploaded_file = request.FILES.get("uploaded_file")
-
-        if author_name:
-            author = Author.objects.create(author_name=author_name)
-
-            # Create the paper with the provided metadata and file
-            paper = Paper.objects.create(
-                paper_title=paper_title,
-                workshop=workshop,
-                author=author,
-                pages=pages,
-                uploaded_file=uploaded_file
-            )
-            
-            return redirect('workshops:metadata_added_success', paper_id=paper.id)
     
+    if request.method == "POST":
+        # Handle the uploaded file
+        uploaded_file = request.FILES['uploaded_file']
+        fs = FileSystemStorage()
+        filename = fs.save(uploaded_file.name, uploaded_file)
+        uploaded_file_url = fs.url(filename)
+
+        # Store the form data and the path to the uploaded file in the session
+        request.session['author_data'] = {
+            'author_name': request.POST.get("author_name"),
+            'paper_title': request.POST.get("paper_title"),
+            'pages': request.POST.get("pages"),
+            'uploaded_file_url': uploaded_file_url,
+            'workshop_id': workshop_id,
+        }
+        return redirect('workshops:metadata_added_success')
+
     return render(request, "workshops/author_upload.html", {
         'workshop': workshop,
     })
 
+def confirm_and_save_author_data(request):
+    author_data = request.session.pop('author_data', None)
 
+    if author_data:
+        workshop = get_object_or_404(Workshop, id=author_data['workshop_id'])
+        author= Author.objects.create(author_name=author_data['author_name'])
+        
+        # Assuming Paper model has a 'file' or similar field for the uploaded file
+        paper = Paper.objects.create(
+            paper_title=author_data['paper_title'],
+            author=author,
+            pages=author_data['pages'],
+            uploaded_file=author_data['uploaded_file_url'],
+            workshop=workshop
+        )
+
+        # Redirect to a page showing the paper details or a success message
+        return redirect('workshops:author_overview', paper_id=paper.id)
+    else:
+        # Handle case where session data is missing, e.g., redirect to upload form
+        return redirect('some_error_handling_view')
 
 def author_overview(request, paper_id):
     # Fetch the paper based on `paper_id`
