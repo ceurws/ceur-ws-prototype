@@ -18,4 +18,5 @@ urlpatterns = [
     path('metadata_added_success/<int:paper_id>', views.metadata_added_success, name='metadata_added_success'),
     path('metadata_added_success/', views.metadata_added_success, name='metadata_added_success'),
     path('author_overview/<int:paper_id>/', views.author_overview, name='author_overview'),
+    path('confirm_and_save_author_data/', views.confirm_and_save_author_data, name='confirm_and_save_author_data'),
 ]
