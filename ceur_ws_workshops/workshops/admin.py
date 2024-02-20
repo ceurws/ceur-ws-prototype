@@ -11,7 +11,7 @@ class PaperAdmin(admin.ModelAdmin):
 
 class AuthorAdmin(admin.ModelAdmin):
     list_display = ('author_name', 'id')
-    search_fields = ['author_name']
+    search_fields = ['author']
 
 class EditorAdmin(admin.ModelAdmin):
     list_display = ('name', 'id')

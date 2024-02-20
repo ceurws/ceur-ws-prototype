@@ -2,7 +2,7 @@
 {% block content %}
     <h1>Are all the details correct?</h1>
     
-    <p><strong>Workshop:</strong> {{ workshop.workshop_title }}</p>
+    <p><strong>Workshop:</strong> {{ paper.workshop.workshop_title }}</p>
 
     <p><strong>Workshop Editors:</strong>
     {% for editor in editors %}
@@ -10,23 +10,18 @@
       <br>{{ editor.name }}
     {% endfor %}
       
-    <p><strong>Author Name:</strong> {{ author_data.author_name }}</p>
-    <p><strong>Paper Title:</strong> {{ author_data.paper_title }}</p>
-    <p><strong>Pages:</strong> {{ author_data.pages }}</p>
+    <p><strong>Author Name:</strong> {{ paper.author.author_name }}</p>
+    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+    <p><strong>Pages:</strong> {{ paper.pages }}</p>
 
-    <p><strong>Paper uploaded:</strong>{{author_data.uploaded_file}}</p>
-    
+    <p><strong>Paper uploaded:</strong>{{paper.uploaded_file}}</p>
+    <!-- href="{% url 'workshops:author_upload' workshop_id %}" -->
     
       {% csrf_token %}
     <div class="button-group">
         <input type = button value = "Edit details" onclick="javascript:history.go(-1)" >
-        <form action="{% url 'workshops:confirm_and_save_author_data' %}" method="post">
-          {% csrf_token %}
-          <button type="submit">Confirm details</button>
-      </form>
+        <a type = "button" href="{% url 'workshops:author_overview' paper_id=paper.id %}" class="button">Confirm details</a>
       </div>
     <!-- You can provide additional content or links here as needed. -->
     
 {% endblock %}
-
-
