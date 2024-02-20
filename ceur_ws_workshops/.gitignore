@@ -5,3 +5,6 @@ workshops/**/__pycache__/
 workshops/__pycache__/
 
 ceur_ws_workshops/__pycache__/
+
+db.sqlite3
+
