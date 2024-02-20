@@ -6,13 +6,15 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.core.exceptions import MultipleObjectsReturned
 
+from .forms import CreateWorkshopForm
+
 def index(request):
     """
     Renders the home page of the workshop site.
     """
     return render(request, 'workshops/index.html')
     
-def metadata_added_success(request, paper_id):
+def author_upload_check(request, paper_id):
     """
     Displays a success message after metadata has been successfully added.
     """
@@ -37,27 +39,25 @@ def edit_workshop(request, workshop_id=None):
     if 'workshop_data' in request.session:
         if request.method == "POST":
             workshop_data = request.session.pop('workshop_data')
-            clean_data = {key: value for key, value in workshop_data.items() if key not in ['csrfmiddlewaretoken', 'editor_1', 'editor_2', 'editor_3']}
 
-            # Create the workshop instance
+            # extract editors and create editor objects
+            editors = [workshop_data[key] for key in workshop_data if key.startswith('editor')]
+            editor_objects = [Editor.objects.create(name=editor_name)for editor_name in editors]
+
+            # create workshop instance by extracting unnecessary data
+            clean_data = {key: value for key, value in workshop_data.items() if key not in ['csrfmiddlewaretoken','editor_1','editor_2','editor_3','editor_4','editor_5']}
             workshop = Workshop.objects.create(**clean_data, secret_token=uuid.uuid4())
 
-            for editor_key in ['editor_1', 'editor_2', 'editor_3']:
-                editor_name = workshop_data.get(editor_key)
-                if editor_name:
-                    try:
-                        editor, created = Editor.objects.get_or_create(name=editor_name)
-                        workshop.editors.add(editor)
-                    except MultipleObjectsReturned:
-                        editor = Editor.objects.filter(name=editor_name).first()
-                        workshop.editors.add(editor)
+            # add all editor objects to the workshop
+            workshop.editors.add(*editor_objects)
 
             return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
     
         else:
             # Render form for final confirmation using session data
             workshop_data = request.session.get('workshop_data')
-            editors = [Editor(name=workshop_data.get(key)) for key in ['editor_1', 'editor_2', 'editor_3'] if workshop_data.get(key)]
+            editor_names = [workshop_data[key] for key in workshop_data if key.startswith('editor')]
+            editors = [Editor(name=name) for name in editor_names]
             return render(request, "workshops/edit_workshop.html", {
                 'workshop': workshop_data,
                 'confirming': True,
@@ -74,40 +74,48 @@ def edit_workshop(request, workshop_id=None):
 
 def workshop_edit_success(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
-    editors = workshop.editors.all()
     organizer_url = reverse('workshops:workshop_overview', args=[workshop.id])
     author_url = reverse('workshops:author_upload', args=[workshop.id])
+
     return render(request, "workshops/workshop_edit_success.html", {
         'organizer_url': organizer_url,
         'author_url': author_url
     })
 
-def workshop_overview(request, workshop_id):
+def workshop_overview(request, workshop_id):    
     workshop = get_object_or_404(Workshop, id=workshop_id)
-    return render(request, 'workshops/workshop_overview.html', {'workshop': workshop})   
+
+    context = {
+        'papers' : [paper for paper in Paper.objects.filter(workshop=workshop)],
+        'workshop' : workshop
+    }
+
+    return render(request, 'workshops/workshop_overview.html', context)
 
 def author_upload(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
     if request.method == "POST":
         
-        author_name = request.POST.get("author_name")
+        author_names = request.POST.getlist("author_name")
         paper_title = request.POST.get("paper_title")
         pages = request.POST.get("pages")
         uploaded_file = request.FILES.get("uploaded_file")
 
-        if author_name:
-            author = Author.objects.create(author_name=author_name)
+        if author_names:
+
+            authors = [Author.objects.create(author_name=author_name)for author_name in author_names]
 
             # Create the paper with the provided metadata and file
             paper = Paper.objects.create(
                 paper_title=paper_title,
-                workshop=workshop,
-                author=author,
+                workshop=workshop,  
                 pages=pages,
                 uploaded_file=uploaded_file
             )
-            
-            return redirect('workshops:metadata_added_success', paper_id=paper.id)
+
+            paper.authors.add(*authors)
+
+            return redirect('workshops:author_upload_check', paper_id=paper.id)
     
 
     return render(request, "workshops/author_upload.html", {
