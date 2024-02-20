@@ -3,7 +3,7 @@
 {% block content %}
   <h2 class="header-title">Create Workshop Volume</h2>
   <div class="form-container">
-    <form action="{% url 'workshops:create_workshop' %}" method="post">
+    <form action="{% url 'workshops:create_workshop' %}" method="post" id="workshopForm">
       {% csrf_token %}
 
       <div class="form-field">
@@ -36,24 +36,41 @@
         <input type="text" id="location_time" name="location_time" required class="input-field">
       </div>
 
-      <div class="form-field">
-        <label for="editor1">Workshop Editor 1:</label>
-        <input type="text" id="editor_1" name="editor_1" required class="input-field">
+      <div class="form-field" id="editorsContainer">
+        <div id="editors">
+          <div class="form-field">
+            <label for="editor1">Workshop Editor 1:</label>
+            <input type="text" id="editor_1" name="editor_1" required class="input-field">
+          </div>
+          <!-- Editor fields will be dynamically added here -->
+        </div>
+        <button type="button" onclick="addEditorField()">Add Editor</button>
       </div>
-
-      <div class="form-field">
-        <label for="editor2">Workshop Editor 2:</label>
-        <input type="text" id="editor_2" name="editor_2" required class="input-field">
-      </div>
-
-      <div class="form-field">
-        <label for="editor3">Workshop Editor 3:</label>
-        <input type="text" id="editor_3" name="editor_3" required class="input-field">
-      </div>
-
-      <!-- Add other necessary fields here -->
 
       <input type="submit" value="Create Workshop" class="button-17">
     </form>
   </div>
+
+  <script>
+    var editorCount = 1; // Initial number of editors
+
+    function addEditorField() {
+      var editorsDiv = document.getElementById('editors');
+      var newEditorInput = document.createElement('input');
+      newEditorInput.type = 'text';
+      newEditorInput.name = 'editor_' + (++editorCount);
+      newEditorInput.required = true;
+      newEditorInput.className = 'input-field';
+
+      var newEditorLabel = document.createElement('label');
+      newEditorLabel.innerHTML = 'Workshop Editor ' + editorCount + ':';
+
+      var newEditorDiv = document.createElement('div');
+      newEditorDiv.className = 'form-field';
+      newEditorDiv.appendChild(newEditorLabel);
+      newEditorDiv.appendChild(newEditorInput);
+
+      editorsDiv.appendChild(newEditorDiv);
+    }
+  </script>
 {% endblock %}

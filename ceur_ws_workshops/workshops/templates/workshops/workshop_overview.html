@@ -21,8 +21,29 @@
     <!-- Display editor names -->
     <p><strong>Editors:</strong></p>
     {% for editor in workshop.editors.all %}
-        <p>{{ editor.name }}</p>
+    <li>{{ editor.name }}
     {% endfor %}
+
+    <hr>
+
+    <!-- Display paper information -->
+    <h2>Papers</h2>
+    <ul>
+        {% for paper in papers %}
+            <li>
+                <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+                <p><strong>Authors:</strong>
+                    {% for author in paper.authors.all %}
+                        {{ author.author_name }}
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <p><strong>Pages:</strong> {{ paper.pages }}</p>
+                <p><strong>Uploaded File:</strong> {{ paper.uploaded_file }}</p>
+                <!-- Add additional details as needed -->
+            </li>
+        {% endfor %}
+    </ul>
 
 </body>
 </html>
