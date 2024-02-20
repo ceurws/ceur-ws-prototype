@@ -26,11 +26,10 @@
 
       <!-- Display editor names -->
       <label for="editors">Editors:</label>
-      {% if editors %}
-        {% for editor in editors %}
-          <input type="text" id="editor_{{ forloop.counter }}" name="editor_{{ forloop.counter }}" value="{{ editor.name }}" class="preview-field" readonly><br><br>
-        {% endfor %}
-      {% endif %}
+      {% for editor in editors %}
+        <input type="text" id="editor_{{ forloop.counter }}" name="editor_{{ forloop.counter }}" value="{{ editor.name }}" class="preview-field" readonly><br><br>
+      {% endfor %}
+
       <div class="button-group">
         <input type = button value = "Edit details" onclick="javascript:history.go(-1)" >
         <input type="submit" value="Confirm" class="button-17">
