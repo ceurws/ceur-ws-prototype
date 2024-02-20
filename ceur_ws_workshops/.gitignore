@@ -2,3 +2,6 @@ __pycache__/
 .DS_STORE
 
 workshops/**/__pycache__/
+workshops/__pycache__/
+
+ceur_ws_workshops/__pycache__/
