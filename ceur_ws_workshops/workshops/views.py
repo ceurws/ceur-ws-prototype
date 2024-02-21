@@ -14,11 +14,11 @@ def index(request):
     """
     return render(request, 'workshops/index.html')
     
-def author_upload_check(request, paper_id):
+def author_upload_check(request, secret_token):
     """
     Displays a success message after metadata has been successfully added.
     """
-    paper = get_object_or_404(Paper, id = paper_id)
+    paper = get_object_or_404(Paper, secret_token=secret_token)
     editors = paper.workshop.editors.all()  
 
     return render(request, 'workshops/author_upload_success.html', {
@@ -124,16 +124,16 @@ def author_upload(request, secret_token):
 
             paper.authors.add(*authors)
 
-            return redirect('workshops:author_upload_check', paper_id=paper.id)
+            return redirect('workshops:author_upload_check', secret_token = paper.secret_token)
     
 
     return render(request, "workshops/author_upload.html", {
         'workshop': workshop,
     })
 
-def author_overview(request, paper_id):
+def author_overview(request, secret_token):
     # Fetch the paper based on `paper_id`
-    paper = get_object_or_404(Paper, id=paper_id)
+    paper = get_object_or_404(Paper, secret_token=secret_token)
     # Assuming Paper model has a relation to Workshop and Author
     editors = paper.workshop.editors.all() if paper.workshop else []
 

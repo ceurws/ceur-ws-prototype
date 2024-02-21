@@ -23,11 +23,10 @@
     <p><strong>Pages:</strong> {{ paper.pages }}</p>
     <p><strong>Paper uploaded:</strong> {{ paper.uploaded_file }}</p>
     
-    
     {% csrf_token %}
     <div class="button-group">
         <input type="button" value="Edit details" onclick="javascript:history.go(-1)">
-        <a type="button" href="{% url 'workshops:author_overview' paper_id=paper.id %}" class="button">Confirm details</a>
+        <a type="button" href="{% url 'workshops:author_overview' secret_token=paper.secret_token %}" class="button">Confirm details</a>
     </div>
     <!-- You can provide additional content or links here as needed. -->
     
