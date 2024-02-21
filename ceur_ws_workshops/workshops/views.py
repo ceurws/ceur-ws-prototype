@@ -83,16 +83,16 @@ def edit_workshop(request, workshop_id=None):
 
 def workshop_edit_success(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
-    organizer_url = reverse('workshops:workshop_overview', args=[workshop.id])
-    author_url = reverse('workshops:author_upload', args=[workshop.id])
+    organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
+    author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
 
     return render(request, "workshops/workshop_edit_success.html", {
         'organizer_url': organizer_url,
         'author_url': author_url
     })
 
-def workshop_overview(request, workshop_id):    
-    workshop = get_object_or_404(Workshop, id=workshop_id)
+def workshop_overview(request, secret_token):    
+    workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
     context = {
         'papers' : [paper for paper in Paper.objects.filter(workshop=workshop)],
@@ -101,8 +101,8 @@ def workshop_overview(request, workshop_id):
 
     return render(request, 'workshops/workshop_overview.html', context)
 
-def author_upload(request, workshop_id):
-    workshop = get_object_or_404(Workshop, id=workshop_id)
+def author_upload(request, secret_token):
+    workshop = get_object_or_404(Workshop, secret_token=secret_token)
     if request.method == "POST":
         
         author_names = request.POST.getlist("author_name")
