@@ -1,2 +1,6 @@
 __pycache__/
 .DS_STORE
+
+ceur_ws_workshops/__pycache__/
+workshops/__pycache__/
+db.sqlite3
