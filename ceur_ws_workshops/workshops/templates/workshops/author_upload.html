@@ -1,3 +1,5 @@
+{% extends "workshops/workshop_edit_success.html" %}
+{% load static %}
 {% block content %}
     <h1>Author Upload</h1>
 
@@ -22,7 +24,7 @@
         <label for="uploaded_file">Upload Paper:</label>
         <input type="file" id="uploaded_file" name="uploaded_file" accept=".pdf, .doc, .docx" required><br><br>
         
-        <input type="submit" value="Upload Author and Metadata">
+        <input type="submit" value="Upload Author and Metadata" class="button-17">
     </form>
 
     <script>
