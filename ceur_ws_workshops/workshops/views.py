@@ -64,13 +64,22 @@ def edit_workshop(request, workshop_id=None):
                 'editors': editors
             })
     else:
-        workshop = get_object_or_404(Workshop, id=workshop_id) if workshop_id else None
-        editors = workshop.editors.all()
-        if request.method == "POST":
+        workshop = None  
+        if workshop_id:
+            workshop = get_object_or_404(Workshop, id=workshop_id)
+        editors = workshop.editors.all() if workshop else []  
+        
+        if request.method == "POST" and workshop:  
             workshop.save()
             return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
-        return render(request, "workshops/edit_workshop.html", {'workshop': workshop, 
-                                                                'confirming': False})
+        
+        # The confirming context variable needs careful handling; it should be true if in session-related logic
+        confirming = 'workshop_data' in request.session
+        return render(request, "workshops/edit_workshop.html", {
+            'workshop': workshop,
+            'confirming': confirming,
+            'editors': editors
+        })
 
 def workshop_edit_success(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
