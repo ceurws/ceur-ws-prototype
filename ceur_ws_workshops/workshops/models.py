@@ -19,7 +19,7 @@ class Workshop(models.Model):
     location_time = models.CharField(max_length=200)
     editors = models.ManyToManyField(Editor, blank=True)  
 
-    # need to include table of contents 
+    # need to include table of content
     # need to include submitted papers 
     
     submitted_papers = models.ManyToManyField('Paper', related_name='submitted_papers')

@@ -72,13 +72,6 @@ def edit_workshop(request, workshop_id=None):
                 if editor_name:
                     editor, created = Editor.objects.get_or_create(name=editor_name)
                     workshop.editors.add(editor)
-            context = {
-            'workshop': workshop_data,
-            'confirming': True,
-            'editors': editors,
-            }
-            # Clear session data and redirect
-            # del request.session['workshop_data']
             return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
 
         # Preparing for the confirmation page but not saving anything yet
@@ -102,44 +95,6 @@ def edit_workshop(request, workshop_id=None):
         'confirming': 'workshop_data' in request.session,
         'editors': editors,
     })
-    # if 'workshop_data' in request.session:
-    #     if request.method == "POST":
-    #         workshop_data = request.session.pop('workshop_data')
-    #         clean_data = {key: value for key, value in workshop_data.items() if key not in ['csrfmiddlewaretoken', 'editor_1', 'editor_2', 'editor_3']}
-
-    #         # Create the workshop instance
-    #         workshop = Workshop.objects.create(**clean_data, secret_token=uuid.uuid4())
-
-    #         for editor_key in ['editor_1', 'editor_2', 'editor_3']:
-    #             editor_name = workshop_data.get(editor_key)
-    #             if editor_name:
-    #                 try:
-    #                     editor, created = Editor.objects.get_or_create(name=editor_name)
-    #                     workshop.editors.add(editor)
-    #                 except MultipleObjectsReturned:
-    #                     editor = Editor.objects.filter(name=editor_name).first()
-    #                     workshop.editors.add(editor)
-
-    #         return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
-    
-    #     else:
-    #         # Render form for final confirmation using session data
-    #         workshop_data = request.session.get('workshop_data')
-    #         editors = [Editor(name=workshop_data.get(key)) for key in ['editor_1', 'editor_2', 'editor_3'] if workshop_data.get(key)]
-    #         return render(request, "workshops/edit_workshop.html", {
-    #             'workshop': workshop_data,
-    #             'confirming': True,
-    #             'editors': editors
-    #         })
-    # else:
-    #     workshop = get_object_or_404(Workshop, id=workshop_id) if workshop_id else None
-    #     editors = workshop.editors.all()
-    #     if request.method == "POST":
-    #         workshop.save()
-    #         return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
-    #     return render(request, "workshops/edit_workshop.html", {'workshop': workshop, 
-    #                                                             'confirming': False})
-
 def workshop_edit_success(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
     editors = workshop.editors.all()
@@ -154,32 +109,6 @@ def workshop_overview(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
     return render(request, 'workshops/workshop_overview.html', {'workshop': workshop})   
 
-# def author_upload(request, workshop_id):
-#     workshop = get_object_or_404(Workshop, id=workshop_id)
-#     if request.method == "POST":
-        
-#         author_name = request.POST.get("author_name")
-#         paper_title = request.POST.get("paper_title")
-#         pages = request.POST.get("pages")
-#         uploaded_file = request.FILES.get("uploaded_file")
-
-#         if author_name:
-#             author = Author.objects.create(author_name=author_name)
-
-#             # Create the paper with the provided metadata and file
-#             paper = Paper.objects.create(
-#                 paper_title=paper_title,
-#                 workshop=workshop,
-#                 author=author,
-#                 pages=pages,
-#                 uploaded_file=uploaded_file
-#             )
-            
-#             return redirect('workshops:metadata_added_success', paper_id=paper.id)
-    
-#     return render(request, "workshops/author_upload.html", {
-#         'workshop': workshop,
-#     })
 def author_upload(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
     
