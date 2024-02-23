@@ -35,7 +35,7 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author)  # Use ManyToManyField for multiple authors
     pages = models.CharField(max_length=10)
     uploaded_file = models.FileField(upload_to='papers/')
-
+    secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     # Add other fields as needed (JSON?)
 
     def __str__(self):

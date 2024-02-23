@@ -14,11 +14,11 @@ def index(request):
     """
     return render(request, 'workshops/index.html')
     
-def author_upload_check(request, paper_id):
+def author_upload_check(request, secret_token):
     """
     Displays a success message after metadata has been successfully added.
     """
-    paper = get_object_or_404(Paper, id = paper_id)
+    paper = get_object_or_404(Paper, secret_token=secret_token)
     editors = paper.workshop.editors.all()  
 
     return render(request, 'workshops/author_upload_success.html', {
@@ -64,26 +64,35 @@ def edit_workshop(request, workshop_id=None):
                 'editors': editors
             })
     else:
-        workshop = get_object_or_404(Workshop, id=workshop_id) if workshop_id else None
-        editors = workshop.editors.all()
-        if request.method == "POST":
+        workshop = None  
+        if workshop_id:
+            workshop = get_object_or_404(Workshop, id=workshop_id)
+        editors = workshop.editors.all() if workshop else []  
+        
+        if request.method == "POST" and workshop:  
             workshop.save()
             return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
-        return render(request, "workshops/edit_workshop.html", {'workshop': workshop, 
-                                                                'confirming': False})
+        
+        # The confirming context variable needs careful handling; it should be true if in session-related logic
+        confirming = 'workshop_data' in request.session
+        return render(request, "workshops/edit_workshop.html", {
+            'workshop': workshop,
+            'confirming': confirming,
+            'editors': editors
+        })
 
 def workshop_edit_success(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
-    organizer_url = reverse('workshops:workshop_overview', args=[workshop.id])
-    author_url = reverse('workshops:author_upload', args=[workshop.id])
+    organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
+    author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
 
     return render(request, "workshops/workshop_edit_success.html", {
         'organizer_url': organizer_url,
         'author_url': author_url
     })
 
-def workshop_overview(request, workshop_id):    
-    workshop = get_object_or_404(Workshop, id=workshop_id)
+def workshop_overview(request, secret_token):    
+    workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
     context = {
         'papers' : [paper for paper in Paper.objects.filter(workshop=workshop)],
@@ -92,8 +101,8 @@ def workshop_overview(request, workshop_id):
 
     return render(request, 'workshops/workshop_overview.html', context)
 
-def author_upload(request, workshop_id):
-    workshop = get_object_or_404(Workshop, id=workshop_id)
+def author_upload(request, secret_token):
+    workshop = get_object_or_404(Workshop, secret_token=secret_token)
     if request.method == "POST":
         
         author_names = request.POST.getlist("author_name")
@@ -115,16 +124,16 @@ def author_upload(request, workshop_id):
 
             paper.authors.add(*authors)
 
-            return redirect('workshops:author_upload_check', paper_id=paper.id)
+            return redirect('workshops:author_upload_check', secret_token = paper.secret_token)
     
 
     return render(request, "workshops/author_upload.html", {
         'workshop': workshop,
     })
 
-def author_overview(request, paper_id):
+def author_overview(request, secret_token):
     # Fetch the paper based on `paper_id`
-    paper = get_object_or_404(Paper, id=paper_id)
+    paper = get_object_or_404(Paper, secret_token=secret_token)
     # Assuming Paper model has a relation to Workshop and Author
     editors = paper.workshop.editors.all() if paper.workshop else []
 

@@ -123,24 +123,7 @@ form {
     width: 50%; 
     
 }
-.large-button {
-    background-color: #4CAF50; /* Green background for visibility */
-    color: white; /* White text for contrast */
-    padding: 15px 30px; /* Larger padding for a bigger button */
-    font-size: 18px; /* Larger font size for the button text */
-    border-radius: 5px; /* Rounded corners for the button */
-    border: none; /* Remove border */
-    cursor: pointer; /* Cursor as pointer to indicate it's clickable */
-    display: block; /* Make the button a block to fit width */
-    width: 100%; /* Full width of the container */
-    box-sizing: border-box; /* Adjust box-sizing */
-    margin-top: 20px; /* Add some margin on the top */
-}
 
-
-.large-button:hover {
-    background-color: #45a049; /* Slightly darker green on hover for feedback */
-} 
 
 .button-17 {
   align-items: center;
@@ -220,7 +203,7 @@ form {
   background-image: none;
   border-style: none;
   box-sizing: border-box;
-  color: #fff;
+  color: #da0b0b;
   cursor: pointer;
   display: inline-block;
   flex-direction: row;
@@ -261,7 +244,7 @@ form {
 }
 
 .button-77:before {
-  background-color: rgba(249, 58, 19, .32);
+  background-color: rgba(64, 16, 6, 0.32);
   content: "";
   display: block;
   height: 100%;
