@@ -1,13 +1,25 @@
 {% block content %}
     <h1>Author and Paper Overview</h1>
     <p>Your author and metadata have been successfully uploaded to <strong>{{ paper.workshop.workshop_title }}</strong> workshop</p>
-    <p><strong>Author Name:</strong> {{ paper.author.author_name }}</p>
-    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
-    <p><strong>Pages:</strong> {{ paper.pages }}</p>
-    <p><strong>Uploaded File:</strong> {{ paper.uploaded_file.name }}</p>
+    <p><strong>Workshop:</strong> {{ paper.workshop.workshop_title }}</p>
     <p><strong>Workshop Editors:</strong>
-    {% for editor in editors %}
-    <br>
-      {{ editor.name }}<br>
-    {% endfor %}
+      <ul>
+          {% for editor in editors %}
+              <li>{{ editor.name }}</li>
+          {% endfor %}
+      </ul>
+  </p>
+    <hr>
+    
+    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+    <p><strong>Author Names:</strong>
+        <ul>
+            {% for author in paper.authors.all %}
+                <li>{{ author.author_name }}</li>
+            {% endfor %}
+        </ul>
+    </p>
+    <p><strong>Pages:</strong> {{ paper.pages }}</p>
+    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+
 {% endblock %}
