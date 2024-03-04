@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.core.exceptions import MultipleObjectsReturned
 
-from .forms import WorkshopForm
+from .forms import WorkshopForm, EditorFormSet
 
 def index(request):
     """
@@ -28,26 +28,39 @@ def author_upload_check(request, secret_token):
     })
 
 def create_workshop(request):
-    # handles second post of form data and saves the data to the database
+    # handles the second post of form data and saves the data to the database
     if request.method == "POST" and 'submit_button' in request.POST: 
-        workshop = Workshop()       
-        form = WorkshopForm(request.POST, instance=workshop)
-        form.save()
+        formset = EditorFormSet(request.POST)
+        form = WorkshopForm(request.POST)
 
-        return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
+        if form.is_valid() and formset.is_valid():
+            workshop = form.save()  # Save the workshop object and get the instance with an ID
+            instances = formset.save()
+
+            workshop.editors.add(*instances)
+            print(workshop.workshop_city)
+            print(instances)
+            print([editor.id for editor in instances])
+
+
+            return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
+
 
     # handles first post of form data
     elif request.method == "POST":
+
         # Create a bound form
         form = WorkshopForm(request.POST)
+        editor_form = EditorFormSet(data=request.POST)
 
         if form.is_valid():
-            return render(request, 'workshops/edit_workshop.html', {'form': form})
+            return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form})
 
     else:
         form = WorkshopForm()
+        editor_form = EditorFormSet(queryset=Editor.objects.none())
         
-        return render(request, "workshops/create_workshop.html", {'form': form})
+        return render(request, "workshops/create_workshop.html", {'form': form, 'editor_form':editor_form})
 
 def workshop_edit_success(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
@@ -62,6 +75,7 @@ def workshop_edit_success(request, workshop_id):
 def workshop_overview(request, secret_token):    
     workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
+    print(workshop.editors)
     context = {
         'papers' : [paper for paper in Paper.objects.filter(workshop=workshop)],
         'workshop' : workshop
