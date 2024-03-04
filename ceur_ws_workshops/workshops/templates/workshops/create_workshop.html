@@ -2,75 +2,14 @@
 {% load static %}
 {% block content %}
   <h2 class="header-title">Create Workshop Volume</h2>
-  <div class="form-container">
-    <form action="{% url 'workshops:create_workshop' %}" method="post" id="workshopForm">
+  <!-- Replace the workshop details with the form -->
+    
+  <!-- Workshop Form -->
+    <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
+      {{ form.as_p }}
 
-      <div class="form-field">
-        <label for="workshop_title">Workshop Title:</label>
-        <input type="text" id="workshop_title" name="workshop_title" required class="input-field">
-      </div>
+      <input type="submit" value="Save Workshop">
+  </form>
 
-      <div class="form-field">
-        <label for="volume_number">Volume Number:</label>
-        <input type="text" id="volume_number" name="volume_number" required class="input-field">
-      </div>
-
-      <div class="form-field">
-        <label for="urn">URN:</label>
-        <input type="text" id="urn" name="urn" required class="input-field">
-      </div>
-
-      <div class="form-field">
-        <label for="publication_year">Publication Year:</label>
-        <input type="number" id="publication_year" name="publication_year" required class="input-field">
-      </div>
-
-      <div class="form-field">
-        <label for="license">License:</label>
-        <input type="text" id="license" name="license" required class="input-field">
-      </div>
-
-      <div class="form-field">
-        <label for="location_time">Location and Time:</label>
-        <input type="text" id="location_time" name="location_time" required class="input-field">
-      </div>
-
-      <div class="form-field" id="editorsContainer">
-        <div id="editors">
-          <div class="form-field">
-            <label for="editor1">Workshop Editor 1:</label>
-            <input type="text" id="editor_1" name="editor_1" required class="input-field">
-          </div>
-          <!-- Editor fields will be dynamically added here -->
-        </div>
-        <button type="button" onclick="addEditorField()">Add Editor</button>
-      </div>
-
-      <input type="submit" value="Create Workshop" class="button-17">
-    </form>
-  </div>
-
-  <script>
-    var editorCount = 1; // Initial number of editors
-
-    function addEditorField() {
-      var editorsDiv = document.getElementById('editors');
-      var newEditorInput = document.createElement('input');
-      newEditorInput.type = 'text';
-      newEditorInput.name = 'editor_' + (++editorCount);
-      newEditorInput.required = true;
-      newEditorInput.className = 'input-field';
-
-      var newEditorLabel = document.createElement('label');
-      newEditorLabel.innerHTML = 'Workshop Editor ' + editorCount + ':';
-
-      var newEditorDiv = document.createElement('div');
-      newEditorDiv.className = 'form-field';
-      newEditorDiv.appendChild(newEditorLabel);
-      newEditorDiv.appendChild(newEditorInput);
-
-      editorsDiv.appendChild(newEditorDiv);
-    }
-  </script>
 {% endblock %}

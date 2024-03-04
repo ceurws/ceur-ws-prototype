@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.core.exceptions import MultipleObjectsReturned
 
-from .forms import CreateWorkshopForm
+from .forms import WorkshopForm
 
 def index(request):
     """
@@ -28,58 +28,26 @@ def author_upload_check(request, secret_token):
     })
 
 def create_workshop(request):
-    if request.method == "POST":
-        # Temporarily store the data in the session instead of saving to the database
-        request.session['workshop_data'] = request.POST.dict()
-        return redirect('workshops:edit_workshop')
+    # handles second post of form data and saves the data to the database
+    if request.method == "POST" and 'submit_button' in request.POST: 
+        workshop = Workshop()       
+        form = WorkshopForm(request.POST, instance=workshop)
+        form.save()
 
-    return render(request, "workshops/create_workshop.html")
+        return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
 
-def edit_workshop(request, workshop_id=None):
-    if 'workshop_data' in request.session:
-        if request.method == "POST":
-            workshop_data = request.session.pop('workshop_data')
+    # handles first post of form data
+    elif request.method == "POST":
+        # Create a bound form
+        form = WorkshopForm(request.POST)
 
-            # extract editors and create editor objects
-            editors = [workshop_data[key] for key in workshop_data if key.startswith('editor')]
-            editor_objects = [Editor.objects.create(name=editor_name)for editor_name in editors]
+        if form.is_valid():
+            return render(request, 'workshops/edit_workshop.html', {'form': form})
 
-            # create workshop instance by extracting unnecessary data
-            clean_data = {key: value for key, value in workshop_data.items() if key not in ['csrfmiddlewaretoken','editor_1','editor_2','editor_3','editor_4','editor_5']}
-            workshop = Workshop.objects.create(**clean_data, secret_token=uuid.uuid4())
-
-            # add all editor objects to the workshop
-            workshop.editors.add(*editor_objects)
-
-            return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
-    
-        else:
-            # Render form for final confirmation using session data
-            workshop_data = request.session.get('workshop_data')
-            editor_names = [workshop_data[key] for key in workshop_data if key.startswith('editor')]
-            editors = [Editor(name=name) for name in editor_names]
-            return render(request, "workshops/edit_workshop.html", {
-                'workshop': workshop_data,
-                'confirming': True,
-                'editors': editors
-            })
     else:
-        workshop = None  
-        if workshop_id:
-            workshop = get_object_or_404(Workshop, id=workshop_id)
-        editors = workshop.editors.all() if workshop else []  
+        form = WorkshopForm()
         
-        if request.method == "POST" and workshop:  
-            workshop.save()
-            return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
-        
-        # The confirming context variable needs careful handling; it should be true if in session-related logic
-        confirming = 'workshop_data' in request.session
-        return render(request, "workshops/edit_workshop.html", {
-            'workshop': workshop,
-            'confirming': confirming,
-            'editors': editors
-        })
+        return render(request, "workshops/create_workshop.html", {'form': form})
 
 def workshop_edit_success(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
