@@ -22,7 +22,7 @@
 
     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
     <p><strong>Pages:</strong> {{ paper.pages }}</p>
-    <p><strong>Paper uploaded:</strong> {{ paper.uploaded_file }}</p>
+    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
     
     {% csrf_token %}
     <div class="button-group">

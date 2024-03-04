@@ -1,39 +1,9 @@
 {% extends "workshops/create_workshop.html" %}
-{% load static %}
 {% block content %}
   <p class="header-title">Are all the details correct?</p>
-  <div class="workshop-preview">
-    <form action="{% url 'workshops:edit_workshop' %}" method="post">
-      {% csrf_token %}
-      <!-- Make all input fields readonly to gray them out -->
-      <label for="workshop_title">Workshop Title:</label>
-      <input type="text" id="workshop_title" name="workshop_title" value="{{ workshop.workshop_title }}" required class="preview-field" readonly><br><br>
-
-      <label for="volume_number">Volume Number:</label>
-      <input type="text" id="volume_number" name="volume_number" value="{{ workshop.volume_number }}" required class="preview-field" readonly><br><br>
-
-      <label for="urn">URN:</label>
-      <input type="text" id="urn" name="urn" value="{{ workshop.urn }}" required class="preview-field" readonly><br><br>
-
-      <label for="publication_year">Publication Year:</label>
-      <input type="number" id="publication_year" name="publication_year" value="{{ workshop.publication_year }}" required class="preview-field" readonly><br><br>
-
-      <label for="license">License:</label>
-      <input type="text" id="license" name="license" value="{{ workshop.license }}" required class="preview-field" readonly><br><br>
-
-      <label for="location_time">Location and Time:</label>
-      <input type="text" id="location_time" name="location_time" value="{{ workshop.location_time }}" required class="preview-field" readonly><br><br>
-
-      <!-- Display editor names -->
-      <label for="editors">Editors:</label>
-      {% for editor in editors %}
-        <input type="text" id="editor_{{ forloop.counter }}" name="editor_{{ forloop.counter }}" value="{{ editor.name }}" class="preview-field" readonly><br><br>
-      {% endfor %}
-
-      <div class="button-group">
-        <input type = button value = "Edit details" onclick="javascript:history.go(-1)" class="button-17">
-        <input type="submit" value="Confirm" class="button-17">
-      </div>
-    </form>
-  </div>
+  <form id="validation-form" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" name="submit_button" value="Confirm">
+  </form>
 {% endblock %}
