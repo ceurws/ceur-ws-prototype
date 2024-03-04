@@ -4,6 +4,7 @@
   <form id="validation-form" method="post">
     {% csrf_token %}
     {{ form.as_p }}
+    {{ editor_form.as_p }}
     <input type="submit" name="submit_button" value="Confirm">
   </form>
 {% endblock %}
