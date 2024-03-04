@@ -38,9 +38,6 @@ def create_workshop(request):
             instances = formset.save()
 
             workshop.editors.add(*instances)
-            print(workshop.workshop_city)
-            print(instances)
-            print([editor.id for editor in instances])
 
 
             return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
