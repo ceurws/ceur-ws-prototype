@@ -39,7 +39,6 @@ def create_workshop(request):
 
             workshop.editors.add(*instances)
 
-
             return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
 
 
@@ -50,7 +49,7 @@ def create_workshop(request):
         form = WorkshopForm(request.POST)
         editor_form = EditorFormSet(data=request.POST)
 
-        if form.is_valid():
+        if form.is_valid() and editor_form.is_valid():
             return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form})
 
     else:
