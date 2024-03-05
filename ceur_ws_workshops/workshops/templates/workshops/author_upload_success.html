@@ -1,12 +1,12 @@
 {% load static %}
 {% block content %}
-    <h1>Are all the details correct?</h1>
+    <h1>Paper Submitted correctly</h1>
     
-    <p><strong>Workshop:</strong> {{ paper.workshop.workshop_title }}</p>
+    <p><strong>Workshop:</strong> {{ workshop.workshop_title }}</p>
 
     <p><strong>Workshop Editors:</strong>
         <ul>
-            {% for editor in editors %}
+            {% for editor in workshop.editors.all %}
                 <li>{{ editor.name }}</li>
             {% endfor %}
         </ul>

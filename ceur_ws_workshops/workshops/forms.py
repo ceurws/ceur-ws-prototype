@@ -49,7 +49,7 @@ AuthorFormSet = modelformset_factory(
                                             'placeholder': 'Enter the university of the author'}),
             'author_uni_url': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the URL of the university'}),
-        }
+        })
 
 
 EditorFormSet = modelformset_factory(
