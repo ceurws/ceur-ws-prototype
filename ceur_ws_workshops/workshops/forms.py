@@ -1,13 +1,15 @@
+
 from .models import Workshop, Editor, Paper, Author
 from django import forms
 from django.forms import modelformset_factory
 from django.forms import TextInput, FileField, FileInput
+
 class WorkshopForm(forms.ModelForm):
     class Meta:
         model = Workshop
         fields = ['workshop_title', 'workshop_description', 'workshop_city', 'workshop_country',
                    'workshop_begin_date', 'workshop_end_date', 'urn', 'submitted_by']
-        
+
         widgets = {
             'workshop_title': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the title of the workshop'}),
@@ -23,10 +25,13 @@ class WorkshopForm(forms.ModelForm):
                                             'placeholder': 'John Doe'}),
         }
 
+
+
 class PaperForm(forms.ModelForm):
     class Meta:
         model = Paper
         fields = ['paper_title', 'pages', 'uploaded_file']
+
         widgets = {
             'paper_title': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the title of the paper'}),
@@ -45,7 +50,7 @@ AuthorFormSet = modelformset_factory(
             'author_uni_url': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the URL of the university'}),
         }
-)
+
 
 EditorFormSet = modelformset_factory(
     Editor, fields=('name', 'university', 'university_country', 'university_url', 'research_group', 'research_group_url'), extra=1,
