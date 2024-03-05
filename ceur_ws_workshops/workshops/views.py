@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.core.exceptions import MultipleObjectsReturned
 
-from .forms import WorkshopForm, EditorFormSet
+from .forms import WorkshopForm, EditorFormSet, AuthorFormSet, PaperForm
 
 def index(request):
     """
@@ -38,10 +38,6 @@ def create_workshop(request):
             instances = formset.save()
 
             workshop.editors.add(*instances)
-            print(workshop.workshop_city)
-            print(instances)
-            print([editor.id for editor in instances])
-
 
             return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
 
@@ -75,7 +71,6 @@ def workshop_edit_success(request, workshop_id):
 def workshop_overview(request, secret_token):    
     workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
-    print(workshop.editors)
     context = {
         'papers' : [paper for paper in Paper.objects.filter(workshop=workshop)],
         'workshop' : workshop
@@ -87,31 +82,26 @@ def author_upload(request, secret_token):
     workshop = get_object_or_404(Workshop, secret_token=secret_token)
     if request.method == "POST":
         
-        author_names = request.POST.getlist("author_name")
-        paper_title = request.POST.get("paper_title")
-        pages = request.POST.get("pages")
-        uploaded_file = request.FILES.get("uploaded_file")
+        author_formset = AuthorFormSet(request.POST)
+        paper_form = PaperForm(request.POST)       
 
-        if author_names:
+        if paper_form.is_valid() and author_formset.is_valid():
+            print('isvalid')
+            paper = paper_form.save()  # Save the workshop object and get the instance with an ID
+            author_instances = author_formset.save()
 
-            authors = [Author.objects.create(author_name=author_name)for author_name in author_names]
+            paper.authors.add(*author_instances)
 
-            # Create the paper with the provided metadata and file
-            paper = Paper.objects.create(
-                paper_title=paper_title,
-                workshop=workshop,  
-                pages=pages,
-                uploaded_file=uploaded_file
-            )
+            return render(request, 'workshops/edit_author.html', {'paper_form': paper_form, 'author_formset':author_formset})
 
-            paper.authors.add(*authors)
-
-            return redirect('workshops:author_upload_check', secret_token = paper.secret_token)
     
+    else:
+        author_formset = AuthorFormSet()
+        paper_form = PaperForm()
 
-    return render(request, "workshops/author_upload.html", {
-        'workshop': workshop,
-    })
+        return render(request, "workshops/author_upload.html", {
+            'workshop': workshop, 'author_formset': author_formset, 'paper_form': paper_form
+        })
 
 def author_overview(request, secret_token):
     # Fetch the paper based on `paper_id`

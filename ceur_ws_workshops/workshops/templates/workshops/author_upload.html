@@ -1,47 +1,47 @@
 {% extends "workshops/workshop_edit_success.html" %}
 {% load static %}
+
 {% block content %}
-    <h1>Author Upload</h1>
+  <h2 class="header-title">Submit Paper</h2>
+    
+  <!-- Paper Form -->
+    <form method="post" id="form-container" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ paper_form.as_p }}
 
-    <form id="authorForm" action="{% url 'workshops:author_upload' workshop.secret_token %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+      <input type="submit" value="Save Paper">
+  <hr>
 
-        <label for="author_name">Author Name:</label>
-        <input type="text" name="author_name" required><br><br>
-
-        <div id="additionalAuthors">
-            <!-- Additional author fields will be added here dynamically -->
+    {{author_formset.management_form}}
+    {% for form in author_formset %}
+        <div class="author-form">
+        {{author_formset.as_p}}
         </div>
+        {% endfor %}
+        <button id="add-form" type="button">Add Author</button>
+  </form>
+  
+  <script>
+    let authorForm = document.querySelectorAll(".author-form")
+    let container = document.querySelector("#form-container")
+    let addButton = document.querySelector("#add-form")
+    let totalForms = document.querySelector("#id_form-TOTAL_FORMS")
 
-        <button type="button" onclick="addAuthorField()">Add Additional Author</button><br><br>
+    let formNum = authorForm.length-1
+    addButton.addEventListener('click', addForm)
 
-        <label for="paper_title">Paper Title:</label>
-        <input type="text" id="paper_title" name="paper_title" required><br><br>
+    function addForm(e){
+        e.preventDefault()
 
-        <label for="pages">Pages:</label>
-        <input type="number" id="pages" name="pages" required><br><br>
+        let newForm = authorForm[0].cloneNode(true)
+        let formRegex = RegExp(`form-(\\d){1}-`,'g')
 
-        <label for="uploaded_file">Upload Paper:</label>
-        <input type="file" id="uploaded_file" name="uploaded_file" accept=".pdf, .doc, .docx" required><br><br>
+        formNum++
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`)
+        container.insertBefore(newForm, addButton)
         
-        <input type="submit" value="Upload Author and Metadata" class="button-17">
-    </form>
+        totalForms.setAttribute('value', `${formNum+1}`)
+    }
+</script>
 
-    <script>
-        function addAuthorField() {
-            var additionalAuthorsDiv = document.getElementById('additionalAuthors');
-            
-            var newLabel = document.createElement('label');
-            newLabel.innerHTML = 'Author Name:';
-            additionalAuthorsDiv.appendChild(newLabel);
-
-            var newAuthorField = document.createElement('input');
-            newAuthorField.type = 'text';
-            newAuthorField.name = 'author_name';
-            newAuthorField.required = true;
-
-            additionalAuthorsDiv.appendChild(newAuthorField);
-            additionalAuthorsDiv.appendChild(document.createElement('br'));
-        }
-    </script>
 {% endblock %}

@@ -6,7 +6,7 @@ class WorkshopAdmin(admin.ModelAdmin):
     search_fields = ['workshop_title']
 
 class PaperAdmin(admin.ModelAdmin):
-    list_display = ('paper_title', 'workshop')
+    list_display = ('paper_title', 'pages')
     search_fields = ['paper_title', 'author__author']
 
 class AuthorAdmin(admin.ModelAdmin):
