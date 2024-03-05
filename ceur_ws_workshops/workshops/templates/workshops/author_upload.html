@@ -6,6 +6,7 @@
     
   <!-- Paper Form -->
     <form method="post" id="form-container" enctype="multipart/form-data">
+
         <fieldset>
         {% csrf_token %}
         {{ paper_form.as_p }}
@@ -55,3 +56,4 @@
 </script>
 
 {% endblock %}
+
