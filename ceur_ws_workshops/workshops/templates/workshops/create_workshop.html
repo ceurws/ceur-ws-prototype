@@ -1,47 +1,57 @@
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
-  <h2 class="header-title">Create Workshop Volume</h2>
-  <!-- Replace the workshop details with the form -->
+
+<!-- Replace the workshop details with the form -->
+
+<!-- Workshop Form -->
+<form method="post" id="form-container" enctype="multipart/form-data">
+  <h1 class="header-title">Create Workshop Volume</h1>
+  <fieldset>
+    {% csrf_token %}
+    {{ form.as_p }}
     
-  <!-- Workshop Form -->
-    <form method="post" id="form-container" enctype="multipart/form-data">
-      {% csrf_token %}
-      {{ form.as_p }}
-
-      <input type="submit" value="Save Workshop">
+  </fieldset>
   <hr>
-
-    {{editor_form.management_form}}
-    {% for form in editor_form %}
-        <div class="editor-form">
-        {{form.as_p}}
-        </div>
-        {% endfor %}
-        <button id="add-form" type="button">Add Editor</button>
-  </form>
   
-  <script>
-    let editorForm = document.querySelectorAll(".editor-form")
-    let container = document.querySelector("#form-container")
-    let addButton = document.querySelector("#add-form")
-    let totalForms = document.querySelector("#id_form-TOTAL_FORMS")
+  <fieldset id="editor-fieldset">
+    {{ editor_form.management_form }}
+    <div id="form-set">
+      {% for form in editor_form %}
+      <div class="editor-form">
+        {{ form.as_p }}
+        <hr>
+      </div>
+      {% endfor %}
+      
+    </div>
+    <button id="add-form" class="button-13">Add Editor</button>
+  </fieldset>
+  <br>
+  <input type="submit" class="button-13" value="Save Workshop">
+</form>
 
-    let formNum = editorForm.length-1
-    addButton.addEventListener('click', addForm)
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let addButton = document.querySelector("#add-form");
+    let formSet = document.querySelector("#editor-fieldset");
+    let totalForms = document.querySelector("#id_form-TOTAL_FORMS");
 
-    function addForm(e){
-        e.preventDefault()
+    function addForm(e) {
+      e.preventDefault();
 
-        let newForm = editorForm[0].cloneNode(true)
-        let formRegex = RegExp(`form-(\\d){1}-`,'g')
+      let formNum = formSet.querySelectorAll(".editor-form").length;
+      let newForm = formSet.querySelector(".editor-form").cloneNode(true);
+      let formRegex = RegExp(`form-(\\d+)-`, 'g');
 
-        formNum++
-        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`)
-        container.insertBefore(newForm, addButton)
-        
-        totalForms.setAttribute('value', `${formNum+1}`)
+      formNum++;
+      newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`);
+      formSet.insertBefore(newForm, addButton);
+
+      totalForms.value = formNum + 1;
     }
-</script>
 
+    addButton.addEventListener('click', addForm);
+  });
+</script>
 {% endblock %}

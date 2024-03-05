@@ -3,8 +3,14 @@
   <p class="header-title">Are all the details correct?</p>
   <form id="validation-form" method="post">
     {% csrf_token %}
+    <fieldset>
     {{ form.as_p }}
+    </fieldset>
+    <hr>
+    <fieldset>
     {{ editor_form.as_p }}
-    <input type="submit" name="submit_button" value="Confirm">
+  </fieldset>
+  <br>
+    <input type="submit" name="submit_button" class = "button-13" value="Confirm">
   </form>
 {% endblock %}

@@ -6,42 +6,54 @@
     
   <!-- Paper Form -->
     <form method="post" id="form-container" enctype="multipart/form-data">
-      {% csrf_token %}
-      {{ paper_form.as_p }}
 
-      <input type="submit" value="Save Paper">
+        <fieldset>
+        {% csrf_token %}
+        {{ paper_form.as_p }}
+        </fieldset>
+      
   <hr>
-
+  <fieldset id="author-fieldset">
     {{author_formset.management_form}}
+    <div class="form-set">
     {% for form in author_formset %}
         <div class="author-form">
         {{author_formset.as_p}}
+        <hr>
         </div>
         {% endfor %}
-        <button id="add-form" type="button">Add Author</button>
+    </div>
+        <button id="add-form" type="button" class = "button-13">Add Author</button>
+    </fieldset>
+    <br>
+    <input type="submit" class = "button-13" value="Save Paper">
   </form>
   
   <script>
-    let authorForm = document.querySelectorAll(".author-form")
-    let container = document.querySelector("#form-container")
-    let addButton = document.querySelector("#add-form")
-    let totalForms = document.querySelector("#id_form-TOTAL_FORMS")
+    document.addEventListener('DOMContentLoaded', function() {
+    let addButton = document.querySelector("#add-form");
+    let formSet = document.querySelector("#author-fieldset");
+    let totalForms = document.querySelector("#id_form-TOTAL_FORMS");
 
-    let formNum = authorForm.length-1
-    addButton.addEventListener('click', addForm)
+    function addForm(e) {
+      e.preventDefault();
 
-    function addForm(e){
-        e.preventDefault()
+      let formNum = formSet.querySelectorAll(".author-form").length;
+      let newForm = formSet.querySelector(".author-form").cloneNode(true);
+      let formRegex = RegExp(`form-(\\d+)-`, 'g');
 
-        let newForm = authorForm[0].cloneNode(true)
-        let formRegex = RegExp(`form-(\\d){1}-`,'g')
+      formNum++;
+      newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`);
+      
+      formSet.insertBefore(newForm, addButton);
 
-        formNum++
-        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`)
-        container.insertBefore(newForm, addButton)
-        
-        totalForms.setAttribute('value', `${formNum+1}`)
+      totalForms.value = formNum + 1;
     }
+
+    addButton.addEventListener('click', addForm);
+  });
+  
 </script>
 
 {% endblock %}
+

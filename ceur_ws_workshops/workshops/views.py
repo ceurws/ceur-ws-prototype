@@ -87,7 +87,9 @@ def author_upload(request, secret_token):
 
         if paper_form.is_valid() and author_formset.is_valid():
             print('isvalid')
+
             paper = paper_form.save()  # Save the workshop object and get the instance with an ID
+
             author_instances = author_formset.save()
 
             paper.authors.add(*author_instances)
@@ -113,6 +115,4 @@ def author_overview(request, secret_token):
         'paper': paper,
         'editors': editors
     })
-
-
     
