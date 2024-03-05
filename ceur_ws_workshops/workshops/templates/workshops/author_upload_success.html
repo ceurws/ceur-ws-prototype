@@ -1,33 +1,22 @@
 {% load static %}
 {% block content %}
-    <h1>Paper Submitted correctly</h1>
+    <h1>Paper Submitted Correctly</h1>
     
     <p><strong>Workshop:</strong> {{ workshop.workshop_title }}</p>
 
-    <p><strong>Workshop Editors:</strong>
-        <ul>
-            {% for editor in workshop.editors.all %}
-                <li>{{ editor.name }}</li>
-            {% endfor %}
-        </ul>
-    </p>
-
-    <p><strong>Author Names:</strong>
+    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+    <p><strong>Pages:</strong> {{ paper.pages }}</p>
+    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+    <p><strong>Paper Author Names:</strong>
         <ul>
             {% for author in paper.authors.all %}
                 <li>{{ author.author_name }}</li>
             {% endfor %}
         </ul>
     </p>
-
-    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
-    <p><strong>Pages:</strong> {{ paper.pages }}</p>
-    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-    
     {% csrf_token %}
     <div class="button-group">
         <input type="button" value="Edit details" onclick="javascript:history.go(-1)" class="button-17">
-        <a type="button" href="{% url 'workshops:author_overview' secret_token=paper.secret_token %}" class="button">Confirm details</a>
     </div>
     <!-- You can provide additional content or links here as needed. -->
     

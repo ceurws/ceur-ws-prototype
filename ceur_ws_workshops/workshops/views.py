@@ -94,18 +94,16 @@ def author_upload(request, secret_token):
             paper_instance = paper_form.save()  
             author_instances = author_formset.save()
             paper_instance.authors.add(*author_instances)
+            workshop.accepted_papers.add(paper_instance)
 
             return render(request, 'workshops/author_upload_success.html', {'workshop':workshop, 'paper': paper_instance, 'authors': author_instances})
 
     elif request.method == "POST":
         author_formset = AuthorFormSet(request.POST)
-        print('author formset',author_formset)
         paper_form = PaperForm(request.POST, request.FILES)  
 
         if paper_form.is_valid() and author_formset.is_valid():
             return render(request, 'workshops/edit_author.html', {'paper_form': paper_form, 'author_formset': author_formset})
-        else:
-            print(paper_form.errors)
 
     else:
         author_formset = AuthorFormSet()
