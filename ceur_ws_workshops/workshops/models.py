@@ -52,7 +52,6 @@ class Paper(models.Model):
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     # KEYS
-    workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE)
     authors = models.ManyToManyField(Author)  # Use ManyToManyField for multiple authors
 
     def __str__(self):

@@ -12,11 +12,15 @@
 
     <h2>{{ workshop.workshop_title }}</h2>
 
+    <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
+    <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
+    <p><strong>Dates:</strong> From: {{ workshop.begin_date }}, Until: {{ workshop.end_date }}</p>
     <p><strong>Volume Number:</strong> {{ workshop.volume_number }}</p>
     <p><strong>URN:</strong> {{ workshop.urn }}</p>
+    <p><strong>Submitted By:</strong> {{ workshop.submitted_by }}</p>
+
     <p><strong>Publication Year:</strong> {{ workshop.publication_year }}</p>
     <p><strong>License:</strong> {{ workshop.license }}</p>
-    <p><strong>Location and Time:</strong> {{ workshop.location_time }}</p>
 
     <!-- Display editor names -->
     <p><strong>Editors:</strong></p>

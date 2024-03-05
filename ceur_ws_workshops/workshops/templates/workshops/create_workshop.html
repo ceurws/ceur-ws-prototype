@@ -14,22 +14,16 @@
   </fieldset>
   <hr>
   
-  <!-- {{editor_form.management_form}}
-    {% for form in editor_form %}
-    
-    <div class="editor-form">
-      {{form.as_p}}
-    </div>
-    {% endfor %}
-  <button id="add-form" class="button-13">Add Editor</button> -->
   <fieldset id="editor-fieldset">
     {{ editor_form.management_form }}
     <div id="form-set">
       {% for form in editor_form %}
       <div class="editor-form">
         {{ form.as_p }}
+        <hr>
       </div>
       {% endfor %}
+      
     </div>
     <button id="add-form" class="button-13">Add Editor</button>
   </fieldset>
