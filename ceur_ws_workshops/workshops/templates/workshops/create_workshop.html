@@ -40,18 +40,26 @@
     function addForm(e) {
       e.preventDefault();
 
-      let formNum = formSet.querySelectorAll(".editor-form").length;
+      let formNum = formSet.querySelectorAll(".editor-form").length -1;
       let newForm = formSet.querySelector(".editor-form").cloneNode(true);
       let formRegex = RegExp(`form-(\\d+)-`, 'g');
 
+      console.log(formNum);
+
       formNum++;
+      console.log(formNum);
+
       newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`);
       formSet.insertBefore(newForm, addButton);
 
       totalForms.value = formNum + 1;
+      console.log('total forms value',totalForms.value);
+
     }
 
     addButton.addEventListener('click', addForm);
   });
 </script>
+
+
 {% endblock %}

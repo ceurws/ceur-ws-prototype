@@ -38,7 +38,7 @@
     function addForm(e) {
       e.preventDefault();
 
-      let formNum = formSet.querySelectorAll(".author-form").length;
+      let formNum = formSet.querySelectorAll(".author-form").length -1;
       let newForm = formSet.querySelector(".author-form").cloneNode(true);
       let formRegex = RegExp(`form-(\\d+)-`, 'g');
 

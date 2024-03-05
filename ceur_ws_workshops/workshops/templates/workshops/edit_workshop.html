@@ -1,7 +1,7 @@
 {% extends "workshops/create_workshop.html" %}
 {% block content %}
   <p class="header-title">Are all the details correct?</p>
-  <form id="validation-form" method="post">
+  <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
     <fieldset>
     {{ form.as_p }}
