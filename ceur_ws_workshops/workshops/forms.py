@@ -1,14 +1,7 @@
-from .models import Workshop, Editor
+from .models import Workshop, Editor, Paper, Author
 from django import forms
 from django.forms import modelformset_factory
-from django.forms import TextInput
-
-class EditorForm(forms.ModelForm):
-    class Meta:
-        model = Editor
-        fields = ['name', 'university', 'university_country', 'university_url', 'research_group', 'research_group_url']
-
-
+from django.forms import TextInput, FileField, FileInput
 class WorkshopForm(forms.ModelForm):
     class Meta:
         model = Workshop
@@ -30,9 +23,33 @@ class WorkshopForm(forms.ModelForm):
                                             'placeholder': 'John Doe'}),
         }
 
+class PaperForm(forms.ModelForm):
+    class Meta:
+        model = Paper
+        fields = ['paper_title', 'pages', 'uploaded_file']
+        widgets = {
+            'paper_title': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the title of the paper'}),
+            'pages': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the number of pages'}),
+        
+        }
+AuthorFormSet = modelformset_factory(
+        Author, fields=('author_name', 'author_university', 'author_uni_url'), extra=1,
+        # CSS styling but for formsets
+        widgets = {
+            'author_name': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the name of the author'}),
+            'author_university': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the university of the author'}),
+            'author_uni_url': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the URL of the university'}),
+        }
+)
+
 EditorFormSet = modelformset_factory(
     Editor, fields=('name', 'university', 'university_country', 'university_url', 'research_group', 'research_group_url'), extra=1,
-
+    # CSS styling but for formsets
     widgets = {
         'name': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the name of the editor'}),
