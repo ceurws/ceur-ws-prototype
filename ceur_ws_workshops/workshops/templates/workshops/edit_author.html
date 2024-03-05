@@ -1,0 +1,10 @@
+{% extends "workshops/author_upload.html" %}
+{% block content %}
+  <p class="header-title">Are all the details correct?</p>
+  <form id="validation-form" method="post">
+    {% csrf_token %}
+    {{ paper_form.as_p }}
+    {{ author_formset.as_p }}
+    <input type="submit" name="submit_button" value="Confirm">
+  </form>
+{% endblock %}
