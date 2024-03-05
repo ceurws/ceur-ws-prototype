@@ -14,7 +14,6 @@ class Editor(models.Model):
     research_group = models.CharField(max_length=100)
     research_group_url = models.URLField(max_length=200)
 
-    
 
 class Author(models.Model):
     author_name = models.CharField(max_length=100, null= True, blank=True)
@@ -54,7 +53,6 @@ class Paper(models.Model):
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     # KEYS
-    workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE)
     authors = models.ManyToManyField(Author)  # Use ManyToManyField for multiple authors
 
     def __str__(self):
