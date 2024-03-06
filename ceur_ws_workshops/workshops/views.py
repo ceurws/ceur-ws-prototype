@@ -107,25 +107,29 @@ def author_upload(request, secret_token):
 
     if request.method == "POST" and 'confirm_button' in request.POST:
         author_formset = AuthorFormSet(request.POST)
-        paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)  
-        
+        paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
 
         if paper_form.is_valid() and author_formset.is_valid():
-
             paper_instance = paper_form.save(commit=False)
+            if 'uploaded_file' not in request.FILES and 'uploaded_file_url' in request.session:
+                paper_instance.uploaded_file.name = request.session['uploaded_file_url']
             
             paper_instance.save()
             author_instances = author_formset.save()
             paper_instance.authors.add(*author_instances)
             workshop.accepted_papers.add(paper_instance)
 
-            return render(request, 'workshops/author_upload_success.html', {'workshop':workshop, 'paper': paper_instance, 'authors': author_instances})
+            return render(request, 'workshops/author_upload_success.html', {'workshop': workshop, 'paper': paper_instance, 'authors': author_instances})
 
     elif request.method == "POST":
         author_formset = AuthorFormSet(request.POST)
-        # file_uploaded=True
-        paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True) 
+        paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
         if paper_form.is_valid() and author_formset.is_valid():
+            if 'uploaded_file' in request.FILES:
+                paper_instance = paper_form.save(commit=False)
+                paper_instance.save()  
+                request.session['uploaded_file_url'] = paper_instance.uploaded_file.url
+
             return render(request, 'workshops/edit_author.html', {
                 'paper_form': paper_form, 
                 'author_formset': author_formset})
@@ -136,6 +140,7 @@ def author_upload(request, secret_token):
         return render(request, "workshops/author_upload.html", {
             'workshop': workshop, 'author_formset': author_formset, 'paper_form': paper_form
         })
+    
 
 def submit_workshop(request, secret_token):
     return render(request, 'workshops/submit_workshop.html')
