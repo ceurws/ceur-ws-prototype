@@ -1,3 +1,6 @@
+{% extends 'workshops/index.html' %}
+{% load static %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,49 +8,84 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workshop Overview</title>
+    <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
 </head>
 <body>
 
     <h1>Workshop Overview</h1>
 
-    <h2>{{ workshop.workshop_title }}</h2>
+    {% if edit_mode %}
+    <form method="post">
+        {% csrf_token %}
+        <fieldset class="workshop-details">
+            <legend>Workshop Details</legend>
 
-    <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
-    <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
-    <p><strong>Dates:</strong> From: {{ workshop.workshop_begin_date }}, Until: {{ workshop.workshop_end_date }}</p>
-    <p><strong>Volume Number:</strong> {{ workshop.volume_number }}</p>
-    <p><strong>URN:</strong> {{ workshop.urn }}</p>
-    <p><strong>Submitted By:</strong> {{ workshop.submitted_by }}</p>
+            {{workshop_form.as_p}}
 
-    <p><strong>Publication Year:</strong> {{ workshop.publication_year }}</p>
-    <p><strong>License:</strong> {{ workshop.license }}</p>
+        </fieldset>
 
-    <!-- Display editor names -->
-    <p><strong>Editors:</strong></p>
-    {% for editor in workshop.editors.all %}
-    <li>{{ editor.name }}
-    {% endfor %}
+        <fieldset class="papers-list">
+            <legend>Papers</legend>
+            <ul>
+                {% for paperform in paper_forms %}
+                    <li>
+                        {{paperform.as_p}}
+                    </li>
+                {% endfor %}
+            </ul>
+        </fieldset>
+        <input type="submit" name="submit_button" class = "button-13" value="Confirm">
+    </form>
 
-    <hr>
+    {% else %}
+    <fieldset class="workshop-details">
+        <legend>Workshop Details</legend>
+        <p><strong>Title:</strong> {{ workshop.workshop_title }}</p>
+        <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
+        <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
+        <p><strong>Dates:</strong> From: {{ workshop.workshop_begin_date }}, Until: {{ workshop.workshop_end_date }}</p>
+        <p><strong>Volume Number:</strong> {{ workshop.volume_number }}</p>
+        <p><strong>URN:</strong> {{ workshop.urn }}</p>
+        <p><strong>Submitted By:</strong> {{ workshop.submitted_by }}</p>
+        <p><strong>Publication Year:</strong> {{ workshop.publication_year }}</p>
+        <p><strong>License:</strong> {{ workshop.license }}</p>
 
-    <!-- Display paper information -->
-    <h2>Papers</h2>
-    <ul>
-        {% for paper in papers %}
-            <li>
-                <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
-                <p><strong>Authors:</strong>
-                    {% for author in paper.authors.all %}
-                        {{ author.author_name }}
-                        {% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </p>
-                <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-                <!-- Add additional details as needed -->
-            </li>
-        {% endfor %}
-    </ul>
+        <p><strong>Editors:</strong></p>
+        <ul class="editors-list">
+            {% for editor in workshop.editors.all %}
+            <li>{{ editor.name }}</li>
+            {% endfor %}
+        </ul>
+    </fieldset>
+
+    <fieldset class="papers-list">
+        <legend>Papers</legend>
+        <ul>
+            {% for paper in papers %}
+                <li>
+                    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+                    <p><strong>Authors:</strong>
+                        {% for author in paper.authors.all %}
+                            {{ author.author_name }}
+                            {% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p><strong>Pages:</strong> {{ paper.pages }}</p>
+                    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+                    <!-- Add additional details as needed -->
+                </li>
+            {% endfor %}
+        </ul>
+    </fieldset>
+
+    <br>
+    <form method="post" id="form-container" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="submit" name="submit_button" class = "button-13" value="Edit">
+        <input type="submit" name="submit_button" class = "button-13" value="Submit Workshop">
+    </form>
+    {% endif %}
 
 </body>
 </html>
+{% endblock %}

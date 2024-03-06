@@ -143,7 +143,8 @@ form {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  vertical-align: middle;
+  vertical-align: left;
+  margin-left: -100px;
   width: fit-content;
 }
 

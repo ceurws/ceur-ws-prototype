@@ -1,10 +1,24 @@
 {% extends "workshops/author_upload.html" %}
+{% load static % }
 {% block content %}
-  <p class="header-title">Are all the details correct?</p>
+  <p class="header-title">Are all the details correct??</p>
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
-    {{ paper_form.as_p }}
-    {{ author_formset.as_p }}
-    <input type="submit" name="confirm_button" value="Confirm">
+    <fieldset>
+      <legend> Paper Data</legend>
+    {{ paper_form.as_p}}
+    <p>Currently uploaded file: {{ paper_form.instance.uploaded_file.name }}</p>
+    </fieldset>
+    <hr>
+    <fieldset>
+      <legend>Author(s) Information</legend>
+      <!-- {% for author in author_formset%}
+        {{author.as_p}}
+      <hr>
+      {%endfor%} -->
+      {{author_formset.as_p}}
+    </fieldset>
+    <br> 
+    <input type="submit" name="confirm_button" class = "button-13" value="Confirm">
   </form>
 {% endblock %}
