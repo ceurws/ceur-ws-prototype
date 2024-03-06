@@ -8,7 +8,11 @@
     </fieldset>
     <hr>
     <fieldset>
-    {{ editor_form.as_p }}
+      {{ editor_form.as_p}}
+    <!-- {% for editor in editor_form%}
+        {{editor.as_p}}
+      <hr>
+    {%endfor%} -->
   </fieldset>
   <br>
     <input type="submit" name="submit_button" class = "button-13" value="Confirm">
