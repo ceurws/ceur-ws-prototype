@@ -15,13 +15,13 @@
   <hr>
   <fieldset id="author-fieldset">
     {{author_formset.management_form}}
-    <div class="form-set">
+    <div id="form-set">
     {% for form in author_formset %}
         <div class="author-form">
-        {{author_formset.as_p}}
+        {{form.as_p}}
         <hr>
         </div>
-        {% endfor %}
+    {% endfor %}
     </div>
         <button id="add-form" type="button" class = "button-13">Add Author</button>
     </fieldset>

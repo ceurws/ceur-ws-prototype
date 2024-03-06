@@ -15,8 +15,8 @@ class Editor(models.Model):
     research_group_url = models.URLField(max_length=200)
 
 class Author(models.Model):
-    author_name = models.CharField(max_length=100, null= True, blank=True)
-    author_university = models.CharField(max_length=100, null= True, blank=True)
+    author_name = models.CharField(max_length=100)
+    author_university = models.CharField(max_length=100)
     author_uni_url = models.URLField(max_length=200)
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -47,7 +47,7 @@ class Workshop(models.Model):
 class Paper(models.Model):
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10)
-    uploaded_file = models.FileField(upload_to='papers/')
+    uploaded_file = models.FileField(upload_to='papers/', null = True, blank = True)
     
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 

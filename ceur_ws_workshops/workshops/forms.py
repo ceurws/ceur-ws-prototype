@@ -25,9 +25,20 @@ class WorkshopForm(forms.ModelForm):
                                             'placeholder': 'John Doe'}),
         }
 
-
+# class CustomClearableFileInput(forms.ClearableFileInput):
+#     template_name = 'custom_clearable_file_input.html'
 
 class PaperForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        file_uploaded = kwargs.pop('file_uploaded', False)
+        super(PaperForm, self).__init__(*args, **kwargs)
+
+        if file_uploaded:
+            # If the file is uploaded, change the field to indicate it's for changing the file.
+            self.fields['uploaded_file'].label = 'Change current file'
+        else:
+            # If the file is not uploaded, you might want to customize the field to indicate it's for uploading.
+            self.fields['uploaded_file'].label = 'Upload file'
     class Meta:
         model = Paper
         fields = ['paper_title', 'pages', 'uploaded_file']
@@ -37,8 +48,11 @@ class PaperForm(forms.ModelForm):
                                             'placeholder': 'Enter the title of the paper'}),
             'pages': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the number of pages'}),
-        
+            # 'uploaded_file': CustomClearableFileInput,
+            'uploaded_file': FileInput(attrs={'accept': '.pdf'}),
         }
+
+
 AuthorFormSet = modelformset_factory(
         Author, fields=('author_name', 'author_university', 'author_uni_url'), extra=1,
         # CSS styling but for formsets
