@@ -112,14 +112,17 @@ def author_upload(request, secret_token):
         if paper_form.is_valid() and author_formset.is_valid():
             paper_instance = paper_form.save(commit=False)
             if 'uploaded_file' not in request.FILES and 'uploaded_file_url' in request.session:
-                paper_instance.uploaded_file.name = request.session['uploaded_file_url']
+                paper_instance.uploaded_file.name = request.session['uploaded_file_url'].split('/media/')[-1]
             
             paper_instance.save()
             author_instances = author_formset.save()
             paper_instance.authors.add(*author_instances)
             workshop.accepted_papers.add(paper_instance)
 
-            return render(request, 'workshops/author_upload_success.html', {'workshop': workshop, 'paper': paper_instance, 'authors': author_instances})
+            return render(request, 'workshops/author_upload_success.html', {
+                'workshop': workshop, 
+                'paper': paper_instance, 
+                'authors': author_instances})
 
     elif request.method == "POST":
         author_formset = AuthorFormSet(request.POST)
@@ -128,7 +131,7 @@ def author_upload(request, secret_token):
             if 'uploaded_file' in request.FILES:
                 paper_instance = paper_form.save(commit=False)
                 paper_instance.save()  
-                request.session['uploaded_file_url'] = paper_instance.uploaded_file.url
+                request.session['uploaded_file_url'] = paper_instance.uploaded_file.name
 
             return render(request, 'workshops/edit_author.html', {
                 'paper_form': paper_form, 
@@ -136,6 +139,8 @@ def author_upload(request, secret_token):
     else:
         author_formset = AuthorFormSet(queryset=Author.objects.none())
         paper_form = PaperForm(file_uploaded=False)
+
+        
 
         return render(request, "workshops/author_upload.html", {
             'workshop': workshop, 'author_formset': author_formset, 'paper_form': paper_form
