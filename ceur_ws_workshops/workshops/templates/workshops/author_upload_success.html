@@ -20,9 +20,9 @@
 
         <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
         <p><strong>Pages:</strong> {{ paper.pages }}</p>
-        {% if paper.uploaded_file %}
-        <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-        {% endif %}
+        <!-- {% if paper.uploaded_file %} -->
+        <p><strong>Uploaded File:</strong> <a href="{% if request.session.uploaded_file_url %}{{ request.session.uploaded_file_url }}{% else %}{{ paper.uploaded_file.url }}{% endif %}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+        <!-- {% endif %} -->
         <p><strong>Paper Author Names:</strong>
             <ul>
                 {% for author in paper.authors.all %}
