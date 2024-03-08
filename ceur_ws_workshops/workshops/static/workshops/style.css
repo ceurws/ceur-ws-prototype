@@ -115,8 +115,6 @@ form {
     height: 100vh; 
 }
 
-
-
 form {
     margin: 20px auto; 
     width: 50%; 
@@ -143,7 +141,6 @@ form {
   -webkit-user-select: none;
   touch-action: manipulation;
   vertical-align: left;
-  margin-left: -100px;
   width: fit-content;
 }
 

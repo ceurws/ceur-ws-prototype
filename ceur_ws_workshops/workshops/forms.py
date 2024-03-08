@@ -2,14 +2,22 @@
 from .models import Workshop, Editor, Paper, Author
 from django import forms
 from django.forms import modelformset_factory
-from django.forms import TextInput, FileField, FileInput
+from django.forms import TextInput, FileInput
+from django_countries.widgets import CountrySelectWidget
+
+class DateInput(forms.DateInput):
+    input_type = "date"
+    def __init__(self, **kwargs):
+        kwargs["format"] = "%Y-%m-%d"
+        super().__init__(**kwargs)
 
 class WorkshopForm(forms.ModelForm):
+
     class Meta:
         model = Workshop
         fields = ['workshop_title', 'workshop_description', 'workshop_city', 'workshop_country',
                    'workshop_begin_date', 'workshop_end_date', 'urn', 'submitted_by']
-
+        
         widgets = {
             'workshop_title': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the title of the workshop'}),
@@ -17,16 +25,14 @@ class WorkshopForm(forms.ModelForm):
                                                      'placeholder': 'Briefly describe the workshop'}),
             'workshop_city': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Amsterdam'}),
-            'workshop_country': TextInput(attrs={'size': 50, 
-                                                'placeholder': 'Netherlands'}),
+            'workshop_begin_date': DateInput(),
+            'workshop_end_date': DateInput(),
+            'workshop_country': CountrySelectWidget(),
             'urn': TextInput(attrs={'size': 50, 
                                    'placeholder': 'urn:nbn:de:0074-2019-001'}),
             'submitted_by': TextInput(attrs={'size': 50,
                                             'placeholder': 'John Doe'}),
         }
-
-# class CustomClearableFileInput(forms.ClearableFileInput):
-#     template_name = 'custom_clearable_file_input.html'
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
