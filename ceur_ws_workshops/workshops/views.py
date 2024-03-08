@@ -34,7 +34,13 @@ def create_workshop(request):
         form = WorkshopForm(request.POST)
 
         if form.is_valid() and formset.is_valid():
-            workshop = form.save()  # Save the workshop object and get the instance with an ID
+        #     check_in = form.cleaned_data.get('check_in')
+        #   check_out = form.cleaned_data.get('check_out')
+        #   if room_number.rooms.filter(Q(check_in_gte=check_in)|Q(check_out_lte=check_out)).exists():
+        #       return HttpResponse('invalid check in out date')
+            before_date = form.cleaned_data.get('workshop_begin_date')
+            after_date = form.cleaned_data.get('workshop_end_date')
+            workshop = form.save()  
             instances = formset.save()
             workshop.editors.add(*instances)
 
@@ -140,13 +146,10 @@ def author_upload(request, secret_token):
         author_formset = AuthorFormSet(queryset=Author.objects.none())
         paper_form = PaperForm(file_uploaded=False)
 
-        
-
         return render(request, "workshops/author_upload.html", {
             'workshop': workshop, 'author_formset': author_formset, 'paper_form': paper_form
         })
     
-
 def submit_workshop(request, secret_token):
     return render(request, 'workshops/submit_workshop.html')
 
