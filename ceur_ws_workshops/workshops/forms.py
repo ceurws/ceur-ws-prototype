@@ -58,7 +58,6 @@ class PaperForm(forms.ModelForm):
             'uploaded_file': FileInput(attrs={'accept': '.pdf'}),
         }
 
-
 AuthorFormSet = modelformset_factory(
         Author, fields=('author_name', 'author_university', 'author_uni_url'), extra=1,
         # CSS styling but for formsets
@@ -80,8 +79,8 @@ EditorFormSet = modelformset_factory(
                                             'placeholder': 'Enter the name of the editor'}),
         'university': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the university of the editor'}),
-        'university_country': TextInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the country of the university'}),
+        'university_country': CountrySelectWidget(),
+
         'university_url': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the URL of the university'}),
         'research_group': TextInput(attrs={'size': 50, 

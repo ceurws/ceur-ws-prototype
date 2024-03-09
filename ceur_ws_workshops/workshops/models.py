@@ -9,7 +9,8 @@ from django_countries.fields import CountryField
 class Editor(models.Model):
     name = models.CharField(max_length=100)
     university = models.CharField(max_length=200)
-    university_country = models.CharField(max_length=250)
+    editor_country_choices = [('', 'Select a country')] + list(CountryField().choices)
+    university_country = models.CharField(max_length=200, choices=editor_country_choices)
     university_url = models.URLField(max_length=200)
     research_group = models.CharField(max_length=100)
     research_group_url = models.URLField(max_length=200)
