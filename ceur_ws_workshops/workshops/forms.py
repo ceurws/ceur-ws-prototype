@@ -16,7 +16,7 @@ class WorkshopForm(forms.ModelForm):
     class Meta:
         model = Workshop
         fields = ['workshop_title', 'workshop_description', 'workshop_city', 'workshop_country',
-                   'workshop_begin_date', 'workshop_end_date', 'urn', 'submitted_by']
+                   'workshop_begin_date', 'workshop_end_date', 'submitted_by', 'email_address']
         
         widgets = {
             'workshop_title': TextInput(attrs={'size': 50, 
@@ -28,11 +28,14 @@ class WorkshopForm(forms.ModelForm):
             'workshop_begin_date': DateInput(attrs={'id': 'id_workshop_begin_date'}),
             'workshop_end_date': DateInput(attrs={'id': 'id_workshop_end_date'}),
             'workshop_country': CountrySelectWidget(),
-            'urn': TextInput(attrs={'size': 50, 
-                                   'placeholder': 'urn:nbn:de:0074-2019-001'}),
+            # 'urn': TextInput(attrs={'size': 50, 
+            #                        'placeholder': 'urn:nbn:de:0074-2019-001'}),
             'submitted_by': TextInput(attrs={'size': 50,
                                             'placeholder': 'John Doe'}),
-        }
+            'email_address': TextInput(attrs={'size': 50,
+                                            'placeholder': 'johndoe@email.com'}),
+                                        
+       }
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
