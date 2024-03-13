@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.core.exceptions import MultipleObjectsReturned
+from django.views import View
 
 from .forms import WorkshopForm, EditorFormSet, AuthorFormSet, PaperForm
 
@@ -34,10 +35,6 @@ def create_workshop(request):
         form = WorkshopForm(request.POST)
 
         if form.is_valid() and formset.is_valid():
-        #     check_in = form.cleaned_data.get('check_in')
-        #   check_out = form.cleaned_data.get('check_out')
-        #   if room_number.rooms.filter(Q(check_in_gte=check_in)|Q(check_out_lte=check_out)).exists():
-        #       return HttpResponse('invalid check in out date')
             workshop = form.save()  
             instances = formset.save()
             workshop.editors.add(*instances)
@@ -105,14 +102,14 @@ def workshop_overview(request, secret_token):
         'edit_mode': edit_mode,
         'secret_token': secret_token
     })
-
+    
 def author_upload(request, secret_token):
     workshop = get_object_or_404(Workshop, secret_token=secret_token)
  
     if request.method == "POST" and 'confirm_button' in request.POST:
         author_formset = AuthorFormSet(request.POST)
         paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
-
+        
         if paper_form.is_valid() and author_formset.is_valid():
             paper_instance = paper_form.save(commit=False)
             if 'uploaded_file' not in request.FILES and 'uploaded_file_url' in request.session:
@@ -141,7 +138,7 @@ def author_upload(request, secret_token):
                 'paper_form': paper_form, 
                 'author_formset': author_formset})
         
-    elif request.mehtod == "POST" and 'edit_details' in request.POST:
+    elif request.method == "POST" and 'edit_details' in request.POST:
         paper = get_object_or_404(Paper, secret_token=secret_token)
         author_formset = AuthorFormSet(queryset=Author.objects.none())
         paper_form = PaperForm(file_uploaded=False, instance=paper)
