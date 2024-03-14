@@ -34,11 +34,13 @@
     let addButton = document.querySelector("#add-form");
     let formSet = document.querySelector("#editor-fieldset");
     let totalForms = document.querySelector("#id_form-TOTAL_FORMS");
+    let startDateInput = document.querySelector('#id_workshop_begin_date');
+    let endDateInput = document.querySelector('#id_workshop_end_date');
 
     function addForm(e) {
       e.preventDefault();
 
-      let formNum = formSet.querySelectorAll(".editor-form").length -1;
+      let formNum = formSet.querySelectorAll(".editor-form").length - 1;
       let newForm = formSet.querySelector(".editor-form").cloneNode(true);
       let formRegex = RegExp(`form-(\\d+)-`, 'g');
 
@@ -48,10 +50,35 @@
       formSet.insertBefore(newForm, addButton);
 
       totalForms.value = formNum + 1;
-
     }
 
     addButton.addEventListener('click', addForm);
+
+    function updateEndDateMin() {
+      endDateInput.setAttribute('min', startDateInput.value);
+      if (endDateInput.value && startDateInput.value > endDateInput.value) {
+        endDateInput.value = startDateInput.value;
+      }
+    }
+
+    function updateStartDateMax() {
+      if (startDateInput.value && startDateInput.value > endDateInput.value) {
+        startDateInput.value = endDateInput.value;
+      }
+    }
+
+    startDateInput.addEventListener('change', updateEndDateMin);
+
+    endDateInput.addEventListener('change', updateStartDateMax);
+
+    if (startDateInput.value) {
+      updateEndDateMin();
+    }
+
+    else if (endDateInput.value) {
+      updateStartDateMax();
+    }
+
   });
 </script>
 
