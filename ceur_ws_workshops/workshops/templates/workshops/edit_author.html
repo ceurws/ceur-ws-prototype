@@ -1,13 +1,14 @@
 {% extends "workshops/author_upload.html" %}
 {% load static % }
 {% block content %}
-  <p class="header-title">Are all the details correct??</p>
+  <p class="header-title">Are all the details correct?</p>
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
     <fieldset>
       <legend> Paper Data</legend>
     {{ paper_form.as_p}}
-    <p>Currently uploaded file: {{ paper_form.instance.uploaded_file }}</p>
+    <p>Currently uploaded Paper: {{ paper_form.instance.uploaded_file }}</p>
+    <p>Currently uploaded Agreement: {{ paper_form.instance.agreement_file }}</p>
     </fieldset>
     <hr>
     <fieldset>
@@ -15,6 +16,8 @@
       {{author_formset.as_p}}
     </fieldset>
     <br> 
-    <input type="submit" name="confirm_button" class = "button-13" value="Confirm">
+    <input type="submit" name="confirm_button" class = "button-13" 
+    
+    value="Confirm">
   </form>
 {% endblock %}

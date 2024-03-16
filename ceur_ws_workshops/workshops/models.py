@@ -55,7 +55,7 @@ class Paper(models.Model):
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10)
     uploaded_file = models.FileField(upload_to='papers/', null = True, blank = True)
-    
+    agreement_file = models.FileField(upload_to = "agreement/", null = True, blank = True)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     # KEYS
