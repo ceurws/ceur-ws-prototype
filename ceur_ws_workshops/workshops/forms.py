@@ -43,22 +43,20 @@ class PaperForm(forms.ModelForm):
         super(PaperForm, self).__init__(*args, **kwargs)
 
         if file_uploaded:
-            # If the file is uploaded, change the field to indicate it's for changing the file.
             self.fields['uploaded_file'].label = 'Change current file'
         else:
-            # If the file is not uploaded, you might want to customize the field to indicate it's for uploading.
             self.fields['uploaded_file'].label = 'Upload file'
     class Meta:
         model = Paper
-        fields = ['paper_title', 'pages', 'uploaded_file']
+        fields = ['paper_title', 'pages', 'uploaded_file', 'agreement_file']
 
         widgets = {
             'paper_title': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the title of the paper'}),
             'pages': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the number of pages'}),
-            # 'uploaded_file': CustomClearableFileInput,
             'uploaded_file': FileInput(attrs={'accept': '.pdf'}),
+            'agreement_file': FileInput(attrs={'accept': '.pdf'}),
         }
 
 AuthorFormSet = modelformset_factory(
@@ -72,7 +70,6 @@ AuthorFormSet = modelformset_factory(
             'author_uni_url': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the URL of the university'}),
         })
-
 
 EditorFormSet = modelformset_factory(
     Editor, fields=('name', 'university', 'university_country', 'university_url', 'research_group', 'research_group_url'), extra=1,
