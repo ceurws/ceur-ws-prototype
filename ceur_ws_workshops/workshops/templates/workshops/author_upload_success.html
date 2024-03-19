@@ -12,7 +12,6 @@
 <body>
 
     <h1>Paper Submitted Correctly</h1>
-    
     <fieldset class="paper-details">
         <legend>Paper Details</legend>
         
@@ -31,15 +30,8 @@
             </ul>
         </p>
     </fieldset>
-    <form method="post" class="edit-form">
-        {% csrf_token %}
-        <div class="button-group">
-            <input type="submit" name = "edit_details" value="Edit details" class="button-17">
-        </div>
-    </form>
 
-    <!-- You can provide additional content or links here as needed. -->
-
+    <i> If you would like to make further changes to this submission please contact {{workshop.submitted_by}} at {{workshop.email_address}}. </i>
 </body>
 </html>
 {% endblock %}
