@@ -16,27 +16,15 @@ def index(request):
     """
     return render(request, 'workshops/index.html')
     
-def author_upload_check(request, secret_token):
-    """
-    Displays a success message after metadata has been successfully added.
-    """
-    paper = get_object_or_404(Paper, secret_token=secret_token)
-    editors = paper.workshop.editors.all()  
-
-    return render(request, 'workshops/author_upload_success.html', {
-        'paper': paper,
-        'editors': editors,
-        'workshop_id': paper.workshop.id
-    })
-
 class CreateWorkshop(View):
-    
     def get(self, request):
         form = WorkshopForm()
         editor_form = EditorFormSet(queryset=Editor.objects.none())
         return render(request, "workshops/create_workshop.html", {'form':form, 'editor_form':editor_form})
 
     def post(self,request):
+
+        # handles logic to save the data when the user has confirmed the changes
         if 'submit_button' in request.POST:
             formset = EditorFormSet(request.POST)
             form = WorkshopForm(request.POST)
@@ -45,26 +33,23 @@ class CreateWorkshop(View):
                 workshop = form.save()  
                 instances = formset.save()
                 workshop.editors.add(*instances)
-                return HttpResponseRedirect(reverse('workshops:workshop_edit_success', args=[workshop.id]))
 
+                organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
+                author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
+
+                return render(request, "workshops/workshop_edit_success.html", {
+                    'organizer_url': organizer_url,
+                    'author_url': author_url
+                })
+        
+        # handles logic to showcase the data so that the user can confirm it
         else:
-            # Create a bound form
             form = WorkshopForm(request.POST)
             editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST)
 
             if form.is_valid():
                 return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form})
             
-
-def workshop_edit_success(request, workshop_id):
-    workshop = get_object_or_404(Workshop, id=workshop_id)
-    organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
-    author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
-
-    return render(request, "workshops/workshop_edit_success.html", {
-        'organizer_url': organizer_url,
-        'author_url': author_url
-    })
 
 class WorkshopOverview(View):
     def get_workshop(self):
@@ -87,9 +72,12 @@ class WorkshopOverview(View):
         return self.render_workshop(request)
 
     def post(self, request, secret_token):
+
+        # renders the workshop overview page in edit mode, allowing to edit all fields
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
 
+        # saves the changes when user is in edit mode and takes user out of edit mode.
         elif request.POST["submit_button"] == "Confirm":
             workshop_form = WorkshopForm(instance = self.get_workshop(), data = request.POST)
             updated_papers = [PaperForm(instance=paper_instance, data = request.POST) for paper_instance in self.get_workshop().accepted_papers.all()]
@@ -98,12 +86,12 @@ class WorkshopOverview(View):
                 workshop_form.save()
                 [paperform.save() for paperform in updated_papers]
                 return self.render_workshop(request, edit_mode = False)
-    
+
+        # allows the workshop owner to submit when all papers have been uploaded 
         elif request.POST["submit_button"] == "Submit Workshop":
-            return redirect(reverse('submit_workshop', kwargs={'secret_token': secret_token}))
+            return render(request, 'workshops/submit_workshop.html')
 
-
-class author_upload_class(View):
+class AuthorUpload(View):
     def get_workshop(self):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
         return workshop
@@ -118,10 +106,11 @@ class author_upload_class(View):
 
     def post(self, request, secret_token):
         
+        # saves the data when the confirm button is pressed in edit mode.
         if 'confirm_button' in request.POST:
             author_formset = AuthorFormSet(request.POST)
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
-            
+
             if paper_form.is_valid() and author_formset.is_valid():
                 paper_instance = paper_form.save(commit=False)
                 if 'uploaded_file' not in request.FILES and 'uploaded_file_url' in request.session:
@@ -137,6 +126,7 @@ class author_upload_class(View):
                     'paper': paper_instance, 
                     'authors': author_instances})
 
+        # shows the filled in files and allows user to make last changes.
         else:
             author_formset = AuthorFormSet(request.POST)
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
@@ -150,7 +140,7 @@ class author_upload_class(View):
                     'paper_form': paper_form, 
                     'author_formset': author_formset}) 
             
-def submit_workshop(request, secret_token):
-    return render(request, 'workshops/submit_workshop.html')
+
+            
 
     
