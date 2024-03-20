@@ -14,7 +14,10 @@
 <body>
 
     <h1>Paper Submitted Correctly</h1>
+<<<<<<< HEAD
     <p><p>Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_title }}</strong>.</p>
+=======
+>>>>>>> 9143bd8a7e798201f437ab50809811c811307797
     <fieldset class="paper-details">
         <legend>Paper Details</legend>
         
@@ -38,6 +41,7 @@
             </ul>
         </p>
     </fieldset>
+<<<<<<< HEAD
 
     <form method="post" id="form-container" enctype="multipart/form-data" >
         {% csrf_token %}
@@ -47,7 +51,10 @@
     </form>
 
     <!-- You can provide additional content or links here as needed. -->
+=======
+>>>>>>> 9143bd8a7e798201f437ab50809811c811307797
 
+    <i> If you would like to make further changes to this submission please contact {{workshop.submitted_by}} at {{workshop.email_address}}. </i>
 </body>
 </html>
 {% endblock %}
