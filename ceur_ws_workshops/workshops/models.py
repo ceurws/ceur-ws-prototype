@@ -36,6 +36,7 @@ class Workshop(models.Model):
     workshop_end_date = models.DateField(default=date.today)
     urn = models.CharField(max_length=50)
     submitted_by = models.CharField(max_length=200)
+    email_address = models.EmailField(max_length=200)
     
     volume_number = models.IntegerField(default=1000)
     publication_year = models.IntegerField(default=2024)
@@ -54,7 +55,7 @@ class Paper(models.Model):
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10)
     uploaded_file = models.FileField(upload_to='papers/', null = True, blank = True)
-    
+    agreement_file = models.FileField(upload_to = "agreement/", null = True, blank = True)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     # KEYS
