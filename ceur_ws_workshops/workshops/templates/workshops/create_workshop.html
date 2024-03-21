@@ -10,7 +10,7 @@
     {{ form.as_p }}
     
   </fieldset>
-  <hr>
+  <hr>    
   
   <fieldset id="editor-fieldset">
     {{ editor_form.management_form }}
@@ -60,7 +60,7 @@
         endDateInput.value = startDateInput.value;
       }
     }
-
+    
     function updateStartDateMax() {
       if (startDateInput.value && startDateInput.value > endDateInput.value) {
         startDateInput.value = endDateInput.value;

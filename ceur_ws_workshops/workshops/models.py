@@ -15,6 +15,10 @@ class Editor(models.Model):
     research_group = models.CharField(max_length=100)
     research_group_url = models.URLField(max_length=200)
 
+    def __str__(self):
+        # return self.name
+        return f"{self.name}, {self.university}, {self.university_country}"
+
 class Author(models.Model):
     author_name = models.CharField(max_length=100)
     author_university = models.CharField(max_length=100)
@@ -22,13 +26,13 @@ class Author(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
-
+    def __str__(self):
+        return self.author_name
 
 class Workshop(models.Model):
     workshop_title = models.CharField(max_length=200)
     workshop_description = models.TextField(max_length=500)
     workshop_city = models.CharField(max_length=200) 
-    # workshop_country = models.CharField(max_length=200) 
     workshop_country_choices = [('', 'Select a country')] + list(CountryField().choices)
     workshop_country = models.CharField(max_length=200, choices=workshop_country_choices)
     workshop_begin_date = models.DateField(default=date.today)
