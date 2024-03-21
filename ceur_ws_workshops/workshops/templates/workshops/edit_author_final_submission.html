@@ -1,4 +1,4 @@
-{% extends "workshops/author_upload.html" %}
+{% extends "workshops/author_upload_success.html" %}
 {% load static % }
 {% block content %}
   <p class="header-title">Are all the details correct?</p>
@@ -7,7 +7,7 @@
     <fieldset>
       <legend> Paper Data</legend>
     {{ paper_form.as_p}}
-    <p>Currently uploaded Paper: {{ paper_form.instance.uploaded_file }}</p>
+    <p>Currently uploaded file: {{ paper_form.instance.uploaded_file.url }}</p>
     <p>Currently uploaded Agreement: {{ paper_form.instance.agreement_file }}</p>
     </fieldset>
     <hr>
