@@ -114,14 +114,13 @@ class AuthorUpload(View):
 
                 workshop_instance = self.get_workshop()
                 paper_instance.workshop = workshop_instance
-                if 'uploaded_file' not in request.FILES and 'uploaded_file_url' in request.session:
+                if ('uploaded_file' and 'agreement_file') not in request.FILES and ('uploaded_file_url' and 'agreement_file_url') in request.session:
                     paper_instance.uploaded_file.name = request.session['uploaded_file_url']
-                if 'agreement_file' not in request.FILES and 'agreement_file_url' in request.session:
                     paper_instance.agreement_file.name = request.session['agreement_file_url']
                 paper_instance.save()
                 author_instances = author_formset.save()
                 paper_instance.authors.add(*author_instances)
-                
+
                 self.get_workshop().accepted_papers.add(paper_instance)
                 print("###############")
                 print(self.get_workshop().accepted_papers)
@@ -138,7 +137,6 @@ class AuthorUpload(View):
                     paper_instance = paper_form.save(commit=False)
                     paper_instance.workshop = self.get_workshop()
                     paper_instance.save()  
-                    print(paper_instance)
                     request.session['uploaded_file_url'] = paper_instance.uploaded_file.name
                     request.session['agreement_file_url']  = paper_instance.agreement_file.name
                 return render(request, 'workshops/edit_author.html', {
