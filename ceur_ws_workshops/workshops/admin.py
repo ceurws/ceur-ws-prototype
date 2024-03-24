@@ -42,6 +42,9 @@ class PaperAdmin(admin.ModelAdmin):
         return ", ".join(author.author_name for author in obj.authors.all())
     get_authors.short_description = 'Authors'
 
+    def get_workshop(self, obj):
+        return ", ".join(workshop.workshop_title for workshop in obj.workshop.all())
+    get_workshop.short_description = 'Workshop'
     def get_author_search_result(self, request, queryset, search_term):
         queryset, use_distinct = super().get_author_search_result(request, queryset, search_term)
         if search_term:
