@@ -42,8 +42,8 @@ class Workshop(models.Model):
     submitted_by = models.CharField(max_length=200)
     email_address = models.EmailField(max_length=200)
     
-    volume_number = models.IntegerField(max_length = 200)
-    publication_year = models.IntegerField(max_length = 200)
+    volume_number = models.IntegerField(null = True, blank = True)
+    publication_year = models.IntegerField()
     license = models.CharField(max_length=50)
 
     # KEYS
@@ -61,11 +61,11 @@ def paper_upload_path(instance, filename):
     Assumes instance has a direct foreign key to Workshop.
     Format: "papers/Vol-{workshop_volume}/{filename}"
     """
-    workshop_volume = instance.workshop.volume_number
+    workshop_volume = instance.workshop.id
     return f"papers/Vol-{workshop_volume}/{filename}"
 
 def agreement_file_path(instance, filename):
-    agreement_file = instance.workshop.volume_number
+    agreement_file = instance.workshop.id
     return f"agreement/Vol-{agreement_file}/{filename}"
     
 class Paper(models.Model):

@@ -17,7 +17,7 @@ class WorkshopForm(forms.ModelForm):
         model = Workshop
         fields = ['workshop_title', 'workshop_description', 'workshop_city', 'workshop_country',
                      'publication_year',
-                   'workshop_begin_date', 'workshop_end_date', 'volume_number', 'license', 'submitted_by', 'email_address']
+                   'workshop_begin_date', 'workshop_end_date', 'license', 'submitted_by', 'email_address']
         
         widgets = {
             'workshop_title': TextInput(attrs={'size': 50, 
