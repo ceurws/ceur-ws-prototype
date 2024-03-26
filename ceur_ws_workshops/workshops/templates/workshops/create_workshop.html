@@ -6,13 +6,15 @@
 <form method="post" id="form-container" enctype="multipart/form-data">
   <h1 class="header-title">Create Workshop Volume</h1>
   <fieldset>
+    <legend>Workshop Details</legend>
     {% csrf_token %}
     {{ form.as_p }}
     
   </fieldset>
-  <hr>
+  <hr>    
   
   <fieldset id="editor-fieldset">
+    <legend>Editors</legend>
     {{ editor_form.management_form }}
     <div id="form-set">
       {% for form in editor_form %}
@@ -60,7 +62,7 @@
         endDateInput.value = startDateInput.value;
       }
     }
-
+    
     function updateStartDateMax() {
       if (startDateInput.value && startDateInput.value > endDateInput.value) {
         startDateInput.value = endDateInput.value;
