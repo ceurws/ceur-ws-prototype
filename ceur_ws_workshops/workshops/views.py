@@ -50,7 +50,6 @@ class CreateWorkshop(View):
             if form.is_valid():
                 return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form})
             
-
 class WorkshopOverview(View):
     def get_workshop(self):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
@@ -77,14 +76,28 @@ class WorkshopOverview(View):
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
 
+            # title_list = request.POST.getlist('paper_title')
+            # page_list = request.POST.getlist('pages')
+
         # saves the changes when user is in edit mode and takes user out of edit mode.
         elif request.POST["submit_button"] == "Confirm":
             workshop_form = WorkshopForm(instance = self.get_workshop(), data = request.POST)
-            updated_papers = [PaperForm(instance=paper_instance, data = request.POST) for paper_instance in self.get_workshop().accepted_papers.all()]
-        
+
+            for i, paper_instance in enumerate(self.get_workshop().accepted_papers.all()):
+
+                paper_data = {
+                'paper_title': request.POST.getlist('paper_title', '')[i],
+                'pages': request.POST.getlist('pages', '')[i],
+                'uploaded_file': request.FILES  # this line puts the uploaded file in every paper form, so it's obviously wrong but I don't know how to fix it
+                }
+
+                paper_form = PaperForm(paper_data, request.FILES, instance=paper_instance,)
+
+                if paper_form.is_valid():
+                    paper_form.save()
+
             if workshop_form.is_valid():
                 workshop_form.save()
-                [paperform.save() for paperform in updated_papers]
                 return self.render_workshop(request, edit_mode = False)
 
         # allows the workshop owner to submit when all papers have been uploaded 
@@ -110,8 +123,9 @@ class AuthorUpload(View):
         if 'confirm_button' in request.POST:
             author_formset = AuthorFormSet(request.POST)
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
-
+            
             if paper_form.is_valid() and author_formset.is_valid():
+
                 paper_instance = paper_form.save(commit=False)
                 if 'uploaded_file' not in request.FILES and 'uploaded_file_url' in request.session:
                     paper_instance.uploaded_file.name = request.session['uploaded_file_url']
@@ -125,15 +139,16 @@ class AuthorUpload(View):
                     'workshop': self.get_workshop(), 
                     'paper': paper_instance, 
                     'authors': author_instances})
+            
 
         # shows the filled in files and allows user to make last changes.
         else:
             author_formset = AuthorFormSet(request.POST)
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
             if paper_form.is_valid() and author_formset.is_valid():
+                
                 if 'uploaded_file' in request.FILES:
                     paper_instance = paper_form.save(commit=False)
-                    paper_instance.save()  
                     request.session['uploaded_file_url'] = paper_instance.uploaded_file.name
 
                 return render(request, 'workshops/edit_author.html', {
