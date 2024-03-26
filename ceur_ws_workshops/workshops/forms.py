@@ -2,7 +2,7 @@
 from .models import Workshop, Editor, Paper, Author
 from django import forms
 from django.forms import modelformset_factory
-from django.forms import TextInput, FileInput
+from django.forms import TextInput, FileInput, NumberInput
 from django_countries.widgets import CountrySelectWidget
 
 class DateInput(forms.DateInput):
@@ -16,7 +16,8 @@ class WorkshopForm(forms.ModelForm):
     class Meta:
         model = Workshop
         fields = ['workshop_title', 'workshop_description', 'workshop_city', 'workshop_country',
-                   'workshop_begin_date', 'workshop_end_date', 'submitted_by', 'email_address']
+                     'publication_year',
+                   'workshop_begin_date', 'workshop_end_date', 'license', 'submitted_by', 'email_address']
         
         widgets = {
             'workshop_title': TextInput(attrs={'size': 50, 
@@ -28,8 +29,10 @@ class WorkshopForm(forms.ModelForm):
             'workshop_begin_date': DateInput(attrs={'id': 'id_workshop_begin_date'}),
             'workshop_end_date': DateInput(attrs={'id': 'id_workshop_end_date'}),
             'workshop_country': CountrySelectWidget(),
-            # 'urn': TextInput(attrs={'size': 50, 
-            #                        'placeholder': 'urn:nbn:de:0074-2019-001'}),
+            'volume_number': NumberInput(attrs={'size': 50, 
+                                            'placeholder': '1000'}),
+            'license': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'MIT'}),
             'submitted_by': TextInput(attrs={'size': 50,
                                             'placeholder': 'John Doe'}),
             'email_address': TextInput(attrs={'size': 50,
@@ -43,22 +46,20 @@ class PaperForm(forms.ModelForm):
         super(PaperForm, self).__init__(*args, **kwargs)
 
         if file_uploaded:
-            # If the file is uploaded, change the field to indicate it's for changing the file.
             self.fields['uploaded_file'].label = 'Change current file'
         else:
-            # If the file is not uploaded, you might want to customize the field to indicate it's for uploading.
             self.fields['uploaded_file'].label = 'Upload file'
     class Meta:
         model = Paper
-        fields = ['paper_title', 'pages', 'uploaded_file']
+        fields = ['paper_title', 'pages', 'uploaded_file', 'agreement_file']
 
         widgets = {
             'paper_title': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the title of the paper'}),
             'pages': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the number of pages'}),
-            # 'uploaded_file': CustomClearableFileInput,
             'uploaded_file': FileInput(attrs={'accept': '.pdf'}),
+            'agreement_file': FileInput(attrs={'accept': '.pdf'}),
         }
 
 AuthorFormSet = modelformset_factory(
@@ -72,7 +73,6 @@ AuthorFormSet = modelformset_factory(
             'author_uni_url': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the URL of the university'}),
         })
-
 
 EditorFormSet = modelformset_factory(
     Editor, fields=('name', 'university', 'university_country', 'university_url', 'research_group', 'research_group_url'), extra=1,
