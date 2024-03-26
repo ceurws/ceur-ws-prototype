@@ -49,7 +49,6 @@ class CreateWorkshop(View):
 
             if form.is_valid():
                 return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form})
-            
 
 class WorkshopOverview(View):
     def get_workshop(self):
@@ -106,41 +105,40 @@ class AuthorUpload(View):
 
     def post(self, request, secret_token):
         
-        # saves the data when the confirm button is pressed in edit mode.
         if 'confirm_button' in request.POST:
             author_formset = AuthorFormSet(request.POST)
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
 
             if paper_form.is_valid() and author_formset.is_valid():
                 paper_instance = paper_form.save(commit=False)
-                if 'uploaded_file' not in request.FILES and 'uploaded_file_url' in request.session:
+
+                workshop_instance = self.get_workshop()
+                paper_instance.workshop = workshop_instance
+                if ('uploaded_file' and 'agreement_file') not in request.FILES and ('uploaded_file_url' and 'agreement_file_url') in request.session:
                     paper_instance.uploaded_file.name = request.session['uploaded_file_url']
-                
+                    paper_instance.agreement_file.name = request.session['agreement_file_url']
                 paper_instance.save()
                 author_instances = author_formset.save()
                 paper_instance.authors.add(*author_instances)
-                self.get_workshop().accepted_papers.add(paper_instance)
 
+                self.get_workshop().accepted_papers.add(paper_instance)
+                print("###############")
+                print(self.get_workshop().accepted_papers)
                 return render(request, 'workshops/author_upload_success.html', {
                     'workshop': self.get_workshop(), 
                     'paper': paper_instance, 
                     'authors': author_instances})
 
-        # shows the filled in files and allows user to make last changes.
         else:
             author_formset = AuthorFormSet(request.POST)
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
             if paper_form.is_valid() and author_formset.is_valid():
-                if 'uploaded_file' in request.FILES:
+                if 'uploaded_file' and 'agreement_file' in request.FILES:
                     paper_instance = paper_form.save(commit=False)
+                    paper_instance.workshop = self.get_workshop()
                     paper_instance.save()  
                     request.session['uploaded_file_url'] = paper_instance.uploaded_file.name
-
+                    request.session['agreement_file_url']  = paper_instance.agreement_file.name
                 return render(request, 'workshops/edit_author.html', {
                     'paper_form': paper_form, 
                     'author_formset': author_formset}) 
-            
-
-            
-
-    
