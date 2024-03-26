@@ -15,7 +15,7 @@
     <h1>Workshop Overview</h1>
 
     {% if edit_mode %}
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <fieldset class="workshop-details">
             <legend>Workshop Details</legend>
@@ -29,7 +29,10 @@
             <ul>
                 {% for paperform in paper_forms %}
                     <li>
-                        {{paperform.as_p}}
+                        {{ paperform.as_p }}
+                        {% if paperform.instance.uploaded_file %}
+                            <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
+                        {% endif %}
                     </li>
                 {% endfor %}
             </ul>
