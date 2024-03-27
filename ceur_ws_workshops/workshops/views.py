@@ -83,28 +83,48 @@ class WorkshopOverview(View):
 
         # saves the changes when user is in edit mode and takes user out of edit mode.
         elif request.POST["submit_button"] == "Confirm":
-            workshop_form = WorkshopForm(instance = self.get_workshop(), data = request.POST)
+        #     workshop_form = WorkshopForm(instance = self.get_workshop(), data = request.POST)
 
-            for i, paper_instance in enumerate(self.get_workshop().accepted_papers.all()):
+        #     for i, paper_instance in enumerate(self.get_workshop().accepted_papers.all()):
 
-                paper_data = {
-                'paper_title': request.POST.getlist('paper_title', '')[i],
-                'pages': request.POST.getlist('pages', '')[i],
-                'uploaded_file': request.FILES  # this line puts the uploaded file in every paper form, so it's obviously wrong but I don't know how to fix it
-                }
+        #         paper_data = {
+        #         'paper_title': request.POST.getlist('paper_title', '')[i],
+        #         'pages': request.POST.getlist('pages', '')[i],
+        #         'uploaded_file': request.FILES  # this line puts the uploaded file in every paper form, so it's obviously wrong but I don't know how to fix it
+        #         }
 
-                paper_form = PaperForm(paper_data, request.FILES, instance=paper_instance,)
+        #         paper_form = PaperForm(paper_data, request.FILES, instance=paper_instance,)
+
+        #         if paper_form.is_valid():
+        #             paper_form.save()
+
+        #     if workshop_form.is_valid():
+        #         workshop_form.save()
+        #         return self.render_workshop(request, edit_mode = False)
+            workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST)
+            workshop = self.get_workshop()
+
+            paper_instances = list(workshop.accepted_papers.all())
+            uploaded_files = request.FILES.getlist('uploaded_file')  # Assuming 'uploaded_file' is the name for all paper file inputs
+
+            if workshop_form.is_valid():
+                workshop_form.save()
+
+            for i, paper_instance in enumerate(paper_instances):
+                paper_form_data = request.POST.copy()
+                if i < len(uploaded_files):
+                    paper_form = PaperForm(paper_form_data, {'uploaded_file': uploaded_files[i]}, instance=paper_instance)
+                else:
+                    paper_form = PaperForm(paper_form_data, instance=paper_instance)
 
                 if paper_form.is_valid():
                     paper_form.save()
 
-            if workshop_form.is_valid():
-                workshop_form.save()
-                return self.render_workshop(request, edit_mode = False)
-
-        # allows the workshop owner to submit when all papers have been uploaded 
+            return self.render_workshop(request, edit_mode=False)
+        # # allows the workshop owner to submit when all papers have been uploaded 
         elif request.POST["submit_button"] == "Submit Workshop":
             return render(request, 'workshops/submit_workshop.html')
+            
 
 class AuthorUpload(View):
     def get_workshop(self):
@@ -139,8 +159,6 @@ class AuthorUpload(View):
                 paper_instance.authors.add(*author_instances)
 
                 self.get_workshop().accepted_papers.add(paper_instance)
-                print("###############")
-                print(self.get_workshop().accepted_papers)
                 return render(request, 'workshops/author_upload_success.html', {
                     'workshop': self.get_workshop(), 
                     'paper': paper_instance, 
@@ -155,7 +173,8 @@ class AuthorUpload(View):
                 
                 if 'uploaded_file' in request.FILES:
                     paper_instance = paper_form.save(commit=False)
-
+                    paper_instance.workshop = self.get_workshop()
+                    paper_instance.save()
                     request.session['uploaded_file_url'] = paper_instance.uploaded_file.name
                     request.session['agreement_file_url']  = paper_instance.agreement_file.name
                 return render(request, 'workshops/edit_author.html', {
