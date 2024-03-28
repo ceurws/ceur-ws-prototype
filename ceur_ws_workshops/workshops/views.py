@@ -28,6 +28,7 @@ class CreateWorkshop(View):
         if 'submit_button' in request.POST:
             formset = EditorFormSet(request.POST)
             form = WorkshopForm(request.POST)
+            print('got here')
 
             if form.is_valid() and formset.is_valid():
                 workshop = form.save()  
@@ -36,12 +37,14 @@ class CreateWorkshop(View):
 
                 organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
                 author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
-
                 return render(request, "workshops/workshop_edit_success.html", {
                     'organizer_url': organizer_url,
                     'author_url': author_url
                 })
-        
+            else:
+                print(form.errors)
+                print('got HERE')
+
         # handles logic to showcase the data so that the user can confirm it
         else:
             form = WorkshopForm(request.POST)
