@@ -1,1 +1,39 @@
-Submitted Workshop 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Workshops</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+    {% block content %}
+    <div class="container mt-3">
+        <header class="text-center mb-4">
+          <h1>Workshops</h1>
+          <a href="{% url 'workshops:index' %}" class="btn btn-secondary mb-3">Back to Home</a>
+        </header>
+      
+        <div class="list-group">
+          {% for workshop in workshops %}
+            <a href="{% url 'workshops:workshop_overview' secret_token=workshop.secret_token %}" class="list-group-item list-group-item-action flex-column align-items-start">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Vol-{{ workshop.id }}: {{ workshop.workshop_title }}</h5>
+                <small>More info</small>
+              </div>
+              <p class="mb-1">{{ workshop.workshop_description }}</p>
+              <small>Edited by:</small>
+              <ul>
+                {% for editor in workshop.editors.all %}
+                  <li>{{ editor.name }}</li> <!-- Replace 'name' with the actual field name in the Editor model -->
+                {% endfor %}
+              </ul>
+            </a>
+          {% empty %}
+            <p class="text-center">No workshops available.</p>
+          {% endfor %}
+        </div>
+      </div>
+      {% endblock %}
+</html>

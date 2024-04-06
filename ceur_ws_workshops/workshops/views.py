@@ -101,12 +101,13 @@ class WorkshopOverview(View):
         #     if workshop_form.is_valid():
         #         workshop_form.save()
         #         return self.render_workshop(request, edit_mode = False)
+
             workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST)
             workshop = self.get_workshop()
 
             paper_instances = list(workshop.accepted_papers.all())
-            uploaded_files = request.FILES.getlist('uploaded_file')  # Assuming 'uploaded_file' is the name for all paper file inputs
-
+            uploaded_files = request.FILES.getlist('uploaded_file')  
+            agreement_files = request.FILES.getlist('agreement_file')
             if workshop_form.is_valid():
                 workshop_form.save()
 
@@ -117,13 +118,24 @@ class WorkshopOverview(View):
                 else:
                     paper_form = PaperForm(paper_form_data, instance=paper_instance)
 
+                if i < len(agreement_files):
+                    paper_form = PaperForm(paper_form_data, {'agreement_file': agreement_files[i]}, instance=paper_instance)
+                else:
+                    paper_form = PaperForm(paper_form_data, instance=paper_instance)
+
                 if paper_form.is_valid():
                     paper_form.save()
 
             return self.render_workshop(request, edit_mode=False)
-        # # allows the workshop owner to submit when all papers have been uploaded 
+        
         elif request.POST["submit_button"] == "Submit Workshop":
-            return render(request, 'workshops/submit_workshop.html')
+            workshops = Workshop.objects.prefetch_related('editors').all()
+            editors = Editor.objects.all()
+            context = {
+                'workshops': workshops,
+                'editors': editors
+            }
+            return render(request, 'workshops/submit_workshop.html', context)
             
 
 class AuthorUpload(View):
