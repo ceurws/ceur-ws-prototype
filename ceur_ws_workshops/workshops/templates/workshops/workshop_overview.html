@@ -44,7 +44,7 @@
 
     {% else %}
     <fieldset class="workshop-details">
-        <legend>Workshop Details</legend>
+        <legend>Workshop-{{workshop.id}} Details</legend>
         <p><strong>Title:</strong> {{ workshop.workshop_title }}</p>
         <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
         <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>

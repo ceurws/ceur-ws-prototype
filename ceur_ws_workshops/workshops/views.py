@@ -4,11 +4,12 @@ from .models import Workshop, Paper, Editor, Author
 import uuid
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.http import HttpResponseRedirect
-from django.core.exceptions import MultipleObjectsReturned
 from django.views import View
-
+from django.core import serializers
 from .forms import WorkshopForm, EditorFormSet, AuthorFormSet, PaperForm
+from django.contrib import messages
+from django.conf import settings
+import os
 
 def index(request):
     """
@@ -50,8 +51,6 @@ class CreateWorkshop(View):
             if form.is_valid():
                 return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form})
 
-            
-
 class WorkshopOverview(View):
     def get_workshop(self):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
@@ -72,6 +71,28 @@ class WorkshopOverview(View):
     def get(self, request, secret_token):
         return self.render_workshop(request)
 
+    def submit_workshop(self, request, secret_token):
+        workshop = get_object_or_404(Workshop, secret_token=secret_token)
+
+        workshop_json = serializers.serialize('json', [workshop,])
+        directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
+        os.makedirs(directory_path, exist_ok=True)
+        file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
+    
+        with open(file_path, 'w') as file:
+            file.write(workshop_json)
+        request.session['json_saved'] = True
+        messages.success(request, 'Workshop submitted successfully.')
+
+        # workshops = Workshop.objects.prefetch_related('editors').all()
+
+        # editors = Editor.objects.all()
+        # context = {
+        #     'workshops': workshops,
+        #     'editors': editors,
+        # }
+        return render(request, 'workshops/submit_workshop.html')
+    
     def post(self, request, secret_token):
 
         # renders the workshop overview page in edit mode, allowing to edit all fields
@@ -102,6 +123,8 @@ class WorkshopOverview(View):
         #         workshop_form.save()
         #         return self.render_workshop(request, edit_mode = False)
 
+            # Modifies the first entry of the paper (regardless which one we want to update), not working
+            # but thought it might be on the right track...
             workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST)
             workshop = self.get_workshop()
 
@@ -129,15 +152,8 @@ class WorkshopOverview(View):
             return self.render_workshop(request, edit_mode=False)
         
         elif request.POST["submit_button"] == "Submit Workshop":
-            workshops = Workshop.objects.prefetch_related('editors').all()
-            editors = Editor.objects.all()
-            context = {
-                'workshops': workshops,
-                'editors': editors
-            }
-            return render(request, 'workshops/submit_workshop.html', context)
+            return self.submit_workshop(request, secret_token)
             
-
 class AuthorUpload(View):
     def get_workshop(self):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
