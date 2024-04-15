@@ -56,7 +56,7 @@ class PaperForm(forms.ModelForm):
         widgets = {
             'paper_title': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the title of the paper'}),
-            'pages': TextInput(attrs={'size': 50, 
+            'pages': NumberInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the number of pages'}),
             'uploaded_file': FileInput(attrs={'accept': '.pdf'}),
             'agreement_file': FileInput(attrs={'accept': '.pdf'}),
