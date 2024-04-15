@@ -140,11 +140,38 @@ class AuthorUpload(View):
             return {'workshop': self.get_workshop(), 'paper': paper_form, 'authors': author_formset}
         return {'workshop': self.get_workshop(), 'author_formset': author_formset, 'paper_form': paper_form}
     
+    def _detect_signature_in_image(self, file_path):
+        loader = Loader()
+        extractor = Extractor()
+        cropper = Cropper(border_ratio=0)
+        judger = Judger()
+
+        masks = loader.get_masks(file_path)
+        is_signed = False
+        for mask in masks:
+            labeled_mask = extractor.extract(mask)
+            results = cropper.run(labeled_mask)
+            for result in results.values():
+                is_signed = judger.judge(result["cropped_mask"])
+                if is_signed:
+                    break
+            if is_signed:
+                break
+        return is_signed
+
     
+    def construct_file_path(self, paper_instance, filename):
+        """
+        Constructs the file path for a Paper instance manually based on the workshop volume.
+        This does not access the file system but constructs the path string as expected.
+        """
+        workshop_volume = paper_instance.workshop.id
+        path = f'agreement/Vol-{workshop_volume}/{filename}'
+        full_path = os.path.join(settings.MEDIA_ROOT, path)
+        return full_path
     def _create_or_update_paper_instance(self, request, paper_form):
         if not paper_form.is_valid():
-        # Handle the case where the form is not valid; return or raise an exception
-            return None
+                messages.error(request, 'OOOOOOOOOPS')
         
         workshop_instance = self.get_workshop()
         paper_title = paper_form.cleaned_data['paper_title']
@@ -154,7 +181,6 @@ class AuthorUpload(View):
 
         if existing_paper:
             paper_instance = existing_paper
-            # Optionally update fields if necessary
             
             existing_paper.paper_title = request.POST['paper_title']
             existing_paper.pages = request.POST['pages']
@@ -163,18 +189,38 @@ class AuthorUpload(View):
                 existing_paper.uploaded_file = request.FILES['uploaded_file']
             if 'agreement_file' in request.FILES:
                 existing_paper.agreement_file = request.FILES['agreement_file']
-                
-                # Check whether the agreement is SIGNED
+
             existing_paper.save()
+
+            heloo = os.path.join(settings.MEDIA_ROOT, paper_instance.agreement_file.name)
+
+            is_signed = self._detect_signature_in_image(heloo)
+
+            if not is_signed:
+                # Handle unsigned agreement file, e.g., by setting an error message
+                print('Agreement file is not signed')
+            else:
+                print('Agreement file is signed')
+
+            print(existing_paper.uploaded_file.url)
         else:
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = workshop_instance
             if 'uploaded_file' not in request.FILES and 'agrement_file' not in request.FILES and ('uploaded_file_url' in request.session and 'agreement_file_url' in request.session):
                 paper_instance.uploaded_file.name = request.session['uploaded_file_url']
                 paper_instance.agreement_file.name = request.session['agreement_file_url']
+
+            # elif 'agreement_file' in request.FILES:
+            #     agreement_file_path = request.FILES['agreement_file_url'].temporary_file_path()
+            #     is_signed = self._check_agreement_signature(agreement_file_path)
+            #     if not is_signed:
+            #         # Handle unsigned agreement file, e.g., by setting an error message
+            #         print('Agreement file is not signed')
+            #         exit()
             paper_instance.save()
 
         return paper_instance
+    
     def submit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
         
@@ -185,39 +231,11 @@ class AuthorUpload(View):
 
         context = self.get_context(author_instances, paper_instance, 'confirm')
         return render(request, self.success_path, context)
-        # if paper_form.is_valid() and author_formset.is_valid():
-
-        #     paper_instance = paper_form.save(commit=False)
-
-        #     workshop_instance = self.get_workshop()
-        #     paper_instance.workshop = workshop_instance
-        #     if 'uploaded_file' not in request.FILES and 'agrement_file' not in request .FILES and ('uploaded_file_url' in request.session and 'agreement_file_url' in request.session):
-        #         paper_instance.uploaded_file.name = request.session['uploaded_file_url']
-        #         paper_instance.agreement_file.name = request.session['agreement_file_url']
-        #     paper_instance.save()
-        #     author_instances = author_formset.save()
-        #     paper_instance.authors.add(*author_instances)
-
-        #     self.get_workshop().accepted_papers.add(paper_instance)
-            
-        #     context  = self.get_context(author_instances, paper_instance, 'confirm')
-        #     return render(request, self.success_path, context)
-        
     def edit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
 
         context = self.get_context(author_formset, paper_form, 'author')
         return render(request, self.edit_path, context)
-        # if paper_form.is_valid() and author_formset.is_valid():
-        #     if 'uploaded_file' in request.FILES and 'agreement_file' in request.FILES:
-        #         paper_instance = paper_form.save(commit=False)
-        #         paper_instance.workshop = self.get_workshop()
-        #         paper_instance.save()
-        #         request.session['uploaded_file_url'] = paper_instance.uploaded_file.name
-        #         request.session['agreement_file_url']  = paper_instance.agreement_file.name
-            
-        #     context = self.get_context(author_formset, paper_form, 'author')
-        #     return render(request, self.edit_path, context) 
         
     def get(self, request, secret_token):
         author_formset = AuthorFormSet(queryset=Author.objects.none())
