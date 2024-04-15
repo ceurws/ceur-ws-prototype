@@ -33,7 +33,9 @@
                         {% if paperform.instance.uploaded_file %}
                             <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
                         {% endif %}
-                    </li>
+                        {% if paperform.instance.agreement_file %}
+                        <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
+                    {% endif %}</li>
                 {% endfor %}
             </ul>
         </fieldset>
@@ -42,7 +44,7 @@
 
     {% else %}
     <fieldset class="workshop-details">
-        <legend>Workshop Details</legend>
+        <legend>Workshop-{{workshop.id}} Details</legend>
         <p><strong>Title:</strong> {{ workshop.workshop_title }}</p>
         <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
         <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
@@ -75,6 +77,7 @@
                     </p>
                     <p><strong>Pages:</strong> {{ paper.pages }}</p>
                     <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+                    <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
                     <!-- Add additional details as needed -->
                 </li>
             {% endfor %}

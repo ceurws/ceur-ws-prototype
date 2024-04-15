@@ -4,11 +4,16 @@ from .models import Workshop, Paper, Editor, Author
 import uuid
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.http import HttpResponseRedirect
-from django.core.exceptions import MultipleObjectsReturned
 from django.views import View
-
+from django.core import serializers
 from .forms import WorkshopForm, EditorFormSet, AuthorFormSet, PaperForm
+from django.contrib import messages
+from django.conf import settings
+import os
+from signature_detect.loader import Loader
+from signature_detect.extractor import Extractor
+from signature_detect.cropper import Cropper
+from signature_detect.judger import Judger
 
 def index(request):
     """
@@ -50,8 +55,6 @@ class CreateWorkshop(View):
             if form.is_valid():
                 return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form})
 
-            
-
 class WorkshopOverview(View):
     def get_workshop(self):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
@@ -72,92 +75,162 @@ class WorkshopOverview(View):
     def get(self, request, secret_token):
         return self.render_workshop(request)
 
+    def submit_workshop(self, request, secret_token):
+        workshop = get_object_or_404(Workshop, secret_token=secret_token)
+
+        workshop_json = serializers.serialize('json', [workshop,])
+        directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
+        os.makedirs(directory_path, exist_ok=True)
+        file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
+    
+        with open(file_path, 'w') as file:
+            file.write(workshop_json)
+        request.session['json_saved'] = True
+        messages.success(request, 'Workshop submitted successfully.')
+
+        return render(request, 'workshops/submit_workshop.html')
+    
     def post(self, request, secret_token):
 
         # renders the workshop overview page in edit mode, allowing to edit all fields
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
-
-            # title_list = request.POST.getlist('paper_title')
-            # page_list = request.POST.getlist('pages')
-
         # saves the changes when user is in edit mode and takes user out of edit mode.
         elif request.POST["submit_button"] == "Confirm":
-            workshop_form = WorkshopForm(instance = self.get_workshop(), data = request.POST)
 
-            for i, paper_instance in enumerate(self.get_workshop().accepted_papers.all()):
+            # Modifies the first entry of the paper (regardless which one we want to update), not working
+            # but thought it might be on the right track...
+            workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST)
+            workshop = self.get_workshop()
 
-                paper_data = {
-                'paper_title': request.POST.getlist('paper_title', '')[i],
-                'pages': request.POST.getlist('pages', '')[i],
-                'uploaded_file': request.FILES  # this line puts the uploaded file in every paper form, so it's obviously wrong but I don't know how to fix it
-                }
+            paper_instances = list(workshop.accepted_papers.all())
+            uploaded_files = request.FILES.getlist('uploaded_file')  
+            agreement_files = request.FILES.getlist('agreement_file')
+            if workshop_form.is_valid():
+                workshop_form.save()
 
-                paper_form = PaperForm(paper_data, request.FILES, instance=paper_instance,)
-
+            for i, paper_instance in enumerate(paper_instances):
+                paper_form_data = request.POST.copy()
+                if i < len(uploaded_files):
+                    paper_form_data['uploaded_file'] = uploaded_files[i]
+                if i < len(agreement_files):
+                    paper_form_data['agreement_file'] = agreement_files[i]
+                paper_form = PaperForm(paper_form_data, instance=paper_instance)
                 if paper_form.is_valid():
                     paper_form.save()
 
-            if workshop_form.is_valid():
-                workshop_form.save()
-                return self.render_workshop(request, edit_mode = False)
-
-        # allows the workshop owner to submit when all papers have been uploaded 
+            return self.render_workshop(request, edit_mode=False)
+        
         elif request.POST["submit_button"] == "Submit Workshop":
-            return render(request, 'workshops/submit_workshop.html')
-
+            return self.submit_workshop(request, secret_token)
+            
 class AuthorUpload(View):
+    upload_path = "workshops/author_upload.html"
+    edit_path  = "workshops/edit_author.html"
+    success_path = "workshops/author_upload_success.html"
+    
     def get_workshop(self):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
         return workshop
+    
+    def get_context(self, author_formset, paper_form, condition='default'):
+        if condition == 'author':
+            return {'author_formset': author_formset, 'paper_form': paper_form}
+        elif condition == "confirm":
+            return {'workshop': self.get_workshop(), 'paper': paper_form, 'authors': author_formset}
+        return {'workshop': self.get_workshop(), 'author_formset': author_formset, 'paper_form': paper_form}
+    
+    
+    def _create_or_update_paper_instance(self, request, paper_form):
+        if not paper_form.is_valid():
+        # Handle the case where the form is not valid; return or raise an exception
+            return None
+        
+        workshop_instance = self.get_workshop()
+        paper_title = paper_form.cleaned_data['paper_title']
 
+        # Try to find an existing paper with the same title in the same workshop
+        existing_paper = Paper.objects.filter(paper_title=paper_title, workshop=workshop_instance).first()
+
+        if existing_paper:
+            paper_instance = existing_paper
+            # Optionally update fields if necessary
+            
+            existing_paper.paper_title = request.POST['paper_title']
+            existing_paper.pages = request.POST['pages']
+            
+            if 'uploaded_file' in request.FILES:
+                existing_paper.uploaded_file = request.FILES['uploaded_file']
+            if 'agreement_file' in request.FILES:
+                existing_paper.agreement_file = request.FILES['agreement_file']
+                
+                # Check whether the agreement is SIGNED
+            existing_paper.save()
+        else:
+            paper_instance = paper_form.save(commit=False)
+            paper_instance.workshop = workshop_instance
+            if 'uploaded_file' not in request.FILES and 'agrement_file' not in request.FILES and ('uploaded_file_url' in request.session and 'agreement_file_url' in request.session):
+                paper_instance.uploaded_file.name = request.session['uploaded_file_url']
+                paper_instance.agreement_file.name = request.session['agreement_file_url']
+            paper_instance.save()
+
+        return paper_instance
+    def submit_author(self, request, author_formset, paper_form):
+        paper_instance = self._create_or_update_paper_instance(request, paper_form)
+        
+        if not paper_instance.authors.exists():  # Check if authors are already associated
+            author_instances = author_formset.save()
+            paper_instance.authors.add(*author_instances)
+            self.get_workshop().accepted_papers.add(paper_instance)
+
+        context = self.get_context(author_instances, paper_instance, 'confirm')
+        return render(request, self.success_path, context)
+        # if paper_form.is_valid() and author_formset.is_valid():
+
+        #     paper_instance = paper_form.save(commit=False)
+
+        #     workshop_instance = self.get_workshop()
+        #     paper_instance.workshop = workshop_instance
+        #     if 'uploaded_file' not in request.FILES and 'agrement_file' not in request .FILES and ('uploaded_file_url' in request.session and 'agreement_file_url' in request.session):
+        #         paper_instance.uploaded_file.name = request.session['uploaded_file_url']
+        #         paper_instance.agreement_file.name = request.session['agreement_file_url']
+        #     paper_instance.save()
+        #     author_instances = author_formset.save()
+        #     paper_instance.authors.add(*author_instances)
+
+        #     self.get_workshop().accepted_papers.add(paper_instance)
+            
+        #     context  = self.get_context(author_instances, paper_instance, 'confirm')
+        #     return render(request, self.success_path, context)
+        
+    def edit_author(self, request, author_formset, paper_form):
+        paper_instance = self._create_or_update_paper_instance(request, paper_form)
+
+        context = self.get_context(author_formset, paper_form, 'author')
+        return render(request, self.edit_path, context)
+        # if paper_form.is_valid() and author_formset.is_valid():
+        #     if 'uploaded_file' in request.FILES and 'agreement_file' in request.FILES:
+        #         paper_instance = paper_form.save(commit=False)
+        #         paper_instance.workshop = self.get_workshop()
+        #         paper_instance.save()
+        #         request.session['uploaded_file_url'] = paper_instance.uploaded_file.name
+        #         request.session['agreement_file_url']  = paper_instance.agreement_file.name
+            
+        #     context = self.get_context(author_formset, paper_form, 'author')
+        #     return render(request, self.edit_path, context) 
+        
     def get(self, request, secret_token):
         author_formset = AuthorFormSet(queryset=Author.objects.none())
         paper_form = PaperForm(file_uploaded=False)
-
-        return render(request, "workshops/author_upload.html", {
-            'workshop': self.get_workshop(), 'author_formset': author_formset, 'paper_form': paper_form
-        })
+        context = self.get_context(author_formset, paper_form)
+        return render(request, self.upload_path, context)
 
     def post(self, request, secret_token):
-        
+        author_formset = AuthorFormSet(request.POST)
+        paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
         if 'confirm_button' in request.POST:
-            author_formset = AuthorFormSet(request.POST)
-            paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
-            
-            if paper_form.is_valid() and author_formset.is_valid():
-
-                paper_instance = paper_form.save(commit=False)
-
-                workshop_instance = self.get_workshop()
-                paper_instance.workshop = workshop_instance
-                if ('uploaded_file' and 'agreement_file') not in request.FILES and ('uploaded_file_url' and 'agreement_file_url') in request.session:
-                    paper_instance.uploaded_file.name = request.session['uploaded_file_url']
-                    paper_instance.agreement_file.name = request.session['agreement_file_url']
-                paper_instance.save()
-                author_instances = author_formset.save()
-                paper_instance.authors.add(*author_instances)
-
-                self.get_workshop().accepted_papers.add(paper_instance)
-                print("###############")
-                print(self.get_workshop().accepted_papers)
-                return render(request, 'workshops/author_upload_success.html', {
-                    'workshop': self.get_workshop(), 
-                    'paper': paper_instance, 
-                    'authors': author_instances})
-            
-
+            return self.submit_author(request, author_formset, paper_form)
         else:
-            author_formset = AuthorFormSet(request.POST)
-            paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
-            if paper_form.is_valid() and author_formset.is_valid():
-
-                
-                if 'uploaded_file' in request.FILES:
-                    paper_instance = paper_form.save(commit=False)
-
-                    request.session['uploaded_file_url'] = paper_instance.uploaded_file.name
-                    request.session['agreement_file_url']  = paper_instance.agreement_file.name
-                return render(request, 'workshops/edit_author.html', {
-                    'paper_form': paper_form, 
-                    'author_formset': author_formset}) 
+            return self.edit_author(request, author_formset, paper_form)
+        
+    
