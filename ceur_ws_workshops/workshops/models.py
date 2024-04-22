@@ -31,44 +31,34 @@ class Author(models.Model):
     def __str__(self):
         return self.author_name
 
-<<<<<<< HEAD
 class Session(models.Model):
     session_title = models.CharField(max_length=100)
 
     def __str__(self):
         return self.session_title
-=======
-class Division(models.Model):
-    division_title = models.CharField(max_length=100)
->>>>>>> 9b4ed16da07f92bd24870be71c7ee613d15024d8
 
 class Workshop(models.Model):
-
-    # Fields to be filled in by user
+    workshop_full_title = models.CharField(max_length=200)
     workshop_short_title = models.CharField(max_length=200)
+    workshop_acronym = models.CharField(max_length=50)
     workshop_description = models.TextField(max_length=500)
     workshop_city = models.CharField(max_length=200) 
     workshop_country_choices = [('', 'Select a country')] + list(CountryField().choices)
     workshop_country = models.CharField(max_length=200, choices=workshop_country_choices)
     workshop_begin_date = models.DateField(default=date.today)
+
     workshop_end_date = models.DateField(default=date.today)
+    urn = models.CharField(max_length=50)
     volume_owner = models.CharField(max_length=200)
     volume_owner_email = models.EmailField(max_length=200)
-    publication_year = models.IntegerField()
     
-    license = models.CharField(max_length=50)
-    workshop_language_iso = models.CharField(max_length=4)
-    workshop_acronym = models.CharField(max_length=10)
-    workshop_full_title = models.CharField(max_length=200)
-    workshop_colocated = models.CharField(max_length=20, blank=True)
-    number_splits_volume = models.IntegerField()
+    workshop_language_iso = models.CharField(max_length=50)
+    workshop_colocated = models.CharField(max_length=200)
 
-    # later filled in at submission stage
-    volume_number = models.IntegerField(null = True, blank = True)
-    number_submitted_papers = models.IntegerField(null = True, blank = True)
-    number_accepted_papers = models.IntegerField(null = True, blank = True)
-    number_regular_size_papers = models.IntegerField(null = True, blank = True)
-    number_short_size_papers = models.IntegerField(null = True, blank = True)
+    # not filled in by user
+    volume_number = models.IntegerField(null=True, blank=True)
+    publication_year = models.IntegerField()
+    license = models.CharField(max_length=50)
 
     # KEYS
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
@@ -78,7 +68,8 @@ class Workshop(models.Model):
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
     def __str__(self):
-        return self.workshop_short_title   
+        return self.workshop_title
+ 
 
 def paper_upload_path(instance, filename):
     """
@@ -103,37 +94,11 @@ class Paper(models.Model):
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')
-<<<<<<< HEAD
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True)
 
-=======
-    division = models.ForeignKey(Division, on_delete=models.CASCADE, related_name='division')
->>>>>>> 9b4ed16da07f92bd24870be71c7ee613d15024d8
     def __str__(self):
         return self.paper_title
 
-    # def _get_session_choices(self):
-    #     """
-    #     Get choices for the session field based on sessions associated with the workshop.
-    #     """
-    #     print(self.workshop_id)
-    #     if self.workshop_id:
-    #         workshop_sessions = self.workshop.sessions.all()
-    #         return [(session.id, session.session_title) for session in workshop_sessions]
-    #     else:
-    #         return []
-
-    # def save(self, *args, **kwargs):
-    #     """
-    #     Override the save method to dynamically set choices for the session field.
-    #     """
-    #     if not self.session_id:
-    #         # If session is not set, set it to the first session associated with the workshop
-    #         workshop_sessions = self.workshop.sessions.all()
-    #         if workshop_sessions:
-    #             self.session = workshop_sessions[0]
-
-    #     super().save(*args, **kwargs)
 
 
 

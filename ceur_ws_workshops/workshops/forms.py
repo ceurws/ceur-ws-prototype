@@ -17,7 +17,7 @@ class WorkshopForm(forms.ModelForm):
         model = Workshop
         fields = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym', 'workshop_language_iso', 
                   'workshop_description', 'workshop_city', 'workshop_country', 'publication_year', 'workshop_colocated',
-                  'number_splits_volume', 'workshop_begin_date', 'workshop_end_date', 'license', 'volume_owner',
+                 'workshop_begin_date', 'workshop_end_date', 'volume_owner',
                   'volume_owner_email']
         
         widgets = {
