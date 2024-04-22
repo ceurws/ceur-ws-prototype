@@ -1,5 +1,5 @@
 
-from .models import Workshop, Editor, Paper, Author
+from .models import Workshop, Editor, Paper, Author, Session
 from django import forms
 from django.forms import modelformset_factory
 from django.forms import TextInput, FileInput, NumberInput
@@ -40,27 +40,34 @@ class WorkshopForm(forms.ModelForm):
                                         
        }
 
+
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         file_uploaded = kwargs.pop('file_uploaded', False)
+        workshop = kwargs.pop('workshop', None)
         super(PaperForm, self).__init__(*args, **kwargs)
 
         if file_uploaded:
             self.fields['uploaded_file'].label = 'Change current file'
         else:
             self.fields['uploaded_file'].label = 'Upload file'
+
+        # Dynamically set queryset for session field based on the workshop
+        if workshop:
+            self.fields['session'].queryset = workshop.sessions.all()
+
     class Meta:
         model = Paper
-        fields = ['paper_title', 'pages', 'uploaded_file', 'agreement_file']
+        fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file']
 
         widgets = {
-            'paper_title': TextInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the title of the paper'}),
-            'pages': TextInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the number of pages'}),
-            'uploaded_file': FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': FileInput(attrs={'accept': '.pdf'}),
+            'paper_title': forms.TextInput(attrs={'size': 50, 'placeholder': 'Enter the title of the paper'}),
+            'pages': forms.TextInput(attrs={'size': 50, 'placeholder': 'Enter the number of pages'}),
+            'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
+            'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
         }
+
+
 
 AuthorFormSet = modelformset_factory(
         Author, fields=('author_name', 'author_university', 'author_uni_url'), extra=1,
@@ -90,5 +97,15 @@ EditorFormSet = modelformset_factory(
                                             'placeholder': 'Enter the research group of the editor'}),
         'research_group_url': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the URL of the research group'}),
+    }
+)
+
+SessionFormSet = modelformset_factory(
+    Session, fields=('session_title',), extra=5,
+    # CSS styling but for formsets
+    widgets = {
+        'session_title': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Title of the session'}),
+
     }
 )

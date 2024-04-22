@@ -17,13 +17,12 @@
     <p><p>Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_title }}</strong>.</p>
     <fieldset class="paper-details">
         <legend>Paper Details</legend>
-        
-        
-
         <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
         <p><strong>Pages:</strong> {{ paper.pages }}</p>
         <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
         <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
+        <p><strong>Session:</strong> {{paper.session}}</p>
+
     </fieldset>
     <br>
     <fieldset>
@@ -34,6 +33,7 @@
                     <li><strong>Name:</strong>  {{ author.author_name }}</li>
                     <li><strong>University:</strong>{{ author.author_university }}</li>
                     <li><strong>University URL:</strong>{{ author.author_uni_url }}</li>
+                    <hr>
                 {% endfor %}
             </ul>
         </p>

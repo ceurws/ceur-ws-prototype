@@ -63,26 +63,36 @@
         </ul>
     </fieldset>
 
-    <fieldset class="papers-list">
-        <legend>Papers</legend>
-        <ul>
-            {% for paper in papers %}
-                <li>
-                    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
-                    <p><strong>Authors:</strong>
-                        {% for author in paper.authors.all %}
-                            {{ author.author_name }}
-                            {% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </p>
-                    <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-                    <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
-                    <!-- Add additional details as needed -->
-                </li>
-            {% endfor %}
-        </ul>
+    {% regroup papers by session as papers_by_session %}
+    <fieldset>
+        <legend>Papers</Legend>
+        {% for session_title in session_title_list %}
+            <fieldset class="papers-list">
+                <legend>{{ session_title }}</legend>
+                <ul>
+                    {% for paper in papers %}
+                        {% if paper.session.session_title == session_title%}
+                        <li>
+                            <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+                            <p><strong>Authors:</strong>
+                                {% for author in paper.authors.all %}
+                                    {{ author.author_name }}
+                                    {% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </p>
+                            <p><strong>Pages:</strong> {{ paper.pages }}</p>
+                            <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+                            <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
+                            <!-- Add additional details as needed -->
+                        </li>
+                        {%endif%}
+                    {% endfor %}
+                </ul>
+            </fieldset>
+        {% endfor %}
     </fieldset>
+    
+
 
     <br>
     <form method="post" id="form-container" enctype="multipart/form-data">
