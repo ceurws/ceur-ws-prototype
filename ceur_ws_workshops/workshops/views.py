@@ -37,6 +37,7 @@ class CreateWorkshop(View):
             editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
             session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
             form = WorkshopForm(request.POST)
+            print('got here')
 
             if all([form.is_valid(), editor_form.is_valid(), session_form.is_valid()]):
                 workshop = form.save()  
@@ -51,7 +52,6 @@ class CreateWorkshop(View):
 
                 organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
                 author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
-
                 return render(request, "workshops/workshop_edit_success.html", {
                     'organizer_url': organizer_url,
                     'author_url': author_url
