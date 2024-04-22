@@ -1,19 +1,21 @@
 from typing import Any
 from django.shortcuts import render, redirect
-from .models import Workshop, Paper, Editor, Author
+from .models import Workshop, Paper, Editor, Author, Session
 import uuid
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views import View
 from django.core import serializers
-from .forms import WorkshopForm, EditorFormSet, AuthorFormSet, PaperForm
+from .forms import WorkshopForm, EditorFormSet, AuthorFormSet, PaperForm, SessionFormSet
 from django.contrib import messages
 from django.conf import settings
+from django.http import HttpResponse
+
 import os
-from signature_detect.loader import Loader
-from signature_detect.extractor import Extractor
-from signature_detect.cropper import Cropper
-from signature_detect.judger import Judger
+# from signature_detect.loader import Loader
+# from signature_detect.extractor import Extractor
+# from signature_detect.cropper import Cropper
+# from signature_detect.judger import Judger
 
 def index(request):
     """
@@ -24,20 +26,28 @@ def index(request):
 class CreateWorkshop(View):
     def get(self, request):
         form = WorkshopForm()
-        editor_form = EditorFormSet(queryset=Editor.objects.none())
-        return render(request, "workshops/create_workshop.html", {'form':form, 'editor_form':editor_form})
+        editor_form = EditorFormSet(queryset=Editor.objects.none(), prefix='editor')
+        session_form = SessionFormSet(queryset=Session.objects.none(), prefix='session')
+        return render(request, "workshops/create_workshop.html", {'form':form, 'editor_form':editor_form, 'session_form':session_form})
 
     def post(self,request):
 
         # handles logic to save the data when the user has confirmed the changes
         if 'submit_button' in request.POST:
-            formset = EditorFormSet(request.POST)
+            editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
+            session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
             form = WorkshopForm(request.POST)
 
-            if form.is_valid() and formset.is_valid():
+            if all([form.is_valid(), editor_form.is_valid(), session_form.is_valid()]):
                 workshop = form.save()  
-                instances = formset.save()
-                workshop.editors.add(*instances)
+                editor_instances = editor_form.save()
+                session_instances = session_form.save()
+
+                # Add related editors and sessions to the workshop instance
+                workshop.editors.add(*editor_instances)
+                workshop.sessions.add(*session_instances)
+
+                workshop.save()
 
                 organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
                 author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
@@ -46,14 +56,16 @@ class CreateWorkshop(View):
                     'organizer_url': organizer_url,
                     'author_url': author_url
                 })
-        
+            else:
+                return HttpResponse('Data entered not valid')
+
         # handles logic to showcase the data so that the user can confirm it
         else:
             form = WorkshopForm(request.POST)
-            editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST)
-
+            editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
+            session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
             if form.is_valid():
-                return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form})
+                return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form, 'session_form':session_form})
 
 class WorkshopOverview(View):
     def get_workshop(self):
@@ -62,12 +74,13 @@ class WorkshopOverview(View):
     
     def render_workshop(self, request, edit_mode = False):
         workshop = self.get_workshop()
-       
+
         return render(request, 'workshops/workshop_overview.html', context = {
             'papers' : [paper for paper in workshop.accepted_papers.all()],
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop),
             'paper_forms' : [PaperForm(instance=paper_instance) for paper_instance in workshop.accepted_papers.all()],
+            'session_title_list' : [session_object.session_title for session_object in workshop.sessions.all()],
             'edit_mode': edit_mode,
             'secret_token': self.kwargs['secret_token']
         })
@@ -185,49 +198,24 @@ class AuthorUpload(View):
 
         context = self.get_context(author_instances, paper_instance, 'confirm')
         return render(request, self.success_path, context)
-        # if paper_form.is_valid() and author_formset.is_valid():
 
-        #     paper_instance = paper_form.save(commit=False)
-
-        #     workshop_instance = self.get_workshop()
-        #     paper_instance.workshop = workshop_instance
-        #     if 'uploaded_file' not in request.FILES and 'agrement_file' not in request .FILES and ('uploaded_file_url' in request.session and 'agreement_file_url' in request.session):
-        #         paper_instance.uploaded_file.name = request.session['uploaded_file_url']
-        #         paper_instance.agreement_file.name = request.session['agreement_file_url']
-        #     paper_instance.save()
-        #     author_instances = author_formset.save()
-        #     paper_instance.authors.add(*author_instances)
-
-        #     self.get_workshop().accepted_papers.add(paper_instance)
-            
-        #     context  = self.get_context(author_instances, paper_instance, 'confirm')
-        #     return render(request, self.success_path, context)
         
     def edit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
 
         context = self.get_context(author_formset, paper_form, 'author')
         return render(request, self.edit_path, context)
-        # if paper_form.is_valid() and author_formset.is_valid():
-        #     if 'uploaded_file' in request.FILES and 'agreement_file' in request.FILES:
-        #         paper_instance = paper_form.save(commit=False)
-        #         paper_instance.workshop = self.get_workshop()
-        #         paper_instance.save()
-        #         request.session['uploaded_file_url'] = paper_instance.uploaded_file.name
-        #         request.session['agreement_file_url']  = paper_instance.agreement_file.name
-            
-        #     context = self.get_context(author_formset, paper_form, 'author')
-        #     return render(request, self.edit_path, context) 
         
     def get(self, request, secret_token):
         author_formset = AuthorFormSet(queryset=Author.objects.none())
-        paper_form = PaperForm(file_uploaded=False)
+        print(self.get_workshop())
+        paper_form = PaperForm(file_uploaded=False, workshop=self.get_workshop())
         context = self.get_context(author_formset, paper_form)
         return render(request, self.upload_path, context)
 
     def post(self, request, secret_token):
         author_formset = AuthorFormSet(request.POST)
-        paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True)
+        paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop())
         if 'confirm_button' in request.POST:
             return self.submit_author(request, author_formset, paper_form)
         else:
