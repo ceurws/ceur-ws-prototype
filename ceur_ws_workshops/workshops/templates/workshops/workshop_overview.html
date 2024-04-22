@@ -44,21 +44,23 @@
 
     {% else %}
     <fieldset class="workshop-details">
-        <legend>Workshop-{{workshop.id}} Details</legend>
-        <p><strong>Title:</strong> {{ workshop.workshop_title }}</p>
+        <legend>Workshop Details</legend>
+        <p><strong>Full title:</strong> {{ workshop.workshop_full_title }}</p>
+        <p><strong>Shorthand title:</strong> {{ workshop.workshop_short_title }} (<strong>{{ workshop.workshop_acronym}}</strong>)</p>
+        <p><strong>Colocated with:</strong> {{ workshop.workshop_colocated }}</p>
         <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
         <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
         <p><strong>Dates:</strong> From: {{ workshop.workshop_begin_date }}, Until: {{ workshop.workshop_end_date }}</p>
-        <p><strong>Volume Number:</strong> {{ workshop.volume_number }}</p>
-        <p><strong>URN:</strong> {{ workshop.urn }}</p>
-        <p><strong>Submitted By:</strong> {{ workshop.submitted_by }}</p>
+        <p><strong>Publication year:</strong> {{ workshop.publication_year }}</p>
+        <p><strong>Workshop Language:</strong> {{ workshop.workshop_language_iso }}</p>
         <p><strong>Publication Year:</strong> {{ workshop.publication_year }}</p>
         <p><strong>License:</strong> {{ workshop.license }}</p>
+        <p><strong>Volume Owner:</strong> {{ workshop.volume_owner }} at {{ workshop.volume_owner_email}}</p>
 
         <p><strong>Editors:</strong></p>
         <ul class="editors-list">
             {% for editor in workshop.editors.all %}
-            <li>{{ editor.name }}</li>
+            <li>{{ editor.name }} (<i>{{ editor.university}}, {{editor.university_country}}</i>)</li>
             {% endfor %}
         </ul>
     </fieldset>
