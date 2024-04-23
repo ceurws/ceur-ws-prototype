@@ -14,6 +14,8 @@ from signature_detect.loader import Loader
 from signature_detect.extractor import Extractor
 from signature_detect.cropper import Cropper
 from signature_detect.judger import Judger
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 def index(request):
     """
@@ -75,16 +77,66 @@ class WorkshopOverview(View):
     def get(self, request, secret_token):
         return self.render_workshop(request)
 
+    # def submit_workshop(self, request, secret_token):
+    #     workshop = get_object_or_404(Workshop, secret_token=secret_token)
+
+    #     workshop_json = serializers.serialize('json', [workshop,])
+    #     directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
+    #     os.makedirs(directory_path, exist_ok=True)
+    #     file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
+    
+    #     with open(file_path, 'w') as file:
+    #         file.write(workshop_json)
+    #     request.session['json_saved'] = True
+    #     messages.success(request, 'Workshop submitted successfully.')
+
+    #     return render(request, 'workshops/submit_workshop.html')
     def submit_workshop(self, request, secret_token):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
-        workshop_json = serializers.serialize('json', [workshop,])
+        workshop_data = {
+            "model": "workshops.workshop",
+            "pk": workshop.pk,
+            "fields": {
+                "workshop_title": workshop.workshop_title,
+                "workshop_description": workshop.workshop_description,
+                "workshop_city": workshop.workshop_city,
+                "workshop_country": workshop.workshop_country,
+                "workshop_begin_date": workshop.workshop_begin_date,
+                "workshop_end_date": workshop.workshop_end_date,
+                "urn": workshop.urn,
+                "submitted_by": workshop.submitted_by,
+                "email_address": workshop.email_address,
+                "volume_number": workshop.volume_number,
+                "publication_year": workshop.publication_year,
+                "license": workshop.license,
+                "secret_token": str(workshop.secret_token),
+            }
+        }
+
+        # Manually serialize Editors data
+        editors_data = [
+            str(editor) for editor in workshop.editors.all()
+        ]
+        workshop_data['fields']['editors'] = editors_data
+
+        accepted_papers_data = [
+            {
+                "title": paper.paper_title,
+                "uploaded_file_url": paper.uploaded_file.url if paper.uploaded_file else None,
+                "agreement_file_url": paper.agreement_file.url if paper.agreement_file else None,
+            }
+            for paper in workshop.accepted_papers.all()
+        ]
+        workshop_data['fields']['accepted_papers'] = accepted_papers_data
+
         directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
         os.makedirs(directory_path, exist_ok=True)
         file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
-    
+        
         with open(file_path, 'w') as file:
-            file.write(workshop_json)
+            json.dump([workshop_data], file, cls=DjangoJSONEncoder, indent=4)
+        
         request.session['json_saved'] = True
         messages.success(request, 'Workshop submitted successfully.')
 
@@ -159,19 +211,9 @@ class AuthorUpload(View):
                 break
         return is_signed
 
-    
-    def construct_file_path(self, paper_instance, filename):
-        """
-        Constructs the file path for a Paper instance manually based on the workshop volume.
-        This does not access the file system but constructs the path string as expected.
-        """
-        workshop_volume = paper_instance.workshop.id
-        path = f'agreement/Vol-{workshop_volume}/{filename}'
-        full_path = os.path.join(settings.MEDIA_ROOT, path)
-        return full_path
     def _create_or_update_paper_instance(self, request, paper_form):
         if not paper_form.is_valid():
-                messages.error(request, 'OOOOOOOOOPS')
+            messages.error(request, 'OOOOOOOOOPS')
         
         workshop_instance = self.get_workshop()
         paper_title = paper_form.cleaned_data['paper_title']
@@ -198,11 +240,9 @@ class AuthorUpload(View):
 
             if not is_signed:
                 # Handle unsigned agreement file, e.g., by setting an error message
-                print('Agreement file is not signed')
+                messages.error(request, 'Agreement file is not signed. Please upload a hand signed agreement file.')
             else:
                 print('Agreement file is signed')
-
-            print(existing_paper.uploaded_file.url)
         else:
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = workshop_instance
@@ -210,20 +250,22 @@ class AuthorUpload(View):
                 paper_instance.uploaded_file.name = request.session['uploaded_file_url']
                 paper_instance.agreement_file.name = request.session['agreement_file_url']
 
-            # elif 'agreement_file' in request.FILES:
-            #     agreement_file_path = request.FILES['agreement_file_url'].temporary_file_path()
-            #     is_signed = self._check_agreement_signature(agreement_file_path)
-            #     if not is_signed:
-            #         # Handle unsigned agreement file, e.g., by setting an error message
-            #         print('Agreement file is not signed')
-            #         exit()
             paper_instance.save()
 
+            heloo = os.path.join(settings.MEDIA_ROOT, paper_instance.agreement_file.name)
+
+            is_signed = self._detect_signature_in_image(heloo)
+
+            if not is_signed:
+                messages.error(request, 'Agreement file is not signed. Please upload a hand signed agreement file.')
+                print('Agreement file is not signed')
+            else:
+                print('Agreement file is signed')
         return paper_instance
     
     def submit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
-        
+        author_instances = None
         if not paper_instance.authors.exists():  # Check if authors are already associated
             author_instances = author_formset.save()
             paper_instance.authors.add(*author_instances)
