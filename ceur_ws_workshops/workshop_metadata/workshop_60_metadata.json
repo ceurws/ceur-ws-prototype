@@ -1,1 +1,27 @@
-[{"model": "workshops.workshop", "pk": 60, "fields": {"workshop_title": "test", "workshop_description": "test", "workshop_city": "test", "workshop_country": "AG", "workshop_begin_date": "2024-04-13", "workshop_end_date": "2024-04-28", "urn": "", "submitted_by": "test", "email_address": "test@domain.com", "volume_number": null, "publication_year": 2019, "license": "test", "secret_token": "088d8761-5477-45c0-afc9-d41e9b60d333", "editors": [89], "accepted_papers": [385]}}]
+[
+    {
+        "model": "workshops.workshop",
+        "pk": 60,
+        "fields": {
+            "workshop_title": "test",
+            "workshop_description": "test",
+            "workshop_city": "test",
+            "workshop_country": "AG",
+            "workshop_begin_date": "2024-04-13",
+            "workshop_end_date": "2024-04-28",
+            "urn": "",
+            "submitted_by": "test",
+            "email_address": "test@domain.com",
+            "volume_number": null,
+            "publication_year": 2019,
+            "license": "test",
+            "secret_token": "088d8761-5477-45c0-afc9-d41e9b60d333",
+            "editors": [
+                89
+            ],
+            "accepted_papers": [
+                385
+            ]
+        }
+    }
+]
