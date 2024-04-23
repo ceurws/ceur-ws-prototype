@@ -5,6 +5,8 @@ from django.contrib import admin
 from datetime import date
 from django_countries.fields import CountryField
 from django.utils.text import slugify
+from django.db.models import Q
+
 
 class Editor(models.Model):
     name = models.CharField(max_length=100)
@@ -29,8 +31,16 @@ class Author(models.Model):
     def __str__(self):
         return self.author_name
 
+class Session(models.Model):
+    session_title = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.session_title
+
 class Workshop(models.Model):
-    workshop_title = models.CharField(max_length=200)
+    workshop_full_title = models.CharField(max_length=200)
+    workshop_short_title = models.CharField(max_length=200)
+    workshop_acronym = models.CharField(max_length=50)
     workshop_description = models.TextField(max_length=500)
     workshop_city = models.CharField(max_length=200) 
     workshop_country_choices = [('', 'Select a country')] + list(CountryField().choices)
@@ -39,21 +49,27 @@ class Workshop(models.Model):
 
     workshop_end_date = models.DateField(default=date.today)
     urn = models.CharField(max_length=50)
-    submitted_by = models.CharField(max_length=200)
-    email_address = models.EmailField(max_length=200)
+    volume_owner = models.CharField(max_length=200)
+    volume_owner_email = models.EmailField(max_length=200)
     
-    volume_number = models.IntegerField(null = True, blank = True)
+    workshop_language_iso = models.CharField(max_length=50)
+    workshop_colocated = models.CharField(max_length=200)
+
+    # not filled in by user
+    volume_number = models.IntegerField(null=True, blank=True)
     publication_year = models.IntegerField()
     license = models.CharField(max_length=50)
 
     # KEYS
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
     accepted_papers = models.ManyToManyField('Paper', related_name='accepted_papers')
+    sessions = models.ManyToManyField(Session, blank=True, related_name='workshop_sessions')
 
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
     def __str__(self):
-        return self.workshop_title   
+        return self.workshop_title
+ 
 
 def paper_upload_path(instance, filename):
     """
@@ -72,11 +88,17 @@ class Paper(models.Model):
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10)
     uploaded_file = models.FileField(upload_to=paper_upload_path, null=True, blank=True)
-    agreement_file = models.FileField(upload_to = agreement_file_path, null = True, blank = True)
+    agreement_file = models.FileField(upload_to=agreement_file_path, null=True, blank=True)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')
+    session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True)
+
     def __str__(self):
         return self.paper_title
+
+
+
+

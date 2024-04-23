@@ -15,7 +15,7 @@ overrides = {
 
 class WorkshopAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Workshop._meta.fields] + ['get_editors']
-    list_display_links = ('workshop_title',)
+    list_display_links = ('workshop_short_title',)
     formfield_overrides = overrides
     search_fields = [field.name for field in Workshop._meta.fields]
 
@@ -43,7 +43,7 @@ class PaperAdmin(admin.ModelAdmin):
     get_authors.short_description = 'Authors'
 
     def get_workshop(self, obj):
-        return ", ".join(workshop.workshop_title for workshop in obj.workshop.all())
+        return ", ".join(workshop.workshop_short_title for workshop in obj.workshop.all())
     get_workshop.short_description = 'Workshop'
     def get_author_search_result(self, request, queryset, search_term):
         queryset, use_distinct = super().get_author_search_result(request, queryset, search_term)
