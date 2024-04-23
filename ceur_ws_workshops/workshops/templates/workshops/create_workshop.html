@@ -7,14 +7,28 @@
   <h1 class="header-title">Create Workshop Volume</h1>
   <fieldset>
     <legend>Workshop Details</legend>
+    <i> Please provide details about the workshop in the following section. </i>
     {% csrf_token %}
     {{ form.as_p }}
     
   </fieldset>
   <hr>    
-  
+  <fieldset id="session_fieldset">
+    <legend>Session</legend>
+    <i> If the workshop has different sessions, please provide the titles of these sessions in this section. If not, please leave blank. Please
+      specify each title as follows: {Session i: session title} </i>
+    {{ session_form.management_form}}
+    <div class="session-form">
+    {% for form in session_form%}
+    <div class="session_form">
+      {{ form.as_p}}
+    </div>
+    {% endfor %}
+  </div>
+</fieldset>
   <fieldset id="editor-fieldset">
     <legend>Editors</legend>
+    <i> Please provide details on the editors in this section. Also provide your own details if you are also an editor. </i>
     {{ editor_form.management_form }}
     <div id="form-set">
       {% for form in editor_form %}
@@ -35,38 +49,38 @@
   document.addEventListener('DOMContentLoaded', function() {
     let addButton = document.querySelector("#add-form");
     let formSet = document.querySelector("#editor-fieldset");
-    let totalForms = document.querySelector("#id_form-TOTAL_FORMS");
+    let totalForms = document.querySelector("#id_editor-TOTAL_FORMS"); // Update the ID selector
     let startDateInput = document.querySelector('#id_workshop_begin_date');
     let endDateInput = document.querySelector('#id_workshop_end_date');
 
     function addForm(e) {
-      e.preventDefault();
+        e.preventDefault();
 
-      let formNum = formSet.querySelectorAll(".editor-form").length - 1;
-      let newForm = formSet.querySelector(".editor-form").cloneNode(true);
-      let formRegex = RegExp(`form-(\\d+)-`, 'g');
+        let formNum = formSet.querySelectorAll(".editor-form").length - 1;
+        let newForm = formSet.querySelector(".editor-form").cloneNode(true);
+        let formRegex = RegExp(`editor-(\\d+)-`, 'g'); // Update the prefix
 
-      formNum++;
+        formNum++;
 
-      newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`);
-      formSet.insertBefore(newForm, addButton);
+        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `editor-${formNum}-`); // Update the prefix
+        formSet.insertBefore(newForm, addButton);
 
-      totalForms.value = formNum + 1;
+        totalForms.value = formNum + 1;
     }
 
     addButton.addEventListener('click', addForm);
 
     function updateEndDateMin() {
-      endDateInput.setAttribute('min', startDateInput.value);
-      if (endDateInput.value && startDateInput.value > endDateInput.value) {
-        endDateInput.value = startDateInput.value;
-      }
+        endDateInput.setAttribute('min', startDateInput.value);
+        if (endDateInput.value && startDateInput.value > endDateInput.value) {
+            endDateInput.value = startDateInput.value;
+        }
     }
-    
+
     function updateStartDateMax() {
-      if (startDateInput.value && startDateInput.value > endDateInput.value) {
-        startDateInput.value = endDateInput.value;
-      }
+        if (startDateInput.value && startDateInput.value > endDateInput.value) {
+            startDateInput.value = endDateInput.value;
+        }
     }
 
     startDateInput.addEventListener('change', updateEndDateMin);
@@ -74,14 +88,11 @@
     endDateInput.addEventListener('change', updateStartDateMax);
 
     if (startDateInput.value) {
-      updateEndDateMin();
+        updateEndDateMin();
+    } else if (endDateInput.value) {
+        updateStartDateMax();
     }
-
-    else if (endDateInput.value) {
-      updateStartDateMax();
-    }
-
-  });
+});
 </script>
 
 
