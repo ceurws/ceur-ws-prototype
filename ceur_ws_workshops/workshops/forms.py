@@ -72,13 +72,13 @@ class PaperForm(forms.ModelForm):
         fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file']
 
         widgets = {
-            'paper_title': forms.TextInput(attrs={'size': 50, 'placeholder': 'Enter the title of the paper'}),
-            'pages': forms.TextInput(attrs={'size': 50, 'placeholder': 'Enter the number of pages'}),
-            'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
+            'paper_title': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the title of the paper'}),
+            'pages': NumberInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the number of pages'}),
+            'uploaded_file': FileInput(attrs={'accept': '.pdf'}),
+            'agreement_file': FileInput(attrs={'accept': '.pdf'}),
         }
-
-
 
 AuthorFormSet = modelformset_factory(
         Author, fields=('author_name', 'author_university', 'author_uni_url'), extra=1,

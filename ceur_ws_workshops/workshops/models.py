@@ -97,6 +97,7 @@ class Paper(models.Model):
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
+
         return self.paper_title
 
 

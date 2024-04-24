@@ -18,6 +18,8 @@ from signature_detect.loader import Loader
 from signature_detect.extractor import Extractor
 from signature_detect.cropper import Cropper
 from signature_detect.judger import Judger
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 def index(request):
     """
@@ -90,6 +92,20 @@ class WorkshopOverview(View):
     def get(self, request, secret_token):
         return self.render_workshop(request)
 
+    # def submit_workshop(self, request, secret_token):
+    #     workshop = get_object_or_404(Workshop, secret_token=secret_token)
+
+    #     workshop_json = serializers.serialize('json', [workshop,])
+    #     directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
+    #     os.makedirs(directory_path, exist_ok=True)
+    #     file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
+    
+    #     with open(file_path, 'w') as file:
+    #         file.write(workshop_json)
+    #     request.session['json_saved'] = True
+    #     messages.success(request, 'Workshop submitted successfully.')
+
+    #     return render(request, 'workshops/submit_workshop.html')
     def submit_workshop(self, request, secret_token):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
         
@@ -270,8 +286,7 @@ class AuthorUpload(View):
     
     def _create_or_update_paper_instance(self, request, paper_form):
         if not paper_form.is_valid():
-        # Handle the case where the form is not valid; return or raise an exception
-            return None
+            messages.error(request, 'OOOOOOOOOPS')
         
         workshop_instance = self.get_workshop()
         paper_title = paper_form.cleaned_data['paper_title']
@@ -289,8 +304,7 @@ class AuthorUpload(View):
                 existing_paper.uploaded_file = request.FILES['uploaded_file']
             if 'agreement_file' in request.FILES:
                 existing_paper.agreement_file = request.FILES['agreement_file']
-                
-                # Check whether the agreement is SIGNED
+
             existing_paper.save()
 
             heloo = os.path.join(settings.MEDIA_ROOT, paper_instance.agreement_file.name)
@@ -310,6 +324,7 @@ class AuthorUpload(View):
             if 'uploaded_file' not in request.FILES and 'agrement_file' not in request.FILES and ('uploaded_file_url' in request.session and 'agreement_file_url' in request.session):
                 paper_instance.uploaded_file.name = request.session['uploaded_file_url']
                 paper_instance.agreement_file.name = request.session['agreement_file_url']
+
             paper_instance.save()
 
             heloo = os.path.join(settings.MEDIA_ROOT, paper_instance.agreement_file.name)
@@ -321,11 +336,11 @@ class AuthorUpload(View):
                 print('Agreement file is not signed')
             else:
                 print('Agreement file is signed')
-
         return paper_instance
+    
     def submit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
-        
+        author_instances = None
         if not paper_instance.authors.exists():  
             author_instances = author_formset.save()
             paper_instance.authors.add(*author_instances)
