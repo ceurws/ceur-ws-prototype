@@ -68,7 +68,7 @@ class Workshop(models.Model):
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
     def __str__(self):
-        return self.workshop_title
+        return self.workshop_full_title
  
 
 def paper_upload_path(instance, filename):

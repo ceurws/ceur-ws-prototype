@@ -1,0 +1,67 @@
+[
+    {
+        "model": "workshops.workshop",
+        "CEURVOLNR": 2,
+        "fields": {
+            "CEURLONGTITLE": "FullTitleNewFull",
+            "CEURSHORTTITLE": "testTitleNew",
+            "CEURVOLACRONYM": "ENG",
+            "CEURDESCRIPTION": "Description brief new",
+            "CEURLOCTIME": {
+                "CEURCITY": "Amsterdam",
+                "CEURCOUNTRY": "NL",
+                "CEURBEGINDATE": "2024-04-24",
+                "CEURENDDATE": "2024-04-24"
+            },
+            "CEURSESSIONS": [
+                {
+                    "session_title": "Session1: TemplateSession",
+                    "CEURPAPERS": [
+                        {
+                            "CEURTITLE": "PaperTitleOdd",
+                            "CEURPAGES": "11-13",
+                            "CEURAUTHOR": [
+                                "newAuthro"
+                            ],
+                            "uploaded_file_url": "/media/papers/Vol-2/abstract2_MdtfyJk.pdf",
+                            "agreement_file_url": "/media/agreement/Vol-2/paper1_J27Ivdq.pdf"
+                        }
+                    ]
+                },
+                {
+                    "session_title": "Session2: NewSession",
+                    "CEURPAPERS": [
+                        {
+                            "CEURTITLE": "paperNew",
+                            "CEURPAGES": "13-15",
+                            "CEURAUTHOR": [
+                                "peter petrov"
+                            ],
+                            "uploaded_file_url": "/media/papers/Vol-2/abstract2.pdf",
+                            "agreement_file_url": "/media/agreement/Vol-2/paper1.pdf"
+                        },
+                        {
+                            "CEURTITLE": "testPaper2",
+                            "CEURPAGES": "19-21",
+                            "CEURAUTHOR": [
+                                "Peter Santos"
+                            ],
+                            "uploaded_file_url": "/media/papers/Vol-2/paper1.pdf",
+                            "agreement_file_url": "/media/agreement/Vol-2/paper1_5aPppf7.pdf"
+                        }
+                    ]
+                },
+                {
+                    "session_title": "Session3: OldSession",
+                    "CEURPAPERS": []
+                }
+            ],
+            "urn": "",
+            "email_address": "j.doe@gmail.com",
+            "volume_number": null,
+            "publication_year": 2012,
+            "license": "",
+            "secret_token": "d3c1759b-a4b2-41a0-9864-6c439c1d03e1"
+        }
+    }
+]

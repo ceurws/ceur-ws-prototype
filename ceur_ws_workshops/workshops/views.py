@@ -10,12 +10,14 @@ from .forms import WorkshopForm, EditorFormSet, AuthorFormSet, PaperForm, Sessio
 from django.contrib import messages
 from django.conf import settings
 from django.http import HttpResponse
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 import os
-# from signature_detect.loader import Loader
-# from signature_detect.extractor import Extractor
-# from signature_detect.cropper import Cropper
-# from signature_detect.judger import Judger
+from signature_detect.loader import Loader
+from signature_detect.extractor import Extractor
+from signature_detect.cropper import Cropper
+from signature_detect.judger import Judger
 
 def index(request):
     """
@@ -90,18 +92,112 @@ class WorkshopOverview(View):
 
     def submit_workshop(self, request, secret_token):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
+        
+        workshop_data = {
+        "CEURVOLNR": workshop.pk,
+        "fields": {
+            "CEURLONGTITLE": workshop.workshop_full_title,
+            "CEURSHORTTITLE": workshop.workshop_short_title,
+            "CEURVOLACRONYM": workshop.workshop_acronym,
+            "CEURDESCRIPTION": workshop.workshop_description,
+            "CEURLOCTIME":{
+                "CEURCITY": workshop.workshop_city,
+                "CEURCOUNTRY": workshop.workshop_country,
+                "CEURBEGINDATE": str(workshop.workshop_begin_date),
+                "CEURENDDATE": str(workshop.workshop_end_date),
+                "CEURPUBYEAR": workshop.publication_year,
+            },
+            "CEURSESSIONS": [],
+            "CEURURN": workshop.urn,
+            "email_address": workshop.volume_owner_email,
+            "CEURLIC": workshop.license,
+            "secret_token": str(workshop.secret_token),
+        }
+    }
 
-        workshop_json = serializers.serialize('json', [workshop,])
+        sessions_data = []
+        for session in workshop.sessions.all():
+            session_data = {
+                "session_title": session.session_title,
+                "CEURPAPERS": [
+                    {
+                        "CEURTITLE": paper.paper_title,
+                        "CEURPAGES": paper.pages,
+                        "CEURAUTHOR": [str(author) for author in paper.authors.all()],
+                        "uploaded_file_url": paper.uploaded_file.url if paper.uploaded_file else None,
+                        "agreement_file_url": paper.agreement_file.url if paper.agreement_file else None,
+                    }
+                    for paper in session.paper_set.all()  
+                ]
+            }
+            sessions_data.append(session_data)
+
+        workshop_data['fields']['CEURSESSIONS'] = sessions_data
+
         directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
         os.makedirs(directory_path, exist_ok=True)
         file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
-    
+
         with open(file_path, 'w') as file:
-            file.write(workshop_json)
+            json.dump([workshop_data], file, cls=DjangoJSONEncoder, indent=4)
+
         request.session['json_saved'] = True
         messages.success(request, 'Workshop submitted successfully.')
 
         return render(request, 'workshops/submit_workshop.html')
+
+        # workshop_data = {
+        #     "model": "workshops.workshop",
+        #     "CEURVOLNR": workshop.pk,
+        #     "fields": {
+        #         "CEURLONGTITLE": workshop.workshop_full_title,
+        #         "CEURSHORTTITLE": workshop.workshop_short_title,
+        #         "CEURVOLACRONYM": workshop.workshop_acronym,
+        #         "CEURDESCRIPTION": workshop.workshop_description,
+        #         "CEURLOCTIME":{
+        #             "CEURCITY": workshop.workshop_city,
+        #             "CEURCOUNTRY": workshop.workshop_country,
+        #             "CEURBEGINDATE": str(workshop.workshop_begin_date),
+        #             "CEURENDDATE": str(workshop.workshop_end_date),
+        #         },
+        #         "CEURSESSIONS": [str(session) for session in workshop.sessions.all()],
+        #         "urn": workshop.urn,
+        #         "email_address": workshop.volume_owner_email,
+        #         "volume_number": workshop.volume_number,
+        #         "publication_year": workshop.publication_year,
+        #         "license": workshop.license,
+        #         "secret_token": str(workshop.secret_token),
+        #     }
+        # }
+
+        # editors_data = [
+        #     str(editor) for editor in workshop.editors.all()
+        # ]
+        # workshop_data['fields']['CEURVOLEDITOR'] = editors_data
+
+        # accepted_papers_data = [
+        #     {
+        #         "CEURTITLE": paper.paper_title,
+        #         "CEURPAGES": paper.pages,
+        #         "CEURAUTHOR": [str(author) for author in paper.authors.all()],
+        #         "uploaded_file_url": paper.uploaded_file.url if paper.uploaded_file else None,
+        #         "agreement_file_url": paper.agreement_file.url if paper.agreement_file else None,
+        #     }
+        #     for paper in workshop.accepted_papers.all()
+        # ]
+        # workshop_data['fields']['accepted_papers'] = accepted_papers_data
+
+        # directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
+        # os.makedirs(directory_path, exist_ok=True)
+        # file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
+        
+        # with open(file_path, 'w') as file:
+        #     json.dump([workshop_data], file, cls=DjangoJSONEncoder, indent=4)
+        
+        # request.session['json_saved'] = True
+        # messages.success(request, 'Workshop submitted successfully.')
+
+        # return render(request, 'workshops/submit_workshop.html')
     
     def post(self, request, secret_token):
 
@@ -153,6 +249,24 @@ class AuthorUpload(View):
             return {'workshop': self.get_workshop(), 'paper': paper_form, 'authors': author_formset}
         return {'workshop': self.get_workshop(), 'author_formset': author_formset, 'paper_form': paper_form}
     
+    def _detect_signature_in_image(self, file_path):
+        loader = Loader()
+        extractor = Extractor()
+        cropper = Cropper(border_ratio=0)
+        judger = Judger()
+
+        masks = loader.get_masks(file_path)
+        is_signed = False
+        for mask in masks:
+            labeled_mask = extractor.extract(mask)
+            results = cropper.run(labeled_mask)
+            for result in results.values():
+                is_signed = judger.judge(result["cropped_mask"])
+                if is_signed:
+                    break
+            if is_signed:
+                break
+        return is_signed
     
     def _create_or_update_paper_instance(self, request, paper_form):
         if not paper_form.is_valid():
@@ -167,7 +281,6 @@ class AuthorUpload(View):
 
         if existing_paper:
             paper_instance = existing_paper
-            # Optionally update fields if necessary
             
             existing_paper.paper_title = request.POST['paper_title']
             existing_paper.pages = request.POST['pages']
@@ -179,6 +292,18 @@ class AuthorUpload(View):
                 
                 # Check whether the agreement is SIGNED
             existing_paper.save()
+
+            heloo = os.path.join(settings.MEDIA_ROOT, paper_instance.agreement_file.name)
+
+            is_signed = self._detect_signature_in_image(heloo)
+
+            if not is_signed:
+                # Handle unsigned agreement file, e.g., by setting an error message
+                messages.error(request, 'Agreement file is not signed. Please upload a hand signed agreement file.')
+                print('Agreement file is not signed')
+                
+            else:
+                print('Agreement file is signed')
         else:
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = workshop_instance
@@ -187,18 +312,28 @@ class AuthorUpload(View):
                 paper_instance.agreement_file.name = request.session['agreement_file_url']
             paper_instance.save()
 
+            heloo = os.path.join(settings.MEDIA_ROOT, paper_instance.agreement_file.name)
+
+            is_signed = self._detect_signature_in_image(heloo)
+
+            if not is_signed:
+                messages.error(request, 'Agreement file is not signed. Please upload a hand signed agreement file.')
+                print('Agreement file is not signed')
+            else:
+                print('Agreement file is signed')
+
         return paper_instance
     def submit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
         
-        if not paper_instance.authors.exists():  # Check if authors are already associated
+        if not paper_instance.authors.exists():  
             author_instances = author_formset.save()
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
 
+
         context = self.get_context(author_instances, paper_instance, 'confirm')
         return render(request, self.success_path, context)
-
         
     def edit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
