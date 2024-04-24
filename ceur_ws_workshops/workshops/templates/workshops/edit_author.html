@@ -5,6 +5,13 @@
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
     <fieldset>
+      {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+      <div class="error-message">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
       <legend> Paper Data</legend>
     {{ paper_form.as_p}}
     <p>Currently uploaded Paper: {{ paper_form.instance.uploaded_file }}</p>
