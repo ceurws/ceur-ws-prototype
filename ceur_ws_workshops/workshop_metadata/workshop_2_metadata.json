@@ -1,17 +1,20 @@
 [
     {
-        "model": "workshops.workshop",
         "CEURVOLNR": 2,
         "fields": {
             "CEURLONGTITLE": "FullTitleNewFull",
             "CEURSHORTTITLE": "testTitleNew",
             "CEURVOLACRONYM": "ENG",
             "CEURDESCRIPTION": "Description brief new",
+            "CEURVOLEDITOR": [
+                "templateeditor, VU, NL"
+            ],
             "CEURLOCTIME": {
                 "CEURCITY": "Amsterdam",
                 "CEURCOUNTRY": "NL",
                 "CEURBEGINDATE": "2024-04-24",
-                "CEURENDDATE": "2024-04-24"
+                "CEURENDDATE": "2024-04-24",
+                "CEURPUBYEAR": 2012
             },
             "CEURSESSIONS": [
                 {
@@ -56,11 +59,9 @@
                     "CEURPAPERS": []
                 }
             ],
-            "urn": "",
+            "CEURURN": "",
             "email_address": "j.doe@gmail.com",
-            "volume_number": null,
-            "publication_year": 2012,
-            "license": "",
+            "CEURLIC": "",
             "secret_token": "d3c1759b-a4b2-41a0-9864-6c439c1d03e1"
         }
     }
