@@ -1,6 +1,14 @@
 {% extends "workshops/author_upload.html" %}
-{% load static % }
+{% load static %}
 {% block content %}
+
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/style.css' %}">
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+  </head>
   <p class="header-title">Are all the details correct?</p>
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
@@ -13,19 +21,28 @@
     </div>
     {% endif %}
       <legend> Paper Data</legend>
-    {{ paper_form.as_p}}
-    <p>Currently uploaded Paper: {{ paper_form.instance.uploaded_file }}</p>
-    <p>Currently uploaded Agreement: {{ paper_form.instance.agreement_file }}</p>
+      {{ paper_form.as_p}}
+      <p>Currently uploaded Paper: {{ paper_form.instance.uploaded_file }}</p>
+      <p>Currently uploaded Agreement: {{ paper_form.instance.agreement_file }}</p>
     </fieldset>
     <hr>
     <fieldset>
       <legend>Author(s) Information</legend>
       {{author_formset.as_p}}
     </fieldset>
-    <br> 
-    <input type="submit" name="confirm_button" class = "button-13" 
+
     
-    value="Confirm">
-    
+    <br>
+    <input type="submit" name="confirm_button" class="button-13" value="Confirm">
+
   </form>
-{% endblock %}
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let messages = Array.from(document.querySelectorAll('#django-messages [data-message]')).map(el => el.getAttribute('data-message'));
+      if (messages.length > 0) {
+        alert(messages.join("\n"));
+      }
+    });
+  </script>
+  {% endblock %}
