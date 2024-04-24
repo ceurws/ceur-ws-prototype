@@ -112,17 +112,21 @@ class WorkshopOverview(View):
         workshop_data = {
         "CEURVOLNR": workshop.pk,
         "fields": {
-            "CEURLONGTITLE": workshop.workshop_full_title,
-            "CEURSHORTTITLE": workshop.workshop_short_title,
+            "CEURFULLTITLE": workshop.workshop_full_title,
+            "CEURVOLTITLE": workshop.workshop_short_title,
             "CEURVOLACRONYM": workshop.workshop_acronym,
             "CEURDESCRIPTION": workshop.workshop_description,
+            "CEURVOLEDITOR": [str(editor) for editor in workshop.editors.all()],
+            "CEURPUBYEAR":{
+                "CEURBEGINDATE": str(workshop.workshop_begin_date),
+                "CEURENDDATE": str(workshop.workshop_end_date),
+            },
             "CEURLOCTIME":{
                 "CEURCITY": workshop.workshop_city,
                 "CEURCOUNTRY": workshop.workshop_country,
-                "CEURBEGINDATE": str(workshop.workshop_begin_date),
-                "CEURENDDATE": str(workshop.workshop_end_date),
                 "CEURPUBYEAR": workshop.publication_year,
             },
+            "CEURCOLOCATED": workshop.workshop_colocated,
             "CEURSESSIONS": [],
             "CEURURN": workshop.urn,
             "email_address": workshop.volume_owner_email,

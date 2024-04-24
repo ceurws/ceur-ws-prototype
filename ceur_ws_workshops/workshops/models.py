@@ -99,7 +99,3 @@ class Paper(models.Model):
     def __str__(self):
 
         return self.paper_title
-
-
-
-
