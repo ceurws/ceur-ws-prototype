@@ -12,7 +12,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.core.serializers.json import DjangoJSONEncoder
 import json
-
+from datetime import date
 import os
 from signature_detect.loader import Loader
 from signature_detect.extractor import Extractor
@@ -47,7 +47,6 @@ class CreateWorkshop(View):
                 editor_instances = editor_form.save()
                 session_instances = session_form.save()
 
-                # Add related editors and sessions to the workshop instance
                 workshop.editors.add(*editor_instances)
                 workshop.sessions.add(*session_instances)
 
@@ -68,6 +67,8 @@ class CreateWorkshop(View):
             session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
             if form.is_valid():
                 return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form, 'session_form':session_form})
+            else:
+                return HttpResponse('Data entered not valid')
 
 class WorkshopOverview(View):
     def get_workshop(self):
@@ -91,13 +92,14 @@ class WorkshopOverview(View):
         return self.render_workshop(request)
     
     def submit_workshop(self, request, secret_token):
+        submit_path = 'workshops/submit_workshop.html'
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
         
         workshop_data = {
-            # "JJJJ":	workshop.year_final_papers,
-            "YYYY": workshop.workshop_begin_date.year, #workshop_end_date,
+            "JJJJ":	workshop.year_final_papers,
+            "YYYY": workshop.workshop_begin_date.year, 
             "NNNN": workshop.workshop_acronym,
-            # "DD": workshop.submission_date,
+            "DD": workshop.submission_date,
             "MM": workshop.workshop_begin_date.month, # workshop_end_date
             "XXX": workshop.volume_number,
             "CEURLANG": workshop.workshop_language_iso,
@@ -112,39 +114,69 @@ class WorkshopOverview(View):
             "CEURLOCTIME":{
                 "CEURCITY": workshop.workshop_city,
                 "CEURCOUNTRY": workshop.workshop_country,
-                "CEURPUBYEAR": workshop.publication_year,
+                "CEURBEGINDATE": workshop.workshop_begin_date,
+                "CEURENDDATE": workshop.workshop_end_date,
             },
-            "CEURVOLEDITOR": [str(editor) for editor in workshop.editors.all()],
-            # editor personal url
-            # editor insitution website
-            # editor institution
-            # editor instituion country
-            # editor research group 
+            "CEUREDITORS": [],
             "email_address": workshop.volume_owner_email,
             
             "CEURSESSIONS": [],
+            "CEURPAPERS": [],
+            "CEURPUBDATE": date.today(),
+            "CEURSUBMITTEDPAPERS": workshop.total_submitted_papers,
+            "CEURACCEPTEDPAPERS": workshop.total_accepted_papers,
+            "CEURACCEPTEDSHORTPAPERS": workshop.total_reg_acc_papers,
+            "CEURACCEPTEDSHORTPAPERS": workshop.total_short_acc_papers,
             "CEURLIC": workshop.license,
             "secret_token": str(workshop.secret_token),
         }
-        sessions_data = []
-        for session in workshop.sessions.all():
-            session_data = {
-                "session_title": session.session_title,
-                "papers": [
-                    {
-                        "CEURTITLE": paper.paper_title,
-                        "CEURPAGES": paper.pages,
-                        "CEURAUTHOR": [str(author) for author in paper.authors.all()],
-                        "uploaded_file_url": paper.uploaded_file.url if paper.uploaded_file else None,
-                        "agreement_file_url": paper.agreement_file.url if paper.agreement_file else None,
-                    }
-                    for paper in session.paper_set.all()  
-                ]
-            }
-            sessions_data.append(session_data)
 
-        workshop_data['CEURSESSIONS'] = sessions_data
+        editors_data = [
+        {
+            "CEURVOLEDITOR": editor.editor_name,
+            "CEUREDITOREMAIL": editor.editor_url,
+            "CEURINSTITUTION": editor.institution,
+            "CEURCOUNTRY": editor.institution_country,
+            "CEURINSTITUTIONURL": editor.institution_url,
+            "CEURRESEARCHGROUP": editor.research_group 
+        }
+        for editor in workshop.editors.all()
+        ]
+        workshop_data['CEUREDITORS'] = editors_data
 
+        if workshop.sessions.exists():  
+            sessions_data = []
+            for session in workshop.sessions.all():
+                session_data = {
+                    "session_title": session.session_title,
+                    "papers": [
+                        {
+                            "CEURTITLE": paper.paper_title,
+                            "CEURPAGES": paper.pages,
+                            "CEURAUTHOR": [str(author) for author in paper.authors.all()],
+                            "uploaded_file_url": paper.uploaded_file.url if paper.uploaded_file else None,
+                            "agreement_file_url": paper.agreement_file.url if paper.agreement_file else None,
+                        }
+                        for paper in session.paper_set.all()
+                    ]
+                }
+                sessions_data.append(session_data)
+            workshop_data['CEURSESSIONS'] = sessions_data
+            del(workshop_data['CEURPAPERS'])
+        else:
+            papers_data = [
+                {
+                    "CEURTITLE": paper.paper_title,
+                    "CEURPAGES": paper.pages,
+                    "CEURAUTHOR": [str(author) for author in paper.authors.all()],
+                    "uploaded_file_url": paper.uploaded_file.url if paper.uploaded_file else None,
+                    "agreement_file_url": paper.agreement_file.url if paper.agreement_file else None,
+                }
+                for paper in workshop.accepted_papers.all()
+            ]
+            del(workshop_data['CEURSESSIONS'])
+            workshop_data['CEURPAPERS'] = papers_data
+           
         directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
         os.makedirs(directory_path, exist_ok=True)
         file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
@@ -155,18 +187,14 @@ class WorkshopOverview(View):
         request.session['json_saved'] = True
         messages.success(request, 'Workshop submitted successfully.')
 
-        return render(request, 'workshops/submit_workshop.html')
+        return render(request, submit_path)
     
     def post(self, request, secret_token):
 
-        # renders the workshop overview page in edit mode, allowing to edit all fields
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
-        # saves the changes when user is in edit mode and takes user out of edit mode.
         elif request.POST["submit_button"] == "Confirm":
 
-            # Modifies the first entry of the paper (regardless which one we want to update), not working
-            # but thought it might be on the right track...
             workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST)
             workshop = self.get_workshop()
 
@@ -233,7 +261,7 @@ class AuthorUpload(View):
         workshop_instance = self.get_workshop()
         paper_title = paper_form.cleaned_data['paper_title']
 
-        # Try to find an existing paper with the same title in the same workshop
+        # existing paper with the same title in the same workshop
         existing_paper = Paper.objects.filter(paper_title=paper_title, workshop=workshop_instance).first()
 
         if existing_paper:
@@ -311,5 +339,4 @@ class AuthorUpload(View):
             return self.submit_author(request, author_formset, paper_form)
         else:
             return self.edit_author(request, author_formset, paper_form)
-        
     

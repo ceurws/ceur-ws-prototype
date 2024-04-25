@@ -3,3 +3,6 @@ ceur_ws_workshops/__pycache__/
 workshops/__pycache__/
 db.sqlite3
 .env
+media
+workshop_metadata
+
