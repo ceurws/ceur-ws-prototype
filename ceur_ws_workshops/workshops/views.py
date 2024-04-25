@@ -37,7 +37,6 @@ class CreateWorkshop(View):
             editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
             session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
             form = WorkshopForm(request.POST)
-            print('got here')
 
             if all([form.is_valid(), editor_form.is_valid(), session_form.is_valid()]):
                 workshop = form.save()  
@@ -208,7 +207,6 @@ class AuthorUpload(View):
         
     def get(self, request, secret_token):
         author_formset = AuthorFormSet(queryset=Author.objects.none())
-        print(self.get_workshop())
         paper_form = PaperForm(file_uploaded=False, workshop=self.get_workshop())
         context = self.get_context(author_formset, paper_form)
         return render(request, self.upload_path, context)

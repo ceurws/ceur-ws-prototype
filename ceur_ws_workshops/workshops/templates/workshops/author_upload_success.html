@@ -14,7 +14,7 @@
 <body>
 
     <h1>Paper Submitted Correctly</h1>
-    <p><p>Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_title }}</strong>.</p>
+    <p><p>Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_full_title }}</strong>.</p>
     <fieldset class="paper-details">
         <legend>Paper Details</legend>
         <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
@@ -41,7 +41,7 @@
 
     <!-- You can provide additional content or links here as needed. -->
 
-    <i> If you would like to make further changes to this submission please contact {{workshop.submitted_by}} at {{workshop.email_address}}. </i>
+    <i> If you would like to make further changes to this submission please contact {{workshop.volume_owner}} at {{workshop.volume_owner_email}}. </i>
 </body>
 </html>
 {% endblock %}

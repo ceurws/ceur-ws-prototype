@@ -51,15 +51,18 @@
         <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
         <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
         <p><strong>Dates:</strong> From: {{ workshop.workshop_begin_date }}, Until: {{ workshop.workshop_end_date }}</p>
-        <p><strong>Publication year:</strong> {{ workshop.publication_year }}</p>
         <p><strong>Workshop Language:</strong> {{ workshop.workshop_language_iso }}</p>
-        <p><strong>Publication Year:</strong> {{ workshop.publication_year }}</p>
         <p><strong>Volume Owner:</strong> {{ workshop.volume_owner }} at {{ workshop.volume_owner_email}}</p>
+        <p><strong>Year last accepted paper released:</strong> {{ workshop.year_final_papers }}</p>
+        <p><strong>Total submitted papers:</strong> {{ workshop.total_submitted_papers }}</p>
+        <p><strong>Total accepted papers:</strong> {{ workshop.total_accepted_papers }}</p>
+        <p><strong>Total short accepted papers:</strong> {{ workshop.total_short_acc_papers }}</p>
+        <p><strong>Total regular accepted papers:</strong> {{ workshop.total_reg_acc_papers }}</p>
 
         <p><strong>Editors:</strong></p>
         <ul class="editors-list">
             {% for editor in workshop.editors.all %}
-            <li>{{ editor.name }} (<i>{{ editor.university}}, {{editor.university_country}}</i>)</li>
+            <li>{{ editor.editor_name }} (<i>{{ editor.institution}}, {{editor.institution_country}}</i>)</li>
             {% endfor %}
         </ul>
     </fieldset>
