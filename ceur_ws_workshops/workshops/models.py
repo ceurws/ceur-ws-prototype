@@ -9,13 +9,15 @@ from django.db.models import Q
 
 
 class Editor(models.Model):
-    name = models.CharField(max_length=100)
-    university = models.CharField(max_length=200)
+    editor_name = models.CharField(max_length=100)
+    editor_url = models.URLField(max_length=200)
+    institution = models.CharField(max_length=200)
     editor_country_choices = [('', 'Select a country')] + list(CountryField().choices)
-    university_country = models.CharField(max_length=200, choices=editor_country_choices)
-    university_url = models.URLField(max_length=200)
-    research_group = models.CharField(max_length=100)
-    research_group_url = models.URLField(max_length=200)
+    institution_country = models.CharField(max_length=200, choices=editor_country_choices)
+    institution_url = models.URLField(max_length=200,null=True, blank=True)
+
+    # optional
+    research_group = models.CharField(max_length=100,null=True, blank=True)
 
     def __str__(self):
         # return self.name
@@ -38,6 +40,7 @@ class Session(models.Model):
         return self.session_title
 
 class Workshop(models.Model):
+    # Filled in by user
     workshop_full_title = models.CharField(max_length=200)
     workshop_short_title = models.CharField(max_length=200)
     workshop_acronym = models.CharField(max_length=50)
@@ -46,19 +49,23 @@ class Workshop(models.Model):
     workshop_country_choices = [('', 'Select a country')] + list(CountryField().choices)
     workshop_country = models.CharField(max_length=200, choices=workshop_country_choices)
     workshop_begin_date = models.DateField(default=date.today)
-
     workshop_end_date = models.DateField(default=date.today)
-    urn = models.CharField(max_length=50)
     volume_owner = models.CharField(max_length=200)
     volume_owner_email = models.EmailField(max_length=200)
-    
     workshop_language_iso = models.CharField(max_length=50)
     workshop_colocated = models.CharField(max_length=200)
+    year_final_papers = models.CharField(max_length=4)
+    total_submitted_papers = models.IntegerField()
+    total_accepted_papers = models.IntegerField()
+    total_reg_acc_papers = models.IntegerField(null=True, blank=True)
+    total_short_acc_papers = models.IntegerField(null=True, blank=True)
 
-    # not filled in by user
+    # Filled in by CEUR
     volume_number = models.IntegerField(null=True, blank=True)
-    publication_year = models.IntegerField()
+    submission_date = models.DateField(null=True, blank=True) # date the submit button is clicked by volume owner
     license = models.CharField(max_length=50)
+    urn = models.CharField(max_length=50)
+
 
     # KEYS
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
@@ -97,5 +104,7 @@ class Paper(models.Model):
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
-
         return self.paper_title
+
+
+
