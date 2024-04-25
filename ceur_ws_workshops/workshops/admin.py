@@ -60,8 +60,8 @@ class AuthorAdmin(admin.ModelAdmin):
 
 class EditorAdmin(admin.ModelAdmin):
     list_display = [field.name for field in Editor._meta.fields]
-    list_display_links = ('name',)
-    search_fields = ['name']
+    list_display_links = ('editor_name',)
+    search_fields = ['editor_name']
     formfield_overrides = overrides
 
 admin.site.register(Workshop, WorkshopAdmin)
