@@ -63,7 +63,6 @@ class CreateWorkshop(View):
             else:
                 return HttpResponse('Data entered not valid')
 
-        # handles logic to showcase the data so that the user can confirm it
         else:
             form = WorkshopForm(request.POST)
             editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
@@ -91,55 +90,48 @@ class WorkshopOverview(View):
 
     def get(self, request, secret_token):
         return self.render_workshop(request)
-
-    # def submit_workshop(self, request, secret_token):
-    #     workshop = get_object_or_404(Workshop, secret_token=secret_token)
-
-    #     workshop_json = serializers.serialize('json', [workshop,])
-    #     directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
-    #     os.makedirs(directory_path, exist_ok=True)
-    #     file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
     
-    #     with open(file_path, 'w') as file:
-    #         file.write(workshop_json)
-    #     request.session['json_saved'] = True
-    #     messages.success(request, 'Workshop submitted successfully.')
-
-    #     return render(request, 'workshops/submit_workshop.html')
     def submit_workshop(self, request, secret_token):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
         
         workshop_data = {
-        "CEURVOLNR": workshop.pk,
-        "fields": {
-            "CEURFULLTITLE": workshop.workshop_full_title,
-            "CEURVOLTITLE": workshop.workshop_short_title,
+            # "JJJJ":	workshop.year_final_papers,
+            "YYYY": workshop.workshop_begin_date.year, #workshop_end_date,
+            "NNNN": workshop.workshop_acronym,
+            # "DD": workshop.submission_date,
+            "MM": workshop.workshop_begin_date.month, # workshop_end_date
+            "XXX": workshop.volume_number,
+            "CEURLANG": workshop.workshop_language_iso,
+            "CEURVOLNR": workshop.pk,
+            "CEURPUBYEAR":str(workshop.workshop_begin_date.year), #workshop_begin_date
+            "CEURURN": workshop.urn,
             "CEURVOLACRONYM": workshop.workshop_acronym,
+            "CEURVOLTITLE": workshop.workshop_short_title,
+            "CEURFULLTITLE": workshop.workshop_full_title,
             "CEURDESCRIPTION": workshop.workshop_description,
-            "CEURVOLEDITOR": [str(editor) for editor in workshop.editors.all()],
-            "CEURPUBYEAR":{
-                "CEURBEGINDATE": str(workshop.workshop_begin_date),
-                "CEURENDDATE": str(workshop.workshop_end_date),
-            },
+            "CEURCOLOCATED": workshop.workshop_colocated,
             "CEURLOCTIME":{
                 "CEURCITY": workshop.workshop_city,
                 "CEURCOUNTRY": workshop.workshop_country,
                 "CEURPUBYEAR": workshop.publication_year,
             },
-            "CEURCOLOCATED": workshop.workshop_colocated,
-            "CEURSESSIONS": [],
-            "CEURURN": workshop.urn,
+            "CEURVOLEDITOR": [str(editor) for editor in workshop.editors.all()],
+            # editor personal url
+            # editor insitution website
+            # editor institution
+            # editor instituion country
+            # editor research group 
             "email_address": workshop.volume_owner_email,
+            
+            "CEURSESSIONS": [],
             "CEURLIC": workshop.license,
             "secret_token": str(workshop.secret_token),
         }
-    }
-
         sessions_data = []
         for session in workshop.sessions.all():
             session_data = {
                 "session_title": session.session_title,
-                "CEURPAPERS": [
+                "papers": [
                     {
                         "CEURTITLE": paper.paper_title,
                         "CEURPAGES": paper.pages,
@@ -152,72 +144,19 @@ class WorkshopOverview(View):
             }
             sessions_data.append(session_data)
 
-        workshop_data['fields']['CEURSESSIONS'] = sessions_data
+        workshop_data['CEURSESSIONS'] = sessions_data
 
         directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
         os.makedirs(directory_path, exist_ok=True)
         file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
 
         with open(file_path, 'w') as file:
-            json.dump([workshop_data], file, cls=DjangoJSONEncoder, indent=4)
+            json.dump(workshop_data, file, cls=DjangoJSONEncoder, indent=4)
 
         request.session['json_saved'] = True
         messages.success(request, 'Workshop submitted successfully.')
 
         return render(request, 'workshops/submit_workshop.html')
-
-        # workshop_data = {
-        #     "model": "workshops.workshop",
-        #     "CEURVOLNR": workshop.pk,
-        #     "fields": {
-        #         "CEURLONGTITLE": workshop.workshop_full_title,
-        #         "CEURSHORTTITLE": workshop.workshop_short_title,
-        #         "CEURVOLACRONYM": workshop.workshop_acronym,
-        #         "CEURDESCRIPTION": workshop.workshop_description,
-        #         "CEURLOCTIME":{
-        #             "CEURCITY": workshop.workshop_city,
-        #             "CEURCOUNTRY": workshop.workshop_country,
-        #             "CEURBEGINDATE": str(workshop.workshop_begin_date),
-        #             "CEURENDDATE": str(workshop.workshop_end_date),
-        #         },
-        #         "CEURSESSIONS": [str(session) for session in workshop.sessions.all()],
-        #         "urn": workshop.urn,
-        #         "email_address": workshop.volume_owner_email,
-        #         "volume_number": workshop.volume_number,
-        #         "publication_year": workshop.publication_year,
-        #         "license": workshop.license,
-        #         "secret_token": str(workshop.secret_token),
-        #     }
-        # }
-
-        # editors_data = [
-        #     str(editor) for editor in workshop.editors.all()
-        # ]
-        # workshop_data['fields']['CEURVOLEDITOR'] = editors_data
-
-        # accepted_papers_data = [
-        #     {
-        #         "CEURTITLE": paper.paper_title,
-        #         "CEURPAGES": paper.pages,
-        #         "CEURAUTHOR": [str(author) for author in paper.authors.all()],
-        #         "uploaded_file_url": paper.uploaded_file.url if paper.uploaded_file else None,
-        #         "agreement_file_url": paper.agreement_file.url if paper.agreement_file else None,
-        #     }
-        #     for paper in workshop.accepted_papers.all()
-        # ]
-        # workshop_data['fields']['accepted_papers'] = accepted_papers_data
-
-        # directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
-        # os.makedirs(directory_path, exist_ok=True)
-        # file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
-        
-        # with open(file_path, 'w') as file:
-        #     json.dump([workshop_data], file, cls=DjangoJSONEncoder, indent=4)
-        
-        # request.session['json_saved'] = True
-        # messages.success(request, 'Workshop submitted successfully.')
-
-        # return render(request, 'workshops/submit_workshop.html')
     
     def post(self, request, secret_token):
 

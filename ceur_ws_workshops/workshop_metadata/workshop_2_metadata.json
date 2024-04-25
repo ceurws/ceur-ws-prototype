@@ -1,68 +1,93 @@
-[
-    {
-        "CEURVOLNR": 2,
-        "fields": {
-            "CEURLONGTITLE": "FullTitleNewFull",
-            "CEURSHORTTITLE": "testTitleNew",
-            "CEURVOLACRONYM": "ENG",
-            "CEURDESCRIPTION": "Description brief new",
-            "CEURVOLEDITOR": [
-                "templateeditor, VU, NL"
-            ],
-            "CEURLOCTIME": {
-                "CEURCITY": "Amsterdam",
-                "CEURCOUNTRY": "NL",
-                "CEURBEGINDATE": "2024-04-24",
-                "CEURENDDATE": "2024-04-24",
-                "CEURPUBYEAR": 2012
-            },
-            "CEURSESSIONS": [
+{
+    "YYYY": 2024,
+    "NNNN": "ENG",
+    "MM": 4,
+    "XXX": null,
+    "CEURLANG": "ENG",
+    "CEURVOLNR": 2,
+    "CEURPUBYEAR": "2024",
+    "CEURURN": "",
+    "CEURVOLACRONYM": "ENG",
+    "CEURVOLTITLE": "testTitleNew",
+    "CEURFULLTITLE": "FullTitleNewFull",
+    "CEURDESCRIPTION": "Description brief new",
+    "CEURCOLOCATED": "Bohn, DE",
+    "CEURLOCTIME": {
+        "CEURCITY": "Amsterdam",
+        "CEURCOUNTRY": "NL",
+        "CEURPUBYEAR": 2012
+    },
+    "CEURVOLEDITOR": [
+        "templateeditor, VU, NL"
+    ],
+    "email_address": "j.doe@gmail.com",
+    "CEURSESSIONS": [
+        {
+            "session_title": "Session1: TemplateSession",
+            "papers": [
                 {
-                    "session_title": "Session1: TemplateSession",
-                    "CEURPAPERS": [
-                        {
-                            "CEURTITLE": "PaperTitleOdd",
-                            "CEURPAGES": "11-13",
-                            "CEURAUTHOR": [
-                                "newAuthro"
-                            ],
-                            "uploaded_file_url": "/media/papers/Vol-2/abstract2_MdtfyJk.pdf",
-                            "agreement_file_url": "/media/agreement/Vol-2/paper1_J27Ivdq.pdf"
-                        }
-                    ]
+                    "CEURTITLE": "PaperTitleOdd",
+                    "CEURPAGES": "11-13",
+                    "CEURAUTHOR": [
+                        "newAuthro"
+                    ],
+                    "uploaded_file_url": "/media/papers/Vol-2/abstract2_MdtfyJk.pdf",
+                    "agreement_file_url": "/media/agreement/Vol-2/paper1_J27Ivdq.pdf"
                 },
                 {
-                    "session_title": "Session2: NewSession",
-                    "CEURPAPERS": [
-                        {
-                            "CEURTITLE": "paperNew",
-                            "CEURPAGES": "13-15",
-                            "CEURAUTHOR": [
-                                "peter petrov"
-                            ],
-                            "uploaded_file_url": "/media/papers/Vol-2/abstract2.pdf",
-                            "agreement_file_url": "/media/agreement/Vol-2/paper1.pdf"
-                        },
-                        {
-                            "CEURTITLE": "testPaper2",
-                            "CEURPAGES": "19-21",
-                            "CEURAUTHOR": [
-                                "Peter Santos"
-                            ],
-                            "uploaded_file_url": "/media/papers/Vol-2/paper1.pdf",
-                            "agreement_file_url": "/media/agreement/Vol-2/paper1_5aPppf7.pdf"
-                        }
-                    ]
-                },
-                {
-                    "session_title": "Session3: OldSession",
-                    "CEURPAPERS": []
+                    "CEURTITLE": "testPaper",
+                    "CEURPAGES": "101",
+                    "CEURAUTHOR": [
+                        "test"
+                    ],
+                    "uploaded_file_url": "/media/papers/Vol-2/paper1_qx42zUX.pdf",
+                    "agreement_file_url": "/media/agreement/Vol-2/paper5_CgIKXvl.pdf"
                 }
-            ],
-            "CEURURN": "",
-            "email_address": "j.doe@gmail.com",
-            "CEURLIC": "",
-            "secret_token": "d3c1759b-a4b2-41a0-9864-6c439c1d03e1"
+            ]
+        },
+        {
+            "session_title": "Session2: NewSession",
+            "papers": [
+                {
+                    "CEURTITLE": "paperNew",
+                    "CEURPAGES": "13-15",
+                    "CEURAUTHOR": [
+                        "peter petrov"
+                    ],
+                    "uploaded_file_url": "/media/papers/Vol-2/abstract2.pdf",
+                    "agreement_file_url": "/media/agreement/Vol-2/paper1.pdf"
+                },
+                {
+                    "CEURTITLE": "testPaper2",
+                    "CEURPAGES": "19-21",
+                    "CEURAUTHOR": [
+                        "Peter Santos"
+                    ],
+                    "uploaded_file_url": "/media/papers/Vol-2/paper1.pdf",
+                    "agreement_file_url": "/media/agreement/Vol-2/paper1_5aPppf7.pdf"
+                }
+            ]
+        },
+        {
+            "session_title": "Session3: OldSession",
+            "papers": [
+                {
+                    "CEURTITLE": "test",
+                    "CEURPAGES": "111",
+                    "CEURAUTHOR": [],
+                    "uploaded_file_url": "/media/papers/Vol-2/paper5.pdf",
+                    "agreement_file_url": "/media/agreement/Vol-2/paper5_wCKNk5k.pdf"
+                },
+                {
+                    "CEURTITLE": "test1111",
+                    "CEURPAGES": "1111",
+                    "CEURAUTHOR": [],
+                    "uploaded_file_url": "/media/papers/Vol-2/paper1_oOlFNTw.pdf",
+                    "agreement_file_url": "/media/agreement/Vol-2/abstract2_EFvFNNz.pdf"
+                }
+            ]
         }
-    }
-]
+    ],
+    "CEURLIC": "",
+    "secret_token": "d3c1759b-a4b2-41a0-9864-6c439c1d03e1"
+}
