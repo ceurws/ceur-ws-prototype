@@ -10,7 +10,7 @@ from django.db.models import Q
 
 class Editor(models.Model):
     editor_name = models.CharField(max_length=100)
-    editor_url = models.URLField(max_length=200)
+    editor_url = models.URLField(max_length=200, blank = True)
     institution = models.CharField(max_length=200)
     editor_country_choices = [('', 'Select a country')] + list(CountryField().choices)
     institution_country = models.CharField(max_length=200, choices=editor_country_choices)
@@ -21,7 +21,7 @@ class Editor(models.Model):
 
     def __str__(self):
         # return self.name
-        return f"{self.name}, {self.university}, {self.university_country}"
+        return f"{self.editor_name}, {self.institution}, {self.institution_country}"
 
 class Author(models.Model):
     author_name = models.CharField(max_length=100)
