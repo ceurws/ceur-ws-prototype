@@ -16,9 +16,9 @@ class WorkshopForm(forms.ModelForm):
     class Meta:
         model = Workshop
         fields = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym', 'workshop_language_iso', 
-                  'workshop_description', 'workshop_city', 'workshop_country', 'publication_year', 'workshop_colocated',
-                 'workshop_begin_date', 'workshop_end_date', 'volume_owner',
-                  'volume_owner_email']
+                  'workshop_description', 'workshop_city', 'workshop_country', 'year_final_papers', 'workshop_colocated',
+                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
+                  'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers']
         
         widgets = {
             'workshop_short_title': TextInput(attrs={'size': 50, 
@@ -36,8 +36,8 @@ class WorkshopForm(forms.ModelForm):
             'workshop_country': CountrySelectWidget(),
             'workshop_begin_date': DateInput(attrs={'id': 'id_workshop_begin_date'}),
             'workshop_end_date': DateInput(attrs={'id': 'id_workshop_end_date'}),
-            'publication_year': TextInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the year the proceedings volume was created'}),
+            'year_final_papers': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the year in which the final papers of the proceedings were produced'}),
             'workshop_colocated': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter with which workshop this workshop was colocated'}),
             'license': TextInput(attrs={'size': 50, 
@@ -46,8 +46,16 @@ class WorkshopForm(forms.ModelForm):
                                             'placeholder': 'John Doe'}),
             'volume_owner_email': TextInput(attrs={'size': 50,
                                             'placeholder': 'johndoe@email.com'}),
-            'number_splits_volume': TextInput(attrs={'size': 50,
-                                            'placeholder': '3'}),
+            'year_final_papers': TextInput(attrs={'size': 50,
+                                            'placeholder': 'Enter the year final paper was uploaded'}),
+            'total_submitted_papers': TextInput(attrs={'size': 50,
+                                            'placeholder': 'Total amount of papers submitted'}),
+            'total_accepted_papers': TextInput(attrs={'size': 50,
+                                            'placeholder': 'Total amount of accepted papers'}),
+            'total_reg_acc_papers': TextInput(attrs={'size': 50,
+                                            'placeholder': '(optional) Total amount of regular size accepted papers'}),
+            'total_short_acc_papers': TextInput(attrs={'size': 50,
+                                            'placeholder': '(optional) Total amount of short size accepted papers'})
                                         
        }
 
@@ -72,13 +80,13 @@ class PaperForm(forms.ModelForm):
         fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file']
 
         widgets = {
-            'paper_title': TextInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the title of the paper'}),
-            'pages': NumberInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the number of pages'}),
-            'uploaded_file': FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': FileInput(attrs={'accept': '.pdf'}),
+            'paper_title': forms.TextInput(attrs={'size': 50, 'placeholder': 'Enter the title of the paper'}),
+            'pages': forms.TextInput(attrs={'size': 50, 'placeholder': 'Enter the number of pages'}),
+            'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
+            'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
         }
+
+
 
 AuthorFormSet = modelformset_factory(
         Author, fields=('author_name', 'author_university', 'author_uni_url'), extra=1,
@@ -93,21 +101,21 @@ AuthorFormSet = modelformset_factory(
         })
 
 EditorFormSet = modelformset_factory(
-    Editor, fields=('name', 'university', 'university_country', 'university_url', 'research_group', 'research_group_url'), extra=1,
+    Editor, fields=('editor_name','editor_url' ,'institution', 'institution_country', 'institution_url', 'research_group'), extra=1,
     # CSS styling but for formsets
     widgets = {
-        'name': TextInput(attrs={'size': 50, 
+        'editor_name': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the name of the editor'}),
-        'university': TextInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the university of the editor'}),
-        'university_country': CountrySelectWidget(),
+        'editor_url': TextInput(attrs={'size': 50, 
+                                            'placeholder': '(optional) Enter the personal url of the editor'}),
+        'institution': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the institution of the editor'}),
+        'institution_country': CountrySelectWidget(),
 
-        'university_url': TextInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the URL of the university'}),
+        'institution_url': TextInput(attrs={'size': 50, 
+                                            'placeholder': 'Enter the URL of the institution'}),
         'research_group': TextInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the research group of the editor'}),
-        'research_group_url': TextInput(attrs={'size': 50, 
-                                            'placeholder': 'Enter the URL of the research group'}),
+                                            'placeholder': '(optional) Enter the research group of the editor'})
     }
 )
 
