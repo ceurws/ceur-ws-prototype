@@ -69,7 +69,7 @@ class CreateWorkshop(View):
                 return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form, 'session_form':session_form})
             else:
                 return HttpResponse('Data entered not valid')
-
+            
 class WorkshopOverview(View):
     def get_workshop(self):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
@@ -99,8 +99,8 @@ class WorkshopOverview(View):
             "JJJJ":	workshop.year_final_papers,
             "YYYY": workshop.workshop_begin_date.year, 
             "NNNN": workshop.workshop_acronym,
-            "DD": workshop.submission_date,
-            "MM": workshop.workshop_begin_date.month, # workshop_end_date
+            # "DD": date.today().day,
+            # "MM": date.today.month,
             "XXX": workshop.volume_number,
             "CEURLANG": workshop.workshop_language_iso,
             "CEURVOLNR": workshop.pk,

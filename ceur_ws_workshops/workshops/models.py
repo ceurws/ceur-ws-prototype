@@ -7,7 +7,6 @@ from django_countries.fields import CountryField
 from django.utils.text import slugify
 from django.db.models import Q
 
-
 class Editor(models.Model):
     editor_name = models.CharField(max_length=100)
     editor_url = models.URLField(max_length=200, blank = True)
@@ -27,7 +26,7 @@ class Author(models.Model):
     author_name = models.CharField(max_length=100)
     author_university = models.CharField(max_length=100)
     author_uni_url = models.URLField(max_length=200)
-
+    author_email = models.EmailField(max_length=200)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
     def __str__(self):
@@ -38,10 +37,10 @@ class Session(models.Model):
 
     def __str__(self):
         return self.session_title
-
+    
 class Workshop(models.Model):
     # Filled in by user
-    workshop_full_title = models.CharField(max_length=200)
+    workshop_full_title = models.CharField(max_length=200,)
     workshop_short_title = models.CharField(max_length=200)
     workshop_acronym = models.CharField(max_length=50)
     workshop_description = models.TextField(max_length=500)
@@ -66,7 +65,6 @@ class Workshop(models.Model):
     license = models.CharField(max_length=50)
     urn = models.CharField(max_length=50)
 
-
     # KEYS
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
     accepted_papers = models.ManyToManyField('Paper', related_name='accepted_papers')
@@ -76,7 +74,6 @@ class Workshop(models.Model):
     
     def __str__(self):
         return self.workshop_full_title
- 
 
 def paper_upload_path(instance, filename):
     """
