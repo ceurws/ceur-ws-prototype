@@ -4,18 +4,26 @@
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
     <fieldset>
-    {{ form.as_p }}
+      {{ form.as_p }}
     </fieldset>
     <hr>
     <fieldset>
-      {{ session_form.as_p}}
-  </fieldset>
+      {% for form in session_form %}
+        {% if not form.empty_permitted or form.has_changed %}
+          {{ form.as_p }}
+        {% endif %}
+      {% endfor %}
+    </fieldset>
     <hr>
     <fieldset>
-      {{ editor_form.as_p}}
-  </fieldset>
+      {% for form in editor_form %}
+        {% if not form.empty_permitted or form.has_changed %}
+          {{ form.as_p }}
+        {% endif %}
+      {% endfor %}
+    </fieldset>
 
-  <br>
-    <input type="submit" name="submit_button" class = "button-13" value="Confirm">
+    <br>
+    <input type="submit" name="submit_button" class="button-13" value="Confirm">
   </form>
 {% endblock %}
