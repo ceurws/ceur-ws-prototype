@@ -194,7 +194,7 @@ class WorkshopOverview(View):
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
         elif request.POST["submit_button"] == "Confirm":
-
+            
             workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST)
             workshop = self.get_workshop()
 
@@ -254,6 +254,13 @@ class AuthorUpload(View):
                 break
         return is_signed
     
+    def _get_agreement_filename(self, paper_instance, original_filename):
+        # Extract paper title, and original extension from the original filename
+        paper_title = paper_instance.paper_title.replace(' ', '')
+        extension = os.path.splitext(original_filename)[1]
+        new_filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
+        return new_filename
+    
     def _create_or_update_paper_instance(self, request, paper_form):
         if not paper_form.is_valid():
             messages.error(request, 'OOOOOOOOOPS')
@@ -273,8 +280,11 @@ class AuthorUpload(View):
             if 'uploaded_file' in request.FILES:
                 existing_paper.uploaded_file = request.FILES['uploaded_file']
             if 'agreement_file' in request.FILES:
-                existing_paper.agreement_file = request.FILES['agreement_file']
+                # existing_paper.agreement_file = request.FILES['agreement_file']
 
+                agreement_file = request.FILES['agreement_file']
+                agreement_file.name = self._get_agreement_filename(paper_instance, agreement_file.name)
+                existing_paper.agreement_file = agreement_file
             existing_paper.save()
 
             heloo = os.path.join(settings.MEDIA_ROOT, paper_instance.agreement_file.name)
@@ -282,7 +292,6 @@ class AuthorUpload(View):
             is_signed = self._detect_signature_in_image(heloo)
 
             if not is_signed:
-                # Handle unsigned agreement file, e.g., by setting an error message
                 messages.error(request, 'Agreement file is not signed. Please upload a hand signed agreement file.')
                 print('Agreement file is not signed')
                 
@@ -291,10 +300,16 @@ class AuthorUpload(View):
         else:
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = workshop_instance
+
             if 'uploaded_file' not in request.FILES and 'agrement_file' not in request.FILES and ('uploaded_file_url' in request.session and 'agreement_file_url' in request.session):
                 paper_instance.uploaded_file.name = request.session['uploaded_file_url']
                 paper_instance.agreement_file.name = request.session['agreement_file_url']
 
+            else:
+                if 'agreement_file' in request.FILES:
+                    agreement_file = request.FILES['agreement_file']
+                    agreement_file.name = self._get_agreement_filename(paper_instance, agreement_file.name)
+                    paper_instance.agreement_file = agreement_file
             paper_instance.save()
 
             heloo = os.path.join(settings.MEDIA_ROOT, paper_instance.agreement_file.name)
@@ -315,7 +330,6 @@ class AuthorUpload(View):
             author_instances = author_formset.save()
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
-
 
         context = self.get_context(author_instances, paper_instance, 'confirm')
         return render(request, self.success_path, context)
@@ -339,4 +353,3 @@ class AuthorUpload(View):
             return self.submit_author(request, author_formset, paper_form)
         else:
             return self.edit_author(request, author_formset, paper_form)
-    
