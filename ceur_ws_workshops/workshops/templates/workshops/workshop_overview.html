@@ -66,7 +66,8 @@
             {% endfor %}
         </ul>
     </fieldset>
-
+    
+    {% if session_title_list %}
     {% regroup papers by session as papers_by_session %}
     <fieldset>
         <legend>Papers</Legend>
@@ -87,7 +88,6 @@
                             <p><strong>Pages:</strong> {{ paper.pages }}</p>
                             <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
                             <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
-                            <!-- Add additional details as needed -->
                         </li>
                         {%endif%}
                     {% endfor %}
@@ -95,7 +95,28 @@
             </fieldset>
         {% endfor %}
     </fieldset>
-    
+    {% else %}
+        <legend>Papers</Legend>
+            <fieldset class="papers-list">
+            <ul>
+            {% for paper in papers %}
+                    <li>
+                    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+                    <p><strong>Authors:</strong>
+                        {% for author in paper.authors.all %}
+                            {{ author.author_name }}
+                            {% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p><strong>Pages:</strong> {{ paper.pages }}</p>
+                    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+                    <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
+                </li>
+            {% endfor %}
+            </ul>
+            </fieldset>
+    {% endif %}
+
 
 
     <br>
