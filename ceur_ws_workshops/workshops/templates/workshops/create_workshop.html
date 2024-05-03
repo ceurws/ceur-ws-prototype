@@ -7,7 +7,7 @@
   <h1 class="header-title">Create Workshop Volume</h1>
   <fieldset>
     <legend>Workshop Details</legend>
-    <i> Please provide details about the workshop in the following section. </i>
+    <i> Please provide details about the workshop in the following section. Optional fields can be left blank if not applicable. </i>
     {% csrf_token %}
     {{ form.as_p }}
     
@@ -15,16 +15,25 @@
   <hr>    
   <fieldset id="session_fieldset">
     <legend>Session</legend>
-    <i> If the workshop has different sessions, please provide the titles of these sessions in this section. If not, please leave blank. Please
-      specify each title as follows: {Session i: session title} </i>
-    {{ session_form.management_form}}
-    <div class="session-form">
-    {% for form in session_form%}
-    <div class="session_form">
-      {{ form.as_p}}
-    </div>
-    {% endfor %}
-  </div>
+    <i> If the workshop has different sessions, please provide the titles of these sessions in this section. If no splits exist, please leave blank.</i>
+      <br>
+      <br>
+      {{ session_form.management_form}}
+      <div class="session-form" id="session-form">
+        {% for form in session_form%}
+          {{ form }}
+          <br>
+          {% endfor %}
+        </div>
+  <input type="button" value="Add Session" class="button-13" id="add_session">
+  <div id="empty_form" style="display:none">
+    <table class='no_error'>
+        {{ session_form.empty_form }}
+        <br>
+
+    </table>
+</div>
+
 </fieldset>
   <fieldset id="editor-fieldset">
     <legend>Editors</legend>
@@ -45,7 +54,14 @@
   <input type="submit" class="button-13" value="Save Workshop">
 </form>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+  $('#add_session').click(function() {
+    var form_idx = $('#id_session-TOTAL_FORMS').val();
+    $('#session-form').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+    $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+});
+
   document.addEventListener('DOMContentLoaded', function() {
     let addButton = document.querySelector("#add-form");
     let formSet = document.querySelector("#editor-fieldset");
