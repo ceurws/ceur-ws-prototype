@@ -4,26 +4,61 @@
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
     <fieldset>
-      {{ form.as_p }}
+    {{ form.as_p }}
     </fieldset>
     <hr>
     <fieldset>
-      {% for form in session_form %}
-        {% if not form.empty_permitted or form.has_changed %}
+      {{ session_form.management_form}}
+      <div class="session-form" id="session-form">
+        {% for form in session_form%}
           {{ form.as_p }}
-        {% endif %}
-      {% endfor %}
-    </fieldset>
+          {% endfor %}
+        </div>
+   <input type="button" value="Add Session" class="button-13" id="add_session">
+  </fieldset>
     <hr>
     <fieldset>
-      {% for form in editor_form %}
-        {% if not form.empty_permitted or form.has_changed %}
+      {{ editor_form.management_form}}
+      <div class="editor-form" id="editor-form">
+        {% for form in editor_form%}
           {{ form.as_p }}
-        {% endif %}
-      {% endfor %}
-    </fieldset>
+          {% endfor %}
+        </div>
+   <input type="button" value="Add Editor" class="button-13" id="add_editor">
+  </fieldset>
 
-    <br>
-    <input type="submit" name="submit_button" class="button-13" value="Confirm">
+  <br>
+    <input type="submit" name="submit_button" class = "button-13" value="Confirm">
   </form>
+
+  {% comment %} logic for session button {% endcomment %}
+  <div id="empty_session_form" style="display:none">
+    <table class='no_error'>
+        {{ session_form.empty_form.as_p }}
+        <br>
+
+    </table>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $('#add_session').click(function() {
+      var form_idx = $('#id_session-TOTAL_FORMS').val();
+      $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
+      $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
+</script>
+
+<div id="empty_editor_form" style="display:none">
+  <table class='no_error'>
+      {{ editor_form.empty_form.as_p }}
+      <br>
+
+  </table>
+</div>
+<script>
+  $('#add_editor').click(function() {
+    var form_idx = $('#id_editor-TOTAL_FORMS').val();
+    $('#editor-form').append($('#empty_editor_form').html().replace(/__prefix__/g, form_idx));
+    $('#id_editor-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
+</script>
+
 {% endblock %}
