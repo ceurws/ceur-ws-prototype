@@ -30,43 +30,50 @@ def index(request):
 class CreateWorkshop(View):
     def get(self, request):
         form = WorkshopForm()
-        editor_form = EditorFormSet(queryset=Editor.objects.none(), prefix='editor')
-        session_form = SessionFormSet(queryset=Session.objects.none(), prefix='session')
-        return render(request, "workshops/create_workshop.html", {'form':form, 'editor_form':editor_form, 'session_form':session_form})
+        editor_form = EditorFormSet(queryset=Editor.objects.none(), 
+                                    prefix='editor')
+        session_form = SessionFormSet(queryset=Session.objects.none(), 
+                                      prefix='session')
+        context = {'form':form, 
+                   'editor_form':editor_form, 
+                   'session_form':session_form}
+        return render(request, "workshops/create_workshop.html", context)
 
-    def post(self,request):
-
+    def post(self,request, secret_token):
+        workshop = get_object_or_404(Workshop, secret_token=secret_token)
         # handles logic to save the data when the user has confirmed the changes
         if 'submit_button' in request.POST:
-            editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
-            session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
-            form = WorkshopForm(request.POST)
+            form = WorkshopForm(request.POST, request.FILES)
+            editor_form = EditorFormSet(data=request.POST, prefix="editor")
+            session_form = SessionFormSet(data=request.POST, prefix="session")
 
-            if all([form.is_valid(), editor_form.is_valid(), session_form.is_valid()]):
-                workshop = form.save()  
+            if form.is_valid() and editor_form.is_valid() and session_form.is_valid():
+                workshop = form.save()
+                if 'editor_agreement' in request.FILES:
+                    workshop.editor_agreement = request.FILES['editor_agreement']
+                    workshop.save()
+
                 editor_instances = editor_form.save()
                 session_instances = session_form.save()
 
                 workshop.editors.add(*editor_instances)
                 workshop.sessions.add(*session_instances)
 
-                workshop.save()
-
                 organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
                 author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
-                return render(request, "workshops/workshop_edit_success.html", {
-                    'organizer_url': organizer_url,
-                    'author_url': author_url
-                })
+                context = {'organizer_url': organizer_url, 'author_url': author_url}
+                return render(request, "workshops/workshop_edit_success.html", context)
             else:
                 return HttpResponse('Data entered not valid')
 
         else:
-            form = WorkshopForm(request.POST)
-            editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
-            session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
-            if form.is_valid():
-                return render(request, 'workshops/edit_workshop.html', {'form': form, 'editor_form':editor_form, 'session_form':session_form})
+            form = WorkshopForm(request.POST, request.FILES)
+            editor_form = EditorFormSet(data=request.POST, prefix="editor")
+            session_form = SessionFormSet(data=request.POST, prefix="session")
+
+            if form.is_valid() and editor_form.is_valid() and session_form.is_valid():
+                context = {'form': form, 'editor_form': editor_form, 'session_form': session_form}
+                return render(request, 'workshops/edit_workshop.html', context)
             else:
                 return HttpResponse('Data entered not valid')
             
