@@ -20,7 +20,7 @@ class WorkshopForm(forms.ModelForm):
         fields = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym',
                 'workshop_language_iso', 'workshop_description', 'workshop_country',  'workshop_city', 'year_final_papers', 'workshop_colocated',
                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
-                'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers']
+                'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement']
         
         widgets = {
             'workshop_short_title': TextInput(attrs={'size': 50, 
@@ -57,7 +57,9 @@ class WorkshopForm(forms.ModelForm):
             'total_reg_acc_papers': TextInput(attrs={'size': 50,
                                             'placeholder': '(optional) Total amount of regular size accepted papers'}),
             'total_short_acc_papers': TextInput(attrs={'size': 50,
-                                            'placeholder': '(optional) Total amount of short size accepted papers'})
+                                            'placeholder': '(optional) Total amount of short size accepted papers'}),
+            'editor_agreement': FileInput(attrs={'accept': '.pdf', 
+                                                 'placeholder': 'Upload the agreement file'}),
                                         
        }
 
@@ -80,7 +82,8 @@ class WorkshopForm(forms.ModelForm):
             'total_submitted_papers': '''<br> <br> The total amount of papers submitted''',
             'total_accepted_papers': '''<br> <br> The total amount of accepted papers, from the total amount of papers submitted, including regular and short papers''',
             'total_reg_acc_papers': '''<br> <br> The total amount of regular-size accepted peer-reviewed papers''',
-            'total_short_acc_papers': '''<br> <br> The total amount of short size accepted papers'''
+            'total_short_acc_papers': '''<br> <br> The total amount of short size accepted papers''',
+            'editor_agreement': '''<br> <br> The agreement file has to be hand signed by the volume owner'''
             }
 
         
@@ -141,7 +144,7 @@ EditorFormSet = modelformset_factory(
         'institution_url': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the URL of the institution'}),
         'research_group': TextInput(attrs={'size': 50, 
-                                            'placeholder': '(optional) Enter the research group of the editor'})
+                                            'placeholder': '(optional) Enter the research group of the editor'}),
     }
 )
 

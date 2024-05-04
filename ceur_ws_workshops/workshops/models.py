@@ -7,18 +7,6 @@ from django_countries.fields import CountryField
 from django.utils.text import slugify
 from django.db.models import Q
 
-def paper_upload_path(instance, filename):
-    """
-    Generate a custom upload path for papers.
-    Assumes instance has a direct foreign key to Workshop.
-    Format: "papers/Vol-{workshop_volume}/{filename}"
-    """
-    workshop_volume = instance.workshop.id
-    return f"papers/Vol-{workshop_volume}/{filename}"
-
-def agreement_file_path(instance, filename):
-    agreement_file = instance.workshop.id
-    return f"agreement/Vol-{agreement_file}/{filename}"
 class Editor(models.Model):
     editor_name = models.CharField(max_length=100)
     editor_url = models.URLField(max_length=200, blank = True)
@@ -26,11 +14,10 @@ class Editor(models.Model):
     editor_country_choices = [('', 'Select a country')] + list(CountryField().choices)
     institution_country = models.CharField(max_length=200, choices=editor_country_choices)
     institution_url = models.URLField(max_length=200,null=True, blank=True)
-    editor_agreement = models.FileField(upload_to=agreement_file_path,null=True, blank=True)
+    editor_agreement = models.FileField(upload_to='agreement',null=True, blank=True)
     # optional
     research_group = models.CharField(max_length=100,null=True, blank=True)
 
-    # workshop = models.ForeignKey('Workshop', on_delete=models.CASCADE, related_name='editors')
     def __str__(self):
         # return self.name
         return f"{self.editor_name}, {self.institution}, {self.institution_country}"
@@ -52,6 +39,16 @@ class Session(models.Model):
         return self.session_title
     
 class Workshop(models.Model):
+
+    def workshop_agreement_file_path(instance, filename):
+        acronym = instance.workshop_acronym
+
+        # Define the new filename
+        filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
+
+        # Construct the path using the new filename
+        workshop_id = instance.id
+        return f"agreement/Vol-{workshop_id}/{filename}"
     # Filled in by user
     workshop_full_title = models.CharField(max_length=200,)
     workshop_short_title = models.CharField(max_length=200)
@@ -78,6 +75,8 @@ class Workshop(models.Model):
     license = models.CharField(max_length=50)
     urn = models.CharField(max_length=50)
 
+    editor_agreement = models.FileField(upload_to=workshop_agreement_file_path,null=True, blank=True)
+
     # KEYS
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
     accepted_papers = models.ManyToManyField('Paper', related_name='accepted_papers')
@@ -89,6 +88,20 @@ class Workshop(models.Model):
         return self.workshop_full_title
     
 class Paper(models.Model):
+
+    def paper_upload_path(instance, filename):
+        """
+        Generate a custom upload path for papers.
+        Assumes instance has a direct foreign key to Workshop.
+        Format: "papers/Vol-{workshop_volume}/{filename}"
+        """
+        workshop_volume = instance.workshop.id
+        return f"papers/Vol-{workshop_volume}/{filename}"
+
+    def agreement_file_path(instance, filename):
+        agreement_file = instance.workshop.id
+
+        return f"agreement/Vol-{agreement_file}/{filename}"
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10)
     uploaded_file = models.FileField(upload_to=paper_upload_path, null=True, blank=True)
