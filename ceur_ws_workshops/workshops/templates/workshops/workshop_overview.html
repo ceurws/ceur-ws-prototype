@@ -65,6 +65,7 @@
             <li>{{ editor.editor_name }} (<i>{{ editor.institution}}, {{editor.institution_country}}</i>)</li>
             {% endfor %}
         </ul>
+        <p><strong>Editor agreement:</strong> {{workshop.editor_agreement}}</p>
     </fieldset>
 
     <!-- {% regroup papers by session as papers_by_session %}
@@ -128,7 +129,7 @@
                 <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
                 <p><strong>Authors:</strong>
                     {% for author in paper.authors.all %}
-                    {{ author.author_name }}{% if not forloop.last %}, {% endif %}
+                    {{ author.author_name }}({{ author.author_email }}){% if not forloop.last %}, {% endif %}
                     {% endfor %}
                 </p>
                 <p><strong>Pages:</strong> {{ paper.pages }}</p>
