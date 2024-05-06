@@ -49,6 +49,7 @@ class Workshop(models.Model):
         # Construct the path using the new filename
         workshop_id = instance.id
         return f"agreement/Vol-{workshop_id}/{filename}"
+    
     # Filled in by user
     workshop_full_title = models.CharField(max_length=200,)
     workshop_short_title = models.CharField(max_length=200)
