@@ -1,7 +1,6 @@
 from typing import Any
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from .models import Workshop, Paper, Editor, Author, Session
-import uuid
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views import View
@@ -11,15 +10,13 @@ from django.contrib import messages
 from django.conf import settings
 from django.http import HttpResponse
 from django.core.serializers.json import DjangoJSONEncoder
-import json
+import json, os, zipfile
 from datetime import date
-import os
 from signature_detect.loader import Loader
 from signature_detect.extractor import Extractor
 from signature_detect.cropper import Cropper
 from signature_detect.judger import Judger
 from django.core.serializers.json import DjangoJSONEncoder
-import json
 
 def index(request):
     """
@@ -110,13 +107,11 @@ class WorkshopOverview(View):
         })
 
     def get(self, request, secret_token):
-        return self.render_workshop(request)
+        return self.render_workshop(request)        
     
-    def submit_workshop(self, request, secret_token):
-        submit_path = 'workshops/submit_workshop.html'
-        workshop = get_object_or_404(Workshop, secret_token=secret_token)
-        
-        workshop_data = {
+
+    def _get_workshop_data(self, workshop):
+        return {
             "JJJJ":	workshop.year_final_papers,
             "YYYY": workshop.workshop_begin_date.year, 
             "NNNN": workshop.workshop_acronym,
@@ -151,7 +146,8 @@ class WorkshopOverview(View):
             "CEURLIC": workshop.license,
             "secret_token": str(workshop.secret_token),
         }
-
+    
+    def add_editors_data(self, workshop, workshop_data):
         editors_data = [
         {
             "CEURVOLEDITOR": editor.editor_name,
@@ -165,7 +161,8 @@ class WorkshopOverview(View):
         ]
         workshop_data['CEUREDITORS'] = editors_data
 
-        if workshop.sessions.exists():  
+    def add_papers_data(self, workshop, workshop_data):
+        if workshop.sessions.exists():
             sessions_data = []
             for session in workshop.sessions.all():
                 session_data = {
@@ -197,7 +194,8 @@ class WorkshopOverview(View):
             ]
             del(workshop_data['CEURSESSIONS'])
             workshop_data['CEURPAPERS'] = papers_data
-           
+
+    def _save_workshop_data(self, workshop_data, workshop):
         directory_path = os.path.join(settings.BASE_DIR, 'workshop_metadata')
         os.makedirs(directory_path, exist_ok=True)
         file_path = os.path.join(directory_path, f'workshop_{workshop.id}_metadata.json')
@@ -205,7 +203,30 @@ class WorkshopOverview(View):
         with open(file_path, 'w') as file:
             json.dump(workshop_data, file, cls=DjangoJSONEncoder, indent=4)
 
+    def _zip_agreement_files(self, workshop):
+        agreement_path = os.path.join(settings.MEDIA_ROOT, 'agreement', f'Vol-{workshop.id}', )
+        os.makedirs('zipped_agreements', exist_ok=True)
+        zip_filename = os.path.join(settings.BASE_DIR, 'zipped_agreements', f'AGREEMENTS-Vol-{workshop.id:04d}.zip')
+    
+        print(agreement_path)
+        with zipfile.ZipFile(zip_filename, 'w') as zipf:
+            for root, _, files in os.walk(agreement_path):
+                for file in files:
+                    print("Adding file", os.path.join(root, file))
+                    zipf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), agreement_path))
+    
+    def submit_workshop(self, request, secret_token):
+        submit_path = 'workshops/submit_workshop.html'
+        
+        workshop = get_object_or_404(Workshop, secret_token=secret_token)
+        workshop_data = self._get_workshop_data(workshop)
+
+        self.add_editors_data(workshop, workshop_data)
+        self.add_papers_data(workshop, workshop_data)   
+        self._save_workshop_data(workshop_data, workshop)
         request.session['json_saved'] = True
+
+        self._zip_agreement_files(workshop)
         messages.success(request, 'Workshop submitted successfully.')
 
         return render(request, submit_path)
@@ -276,7 +297,6 @@ class AuthorUpload(View):
         return is_signed
     
     def _get_agreement_filename(self, paper_instance, original_filename):
-        # Extract paper title, and original extension from the original filename
         paper_title = paper_instance.paper_title.replace(' ', '')
         extension = os.path.splitext(original_filename)[1]
         new_filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
@@ -340,6 +360,7 @@ class AuthorUpload(View):
             if not is_signed:
                 messages.error(request, 'Agreement file is not signed. Please upload a hand signed agreement file.')
                 print('Agreement file is not signed')
+                return render(request, self.edit_path, self.get_context(AuthorFormSet(), paper_form))
             else:
                 print('Agreement file is signed')
         return paper_instance
