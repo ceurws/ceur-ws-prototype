@@ -267,11 +267,11 @@ class AuthorUpload(View):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
         return workshop
     
-    def get_context(self, author_formset, paper_form, condition='default'):
+    def get_context(self, author_formset, paper_form, condition='default', edit_paper_url=None):
         if condition == 'author':
             return {'author_formset': author_formset, 'paper_form': paper_form}
         elif condition == "confirm":
-            return {'workshop': self.get_workshop(), 'paper': paper_form, 'authors': author_formset}
+            return {'workshop': self.get_workshop(), 'paper': paper_form, 'authors': author_formset, 'edit_paper_url': edit_paper_url}
         return {'workshop': self.get_workshop(), 'author_formset': author_formset, 'paper_form': paper_form}
     
     def _detect_signature_in_image(self, file_path):
@@ -347,6 +347,17 @@ class AuthorUpload(View):
 
         return paper_instance
     
+     
+        
+    def edit_author(self, request, author_formset, paper_form):
+        paper_instance = self._create_or_update_paper_instance(request, paper_form)
+
+        context = self.get_context(author_formset, paper_form, 'author')
+        if not paper_instance:
+            return render(request, self.edit_path, context)
+
+        return render(request, self.edit_path, context)
+    
     def submit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
 
@@ -360,17 +371,10 @@ class AuthorUpload(View):
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
 
-        context = self.get_context(author_instances, paper_instance, 'confirm')
+        edit_paper_url = reverse('workshops:author_upload', args=[paper_instance.secret_token])
+
+        context = self.get_context(author_instances, paper_instance, 'confirm', edit_paper_url)
         return render(request, self.success_path, context)
-        
-    def edit_author(self, request, author_formset, paper_form):
-        paper_instance = self._create_or_update_paper_instance(request, paper_form)
-
-        context = self.get_context(author_formset, paper_form, 'author')
-        if not paper_instance:
-            return render(request, self.edit_path, context)
-
-        return render(request, self.edit_path, context)
         
     def get(self, request, secret_token):
         author_formset = AuthorFormSet(queryset=Author.objects.none())
