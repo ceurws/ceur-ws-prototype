@@ -1,22 +1,14 @@
 from typing import Any
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from .models import Workshop, Paper, Editor, Author, Session
-import uuid
-
+from django.conf import settings
 from django.urls import reverse
 from django.views import View
-from django.core import serializers
 from .forms import WorkshopForm, EditorFormSet, AuthorFormSet, PaperForm, SessionFormSet
 from django.contrib import messages
-from django.conf import settings
-from django.http import HttpResponse
 from django.core.serializers.json import DjangoJSONEncoder
 import json, os, zipfile
 from datetime import date
-from signature_detect.loader import Loader
-from signature_detect.extractor import Extractor
-from signature_detect.cropper import Cropper
-from signature_detect.judger import Judger
 from django.core.serializers.json import DjangoJSONEncoder
 
 def index(request):
@@ -26,6 +18,7 @@ def index(request):
     return render(request, 'workshops/index.html')
     
 class CreateWorkshop(View):
+
     def get(self, request):
         form = WorkshopForm()
         editor_form = EditorFormSet(queryset=Editor.objects.none(), 
@@ -36,22 +29,20 @@ class CreateWorkshop(View):
                    'editor_form':editor_form, 
                    'session_form':session_form}
         return render(request, "workshops/create_workshop.html", context)
-
+    
     def post(self,request):
-        if 'submit_button' in request.POST:
-            editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
-            session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
-            form = WorkshopForm(data = request.POST, files = request.FILES)
-            
-            if all([form.is_valid(), editor_form.is_valid(), session_form.is_valid()]):
-                workshop = form.save()  
-                
-                if 'editor_agreement' not in request.FILES:
-                    workshop.editor_agreement = request.FILES['editor_agreement']
-                else:
-                    print('No editor agreement file uploaded')
+        success_path = "workshops/workshop_edit_success.html"
+        edit_path = "workshops/edit_workshop.html"
 
-                workshop.save()
+        editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
+        session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
+        form = WorkshopForm(data = request.POST, files = request.FILES)
+
+        if 'submit_button' in request.POST:
+            if all([form.is_valid(), editor_form.is_valid(), session_form.is_valid()]):
+                workshop = form.save(commit=False)  
+                workshop.save()  
+                workshop.editor_agreement = request.FILES['editor_agreement']
                 editor_instances = editor_form.save()
                 session_instances = session_form.save()
 
@@ -62,29 +53,31 @@ class CreateWorkshop(View):
 
                 organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
                 author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
-                return render(request, "workshops/workshop_edit_success.html", {
+                context = {
                     'organizer_url': organizer_url,
                     'author_url': author_url
-                })
+                }
+                return render(request, success_path, context)
             else:
-                return HttpResponse('Data entered not valid, please go back.')
-
-
-        else:
-            form = WorkshopForm(request.POST, request.FILES)
-            editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
-            session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
-
-            if 'editor_agreement' not in request.FILES:
-                print(request.FILES['editor_agreement'])
-                form.editor_agreement = request.FILES['editor_agreement']
-            if form.is_valid():
                 context = {'form': form, 
                            'editor_form':editor_form, 
                            'session_form':session_form}
-                return render(request, 'workshops/edit_workshop.html', context)
+                return render(request, edit_path, context)
+        else:
+            if 'editor_agreement' not in request.FILES:
+                print(request.FILES['editor_agreement'])
+                form.editor_agreement = request.FILES['editor_agreement']
+
+            if all([form.is_valid(), editor_form.is_valid(), session_form.is_valid()]):
+                context = {'form': form, 
+                           'editor_form':editor_form, 
+                           'session_form':session_form}
+                return render(request, edit_path, context)
             else:
-                return HttpResponse('Data entered not valid')
+                context = {'form': form, 
+                           'editor_form':editor_form, 
+                           'session_form':session_form}
+                return render(request, edit_path, context)
 
 class WorkshopOverview(View):
     def get_workshop(self):
@@ -275,25 +268,6 @@ class AuthorUpload(View):
             return {'workshop': self.get_workshop(), 'paper': paper_form, 'authors': author_formset, 'edit_paper_url': edit_paper_url}
         return {'workshop': self.get_workshop(), 'author_formset': author_formset, 'paper_form': paper_form}
     
-    def _detect_signature_in_image(self, file_path):
-        loader = Loader()
-        extractor = Extractor()
-        cropper = Cropper(border_ratio=0)
-        judger = Judger()
-
-        masks = loader.get_masks(file_path)
-        is_signed = False
-        for mask in masks:
-            labeled_mask = extractor.extract(mask)
-            results = cropper.run(labeled_mask)
-            for result in results.values():
-                is_signed = judger.judge(result["cropped_mask"])
-                if is_signed:
-                    break
-            if is_signed:
-                break
-        return is_signed
-    
     def _get_agreement_filename(self, paper_instance, original_filename):
         paper_title = paper_instance.paper_title.replace(' ', '')
         extension = os.path.splitext(original_filename)[1]
@@ -303,17 +277,14 @@ class AuthorUpload(View):
     def _create_or_update_paper_instance(self, request, paper_form):
         if not paper_form.is_valid():
             messages.error(request, 'Invalid paper form data. Please fix the errors.')
-            return None
+            return None  
 
         workshop_instance = self.get_workshop()
-        paper_title = paper_form.cleaned_data['paper_title']
-
-        existing_paper = Paper.objects.filter(paper_title=paper_title, workshop=workshop_instance).first()
-
-        if existing_paper:
-            paper_instance = existing_paper
-            paper_instance.paper_title = request.POST['paper_title']
-            paper_instance.pages = request.POST['pages']
+        if paper_form.instance.id:
+            paper_instance = paper_form.save()  # Save the updates directly if the paper already exists
+        else:
+            paper_instance = paper_form.save(commit=False)  # Create a new paper instance
+            paper_instance.workshop = workshop_instance
 
             if 'uploaded_file' in request.FILES:
                 paper_instance.uploaded_file = request.FILES['uploaded_file']
@@ -321,29 +292,8 @@ class AuthorUpload(View):
                 agreement_file = request.FILES['agreement_file']
                 agreement_file.name = self._get_agreement_filename(paper_instance, agreement_file.name)
                 paper_instance.agreement_file = agreement_file
-            paper_instance.save()
-        else:
-            paper_instance = paper_form.save(commit=False)
-            paper_instance.workshop = workshop_instance
 
-            if 'uploaded_file' not in request.FILES and 'agreement_file' not in request.FILES and ('uploaded_file_url' in request.session and 'agreement_file_url' in request.session):
-                paper_instance.uploaded_file.name = request.session['uploaded_file_url']
-                paper_instance.agreement_file.name = request.session['agreement_file_url']
-            else:
-                if 'agreement_file' in request.FILES:
-                    agreement_file = request.FILES['agreement_file']
-                    agreement_file.name = self._get_agreement_filename(paper_instance, agreement_file.name)
-                    paper_instance.agreement_file = agreement_file
-
-            paper_instance.save()
-
-        # Check for agreement signature
-        agreement_file_path = os.path.join(settings.MEDIA_ROOT, paper_instance.agreement_file.name)
-        is_signed = self._detect_signature_in_image(agreement_file_path)
-
-        if not is_signed:
-            messages.error(request, 'Agreement file is not signed. Please upload a hand signed agreement file.')
-            return None
+            paper_instance.save()  # Save the new or updated paper instance to the database
 
         return paper_instance
     
@@ -360,9 +310,6 @@ class AuthorUpload(View):
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
 
-        # author_edit_url = reverse('edit_author_post', kwargs={"paper_id":paper_instance.secret_token})
-        # print(author_edit_url)
-
         context = self.get_context(author_instances, paper_instance, 'confirm')
         return render(request, self.success_path, context)
 
@@ -370,8 +317,10 @@ class AuthorUpload(View):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
 
         context = self.get_context(author_formset, paper_form, 'author')
-        return render(request, self.edit_path, context)
+        if not paper_instance:
+            return render(request, self.edit_path, context)
 
+        return render(request, self.edit_path, context)
         
     def get(self, request, secret_token):
         author_formset = AuthorFormSet(queryset=Author.objects.none())

@@ -39,7 +39,6 @@ class Session(models.Model):
         return self.session_title
     
 class Workshop(models.Model):
-
     def workshop_agreement_file_path(instance, filename):
         acronym = instance.workshop_acronym
 
