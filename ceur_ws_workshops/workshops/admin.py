@@ -20,7 +20,7 @@ class WorkshopAdmin(admin.ModelAdmin):
     search_fields = [field.name for field in Workshop._meta.fields]
 
     def get_editors(self, obj):
-        return ", ".join(editor.name for editor in obj.editors.all())
+        return ", ".join(editor.editor_name for editor in obj.editors.all())
     get_editors.short_description = 'Editors'
 
     def get_editor_search_result(self, request, queryset, search_term):

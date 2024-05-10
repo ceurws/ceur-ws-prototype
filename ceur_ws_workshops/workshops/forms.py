@@ -20,7 +20,7 @@ class WorkshopForm(forms.ModelForm):
         fields = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym',
                 'workshop_language_iso', 'workshop_description', 'workshop_country',  'workshop_city', 'year_final_papers', 'workshop_colocated',
                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
-                'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers']
+                'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement']
         
         widgets = {
             'workshop_short_title': TextInput(attrs={'size': 50, 
@@ -30,7 +30,7 @@ class WorkshopForm(forms.ModelForm):
             'workshop_acronym': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the acronym of the workshop'}),
             'workshop_language_iso': TextInput(attrs={'size': 50, 
-                                            'placeholder': '''<br> <br> The main language of the proceedings (eng, deu, fra, spa, rus, ita, por, ...) according to ISO 639-2/T (http://en.wikipedia.org/wiki/List_of_ISO_639-2_codes)'''}),
+                                            'placeholder': 'The main language of the proceedings '}),
             'workshop_description': TextInput(attrs={'size': 50,
                                                      'placeholder': 'Briefly describe the workshop'}),
             'workshop_city': TextInput(attrs={'size': 50, 
@@ -57,34 +57,11 @@ class WorkshopForm(forms.ModelForm):
             'total_reg_acc_papers': TextInput(attrs={'size': 50,
                                             'placeholder': '(optional) Total amount of regular size accepted papers'}),
             'total_short_acc_papers': TextInput(attrs={'size': 50,
-                                            'placeholder': '(optional) Total amount of short size accepted papers'})
+                                            'placeholder': '(optional) Total amount of short size accepted papers'}),
+            'editor_agreement': FileInput(attrs={'accept': '.pdf', 
+                                                 'placeholder': 'Upload the agreement file'}),
                                         
        }
-
-        help_texts = {
-            'workshop_short_title': '<br> <br> This is the shorthand title of the workshop',
-            'workshop_full_title': '<br> <br> This is the long title of the proceedings',
-            'workshop_acronym': '''<br> <br> The acronym of the workshop plus YYYY (year of the workshop)
-                 the acronym may contain '-'; between acronym and year is either a blank
-                 or a '-'. The year is exactly 4 digits, e.g. 2012''',
-            'workshop_language_iso': '''<br> <br> The main language of the proceedings (eng, deu, fra, spa, rus, ita, por, ...) according to ISO 639-2/T (http://en.wikipedia.org/wiki/List_of_ISO_639-2_codes)''',
-            'workshop_description': '''<br> <br> A brief description of the workshop. This will be displayed on the CEUR-WS.org page of the workshop.''',
-            'workshop_city': '''<br> <br> The city where the workshop was held.''',
-            'workshop_country': '''<br> <br> The country where the workshop was held.''',
-            'workshop_begin_date': '''<br> <br> The date when the workshop started.''',
-            'workshop_end_date': '''<br> <br> The date when the workshop ended. If the workshop was a one-day event, the begin and end date are the same.''',
-            'year_final_papers': '''<br> <br> The year in which the final papers of the proceedings were produced''',
-            'workshop_colocated': '''<br> <br> The name of the workshop with which this workshop was colocated''',
-            'volume_owner': '''<br> <br> The full name  of the person who is responsible for the proceedings''',
-            'volume_owner_email': '''<br> <br> The email address of the person who is responsible for the proceedings''',
-            'total_submitted_papers': '''<br> <br> The total amount of papers submitted''',
-            'total_accepted_papers': '''<br> <br> The total amount of accepted papers, from the total amount of papers submitted, including regular and short papers''',
-            'total_reg_acc_papers': '''<br> <br> The total amount of regular-size accepted peer-reviewed papers''',
-            'total_short_acc_papers': '''<br> <br> The total amount of short size accepted papers'''
-            }
-
-        
-
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -141,7 +118,7 @@ EditorFormSet = modelformset_factory(
         'institution_url': TextInput(attrs={'size': 50, 
                                             'placeholder': 'Enter the URL of the institution'}),
         'research_group': TextInput(attrs={'size': 50, 
-                                            'placeholder': '(optional) Enter the research group of the editor'})
+                                            'placeholder': '(optional) Enter the research group of the editor'}),
     }
 )
 
