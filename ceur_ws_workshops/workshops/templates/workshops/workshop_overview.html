@@ -51,7 +51,7 @@
         <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
         <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
         <p><strong>Dates:</strong> From: {{ workshop.workshop_begin_date }}, Until: {{ workshop.workshop_end_date }}</p>
-        <p><strong>Workshop Language:</strong> {{ workshop.workshop_language_iso }}</p>
+        <p><strong>Workshop Language ISO:</strong> {{ workshop.workshop_language_iso }}</p>
         <p><strong>Volume Owner:</strong> {{ workshop.volume_owner }} at {{ workshop.volume_owner_email}}</p>
         <p><strong>Year last accepted paper released:</strong> {{ workshop.year_final_papers }}</p>
         <p><strong>Total submitted papers:</strong> {{ workshop.total_submitted_papers }}</p>
@@ -67,8 +67,10 @@
         </ul>
         <p><strong>Editor agreement:</strong> {{workshop.editor_agreement}}</p>
     </fieldset>
+    
+    {% if session_title_list %}
+    {% regroup papers by session as papers_by_session %}
 
-    <!-- {% regroup papers by session as papers_by_session %}
     <fieldset>
         <legend>Papers</Legend>
         {% for session_title in session_title_list %}
@@ -94,52 +96,29 @@
                 </ul>
             </fieldset>
         {% endfor %}
-    </fieldset> -->
-    
-    {% if session_title_list %}
-    {% for session_title in session_title_list %}
-    <fieldset class="session-details">
-        <legend>{{ session_title }}</legend>
-        <ul>
-            {% for paper in papers %}
-            {% if paper.session.session_title == session_title %}
-            <li>
-                <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
-                <p><strong>Authors:</strong>
-                    {% for author in paper.authors.all %}
-                        {{ author.author_name }}
-                        {% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </p>
-                <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-                <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
-            </li>
-            {% endif %}
-            {% endfor %}
-        </ul>
     </fieldset>
-    {% endfor %}
-{% else %}
-    <fieldset class="papers-list">
-        <legend>Papers without Session</legend>
-        <ul>
+    {% else %}
+        <legend>Papers</Legend>
+            <fieldset class="papers-list">
+            <ul>
             {% for paper in papers %}
-            <li>
-                <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
-                <p><strong>Authors:</strong>
-                    {% for author in paper.authors.all %}
-                    {{ author.author_name }}({{ author.author_email }}){% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </p>
-                <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-                <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
-            </li>
+                    <li>
+                    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+                    <p><strong>Authors:</strong>
+                        {% for author in paper.authors.all %}
+                            {{ author.author_name }}
+                            {% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p><strong>Pages:</strong> {{ paper.pages }}</p>
+                    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+                    <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
+                </li>
             {% endfor %}
-        </ul>
-    </fieldset>
-{% endif %}
+            </ul>
+            </fieldset>
+    {% endif %}
+
 
     <br>
     <form method="post" id="form-container" enctype="multipart/form-data">
