@@ -9,7 +9,7 @@ from django.db.models import Q
 
 class Editor(models.Model):
     editor_name = models.CharField(max_length=100)
-    editor_url = models.URLField(max_length=200, blank = True)
+    editor_url = models.URLField(max_length=200,null=True, blank=True)
     institution = models.CharField(max_length=200)
     editor_country_choices = [('', 'Select a country')] + list(CountryField().choices)
     institution_country = models.CharField(max_length=200, choices=editor_country_choices)
@@ -62,8 +62,8 @@ class Workshop(models.Model):
     workshop_end_date = models.DateField(default=date.today)
     volume_owner = models.CharField(max_length=200)
     volume_owner_email = models.EmailField(max_length=200)
-    workshop_language_iso = models.CharField(max_length=50)
-    workshop_colocated = models.CharField(max_length=200)
+    workshop_language_iso = models.CharField(max_length=5)
+    workshop_colocated = models.CharField(max_length=200,null=True, blank=True)
     year_final_papers = models.CharField(max_length=4)
     total_submitted_papers = models.IntegerField()
     total_accepted_papers = models.IntegerField()
@@ -73,8 +73,8 @@ class Workshop(models.Model):
     # Filled in by CEUR
     volume_number = models.IntegerField(null=True, blank=True)
     submission_date = models.DateField(null=True, blank=True) # date the submit button is clicked by volume owner
-    license = models.CharField(max_length=50)
-    urn = models.CharField(max_length=50)
+    license = models.CharField(max_length=50,null=True, blank=True)
+    urn = models.CharField(max_length=50,null=True, blank=True)
 
     editor_agreement = models.FileField(upload_to=workshop_agreement_file_path)
 
@@ -87,7 +87,27 @@ class Workshop(models.Model):
     
     def __str__(self):
         return self.workshop_full_title
-    
+
+def paper_upload_path(instance, filename):
+    """
+    Generate a custom upload path for papers.
+    Assumes instance has a direct foreign key to Workshop.
+    Format: "papers/Vol-{workshop_volume}/{filename}"
+    """
+    workshop_volume = instance.workshop.id
+    return f"papers/Vol-{workshop_volume}/{filename}"
+
+def agreement_file_path(instance, filename):
+    agreement_file = instance.workshop.id
+    return f"agreement/Vol-{agreement_file}/{filename}"
+
+class Language(models.Model):
+    iso_639_2 = models.CharField(max_length=3, primary_key=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class Paper(models.Model):
 
     def paper_upload_path(instance, filename):

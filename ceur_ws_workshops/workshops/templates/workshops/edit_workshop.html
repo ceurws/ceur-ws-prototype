@@ -9,14 +9,55 @@
     </fieldset>
     <hr>
     <fieldset>
-      {{ session_form.as_p}}
+      {{ session_form.management_form}}
+      <div class="session-form" id="session-form">
+        {% for form in session_form%}
+          {{ form.as_p }}
+          {% endfor %}
+        </div>
+   <input type="button" value="Add Session" class="button-13" id="add_session">
   </fieldset>
     <hr>
     <fieldset>
-      {{ editor_form.as_p}}
+      {{ editor_form.management_form}}
+      <div class="editor-form" id="editor-form">
+        {% for form in editor_form%}
+          {{ form.as_p }}
+          {% endfor %}
+        </div>
+   <input type="button" value="Add Editor" class="button-13" id="add_editor">
   </fieldset>
 
   <br>
     <input type="submit" name="submit_button" class = "button-13" value="Confirm">
   </form>
+
+{% comment %} logic for session button {% endcomment %}
+<div id="empty_session_form" style="display:none">
+  <table class='no_error'>
+      {{ session_form.empty_form.as_p }}
+      <br>
+
+  </table>
+</div>
+<div id="empty_editor_form" style="display:none">
+  <table class='no_error'>
+      {{ editor_form.empty_form.as_p }}
+      <br>
+
+  </table>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $('#add_editor').click(function() {
+    var form_idx = $('#id_editor-TOTAL_FORMS').val();
+    $('#editor-form').append($('#empty_editor_form').html().replace(/__prefix__/g, form_idx));
+    $('#id_editor-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
+
+  $('#add_session').click(function() {
+    var form_idx = $('#id_session-TOTAL_FORMS').val();
+    $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
+    $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
+</script>
+
 {% endblock %}
