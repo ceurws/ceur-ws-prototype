@@ -2,7 +2,6 @@
 {% load static %}
 {% block content %}
 
-
 <form method="post" id="form-container" enctype="multipart/form-data">
   <h1 class="header-title">Create Workshop Volume</h1>
   <fieldset>
@@ -10,7 +9,6 @@
     <i> Please provide details about the workshop in the following section. Optional fields can be left blank if not applicable. </i>
     {% csrf_token %}
     {{ form.as_p }}
-    
   </fieldset>
   <hr>    
   <fieldset id="session_fieldset">

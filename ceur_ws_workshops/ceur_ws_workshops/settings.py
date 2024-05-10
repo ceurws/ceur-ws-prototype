@@ -72,6 +72,7 @@ TEMPLATES = [
         },
     },
 ]
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 WSGI_APPLICATION = "ceur_ws_workshops.wsgi.application"
 
