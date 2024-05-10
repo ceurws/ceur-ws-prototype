@@ -4,6 +4,7 @@
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
     <fieldset>
+      <legend>Workshop Details</legend>
     {{ form.as_p }}
     </fieldset>
     <hr>

@@ -8,21 +8,23 @@ from django.templatetags.static import static
 import os
 import json
 
+
 class DateInput(forms.DateInput):
     input_type = "date"
     def __init__(self, **kwargs):
         kwargs["format"] = "%Y-%m-%d"
         super().__init__(**kwargs)
 
+
 class WorkshopForm(forms.ModelForm):
     workshop_language_iso = forms.ChoiceField(label="Language", choices=[], required=False)
 
     class Meta:
         model = Workshop
-        fields = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym', 'workshop_language_iso', 
-                  'workshop_description', 'workshop_city', 'workshop_country', 'year_final_papers', 'workshop_colocated',
-                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
-                  'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers']
+        fields = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym',
+                'workshop_language_iso', 'workshop_description', 'workshop_country',  'workshop_city', 'year_final_papers', 'workshop_colocated',
+                'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
+                'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement']
         
         help_texts = {'workshop_language_iso': '    <br/>Please select the ISO code from the following link: https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes'}
         
@@ -63,6 +65,8 @@ class WorkshopForm(forms.ModelForm):
                                             'placeholder': '(optional) Provide the total number of regular length papers submitted'}),
             'total_short_acc_papers': TextInput(attrs={'size': 70,
                                             'placeholder': '(optional) Provide the total number of short length papers submitted'})
+            'editor_agreement': FileInput(attrs={'accept': '.pdf', 
+                                                 'placeholder': 'Upload the agreement file'}),
                                         
        }
         
@@ -79,7 +83,6 @@ class WorkshopForm(forms.ModelForm):
         # Populate dropdown choices from JSON data
         choices = [(data['639-2'], data['name']) for code, data in languages.items()]
         self.fields['workshop_language_iso'].choices = choices
-
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -107,10 +110,8 @@ class PaperForm(forms.ModelForm):
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
         }
 
-
-
 AuthorFormSet = modelformset_factory(
-        Author, fields=('author_name', 'author_university', 'author_uni_url'), extra=1,
+        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=1,
         # CSS styling but for formsets
         widgets = {
             'author_name': TextInput(attrs={'size': 70, 
@@ -119,6 +120,8 @@ AuthorFormSet = modelformset_factory(
                                             'placeholder': 'Enter the university of the author'}),
             'author_uni_url': TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the URL of the university'}),
+            'author_email': TextInput(attrs={'size': 50,
+                                            'placeholder': 'Enter the email of the author'})
         })
 
 EditorFormSet = modelformset_factory(
