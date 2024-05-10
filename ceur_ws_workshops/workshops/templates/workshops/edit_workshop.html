@@ -5,6 +5,21 @@
     {% csrf_token %}
     <fieldset>
       <legend>Workshop Details</legend>
+      <style>
+        .errorlist {
+          color: #721c24;
+          background-color: #f8d7da;
+          border-color: #f5c6cb;
+          position: relative;
+          padding: .75rem 1.25rem;
+          margin-bottom: 1rem;
+          border: 1px solid transparent;
+          border-radius: .25rem;
+          text-align: center;
+          font-weight: bold;
+        }
+    </style>
+      <!-- {{ form.non_field_errors }}  -->
     {{ form.as_p }}
     </fieldset>
     <hr>
@@ -58,6 +73,13 @@
     var form_idx = $('#id_session-TOTAL_FORMS').val();
     $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
     $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
+
+  // document.addEventListener('DOMContentLoaded', function () {
+  //   let messages = Array.from(document.querySelectorAll('#django-messages [data-message]')).map(el => el.getAttribute('data-message'));
+  //   if (messages.length > 0) {
+  //     alert(messages.join("\n"));
+  //   }
+  // });
 </script>
 
 {% endblock %}

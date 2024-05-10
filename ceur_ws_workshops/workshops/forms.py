@@ -1,13 +1,16 @@
 
 from .models import Workshop, Editor, Paper, Author, Session
 from django import forms
-from django.forms import modelformset_factory
-from django.forms import TextInput, FileInput, NumberInput
+from django.forms import modelformset_factory, TextInput, FileInput, NumberInput
 from django_countries.widgets import CountrySelectWidget
 from django.templatetags.static import static
-import os
-import json
-
+import os, json
+from django.core.exceptions import ValidationError
+from signature_detect.loader import Loader
+from signature_detect.extractor import Extractor
+from signature_detect.cropper import Cropper
+from signature_detect.judger import Judger
+from django.conf import settings
 
 class DateInput(forms.DateInput):
     input_type = "date"
@@ -26,8 +29,12 @@ class WorkshopForm(forms.ModelForm):
                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
                 'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement']
         
-        help_texts = {'workshop_language_iso': '    <br/>Please select the ISO code from the following link: https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes'}
-        
+        help_texts = {'workshop_acronym': '''    <br/><br/>Please provide the acronym of the workshop.  
+                    the acronym of the workshop plus YYYY (year of the workshop)
+                    the acronym may contain '-'; between acronym and year is either a blank
+                    or a '-'. The year is exactly 4 digits, e.g. 2012''',
+                    'workshop_colocated': '''<br> <br> The name of the workshop with which this workshop was colocated. Usually, this is the name of the main conference. If the workshop was not colocated, leave this field empty.'''
+    }
         widgets = {
             'workshop_short_title': TextInput(attrs={'size': 70, 
                                             'placeholder': 'Provide the shorthand title of the workshop'}),
@@ -64,10 +71,10 @@ class WorkshopForm(forms.ModelForm):
             'total_reg_acc_papers': TextInput(attrs={'size': 70,
                                             'placeholder': '(optional) Provide the total number of regular length papers submitted'}),
             'total_short_acc_papers': TextInput(attrs={'size': 70,
-                                            'placeholder': '(optional) Provide the total number of short length papers submitted'})
+                                            'placeholder': '(optional) Provide the total number of short length papers submitted'}),
             'editor_agreement': FileInput(attrs={'accept': '.pdf', 
                                                  'placeholder': 'Upload the agreement file'}),
-                                        
+                                
        }
         
     def __init__(self, *args, **kwargs):
@@ -84,10 +91,26 @@ class WorkshopForm(forms.ModelForm):
         choices = [(data['639-2'], data['name']) for code, data in languages.items()]
         self.fields['workshop_language_iso'].choices = choices
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        total_submitted_papers = cleaned_data.get('total_submitted_papers')
+        total_accepted_papers = cleaned_data.get('total_accepted_papers')
+        total_reg_acc_papers = cleaned_data.get('total_reg_acc_papers', 0)  
+        total_short_acc_papers = cleaned_data.get('total_short_acc_papers', 0)  
+
+        if total_accepted_papers > total_submitted_papers:
+            raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
+
+        if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
+            raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
+
+        return cleaned_data
+
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
+        self.workshop = kwargs.pop('workshop', None)  # Capture the workshop instance from kwargs
         file_uploaded = kwargs.pop('file_uploaded', False)
-        workshop = kwargs.pop('workshop', None)
         super(PaperForm, self).__init__(*args, **kwargs)
 
         if file_uploaded:
@@ -96,8 +119,41 @@ class PaperForm(forms.ModelForm):
             self.fields['uploaded_file'].label = 'Upload file'
 
         # Dynamically set queryset for session field based on the workshop
-        if workshop:
-            self.fields['session'].queryset = workshop.sessions.all()
+        if self.workshop:  # Now using self.workshop which is the instance attribute
+            self.fields['session'].queryset = self.workshop.sessions.all()
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     agreement_file = cleaned_data.get('agreement_file')
+
+    #     if agreement_file and self.workshop:
+    #         # Ensure the directory includes the workshop id
+    #         directory_path = os.path.join('agreement', f'VOL-{self.workshop.id}')
+    #         agreement_file_path = os.path.join(settings.MEDIA_ROOT, directory_path, agreement_file.name)
+            
+    #         if not self._detect_signature_in_image(agreement_file_path):
+    #             raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
+
+    #     return cleaned_data
+
+    # def _detect_signature_in_image(self, file_path):
+    #     loader = Loader()
+    #     extractor = Extractor()
+    #     cropper = Cropper(border_ratio=0)
+    #     judger = Judger()
+
+    #     masks = loader.get_masks(file_path)
+    #     is_signed = False
+    #     for mask in masks:
+    #         labeled_mask = extractor.extract(mask)
+    #         results = cropper.run(labeled_mask)
+    #         for result in results.values():
+    #             is_signed = judger.judge(result["cropped_mask"])
+    #             if is_signed:
+    #                 break
+    #         if is_signed:
+    #             break
+    #     return is_signed
 
     class Meta:
         model = Paper
