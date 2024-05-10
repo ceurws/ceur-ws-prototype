@@ -1,8 +1,7 @@
 from typing import Any
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Workshop, Paper, Editor, Author, Session
 import uuid
-from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views import View
 from django.core import serializers
@@ -56,7 +55,7 @@ class CreateWorkshop(View):
                     'author_url': author_url
                 })
             else:
-                return HttpResponse('Data entered not valid')
+                return HttpResponse('Data entered not valid, please go back.')
 
         # handles logic to showcase the data so that the user can confirm it
         else:
@@ -152,7 +151,6 @@ class AuthorUpload(View):
             return {'workshop': self.get_workshop(), 'paper': paper_form, 'authors': author_formset}
         return {'workshop': self.get_workshop(), 'author_formset': author_formset, 'paper_form': paper_form}
     
-    
     def _create_or_update_paper_instance(self, request, paper_form):
         if not paper_form.is_valid():
         # Handle the case where the form is not valid; return or raise an exception
@@ -187,6 +185,7 @@ class AuthorUpload(View):
             paper_instance.save()
 
         return paper_instance
+    
     def submit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
         
@@ -195,10 +194,12 @@ class AuthorUpload(View):
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
 
+        # author_edit_url = reverse('edit_author_post', kwargs={"paper_id":paper_instance.secret_token})
+        # print(author_edit_url)
+
         context = self.get_context(author_instances, paper_instance, 'confirm')
         return render(request, self.success_path, context)
 
-        
     def edit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
 
@@ -219,4 +220,7 @@ class AuthorUpload(View):
         else:
             return self.edit_author(request, author_formset, paper_form)
         
-    
+def edit_author_post_view(request, paper_id):
+    context = {}
+
+    return render(request, 'workshops/author_upload_success.html', context)

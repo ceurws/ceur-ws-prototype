@@ -31,22 +31,14 @@
     <input type="submit" name="submit_button" class = "button-13" value="Confirm">
   </form>
 
-  {% comment %} logic for session button {% endcomment %}
-  <div id="empty_session_form" style="display:none">
-    <table class='no_error'>
-        {{ session_form.empty_form.as_p }}
-        <br>
+{% comment %} logic for session button {% endcomment %}
+<div id="empty_session_form" style="display:none">
+  <table class='no_error'>
+      {{ session_form.empty_form.as_p }}
+      <br>
 
-    </table>
+  </table>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $('#add_session').click(function() {
-      var form_idx = $('#id_session-TOTAL_FORMS').val();
-      $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
-      $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
-</script>
-
 <div id="empty_editor_form" style="display:none">
   <table class='no_error'>
       {{ editor_form.empty_form.as_p }}
@@ -54,11 +46,17 @@
 
   </table>
 </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   $('#add_editor').click(function() {
     var form_idx = $('#id_editor-TOTAL_FORMS').val();
     $('#editor-form').append($('#empty_editor_form').html().replace(/__prefix__/g, form_idx));
     $('#id_editor-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
+
+  $('#add_session').click(function() {
+    var form_idx = $('#id_session-TOTAL_FORMS').val();
+    $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
+    $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
 </script>
 
 {% endblock %}
