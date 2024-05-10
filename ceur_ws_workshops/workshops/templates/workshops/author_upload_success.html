@@ -70,33 +70,6 @@
     });
   </script>
   {% endif %}
-  <fieldset>
-    <legend>Manage Your Submission:</legend>
-    <p>
-        <div class="tooltip">
-            <a id="edit_paper_url" href="{{ edit_paper_url }}" target="_blank">Edit Your Submission</a>
-            <button class="copy_clipboard" onclick="CopyText('edit_paper_url', 'tooltip_edit')" onmouseout="outFunc('tooltip_edit')">
-                <span class="tooltiptext" id="tooltip_edit">Copy to clipboard</span>
-                <img src="{% static 'workshops/icons8-copy-24.png' %}" alt="Copy to clipboard" width="20" height="20">
-            </button>
-        </div>
-    </p>
-</fieldset>
-...
-<script>
-    function CopyText(elementId, tooltipId) {
-        var url = document.getElementById(elementId).href;  
-        navigator.clipboard.writeText(url).then(() => {
-            var tooltip = document.getElementById(tooltipId);
-            tooltip.innerHTML = "Copied to clipboard!";
-        });
-    }
-
-    function outFunc(tooltipId) {
-        var tooltip = document.getElementById(tooltipId);
-        tooltip.innerHTML = "Copy to clipboard";
-    }
-</script>
 </body>
 
 </html>

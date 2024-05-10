@@ -320,7 +320,6 @@ class AuthorUpload(View):
                 agreement_file = request.FILES['agreement_file']
                 agreement_file.name = self._get_agreement_filename(paper_instance, agreement_file.name)
                 paper_instance.agreement_file = agreement_file
-
             paper_instance.save()
         else:
             paper_instance = paper_form.save(commit=False)
@@ -347,8 +346,6 @@ class AuthorUpload(View):
 
         return paper_instance
     
-     
-        
     def edit_author(self, request, author_formset, paper_form):
         paper_instance = self._create_or_update_paper_instance(request, paper_form)
 
@@ -370,8 +367,6 @@ class AuthorUpload(View):
             author_instances = author_formset.save()
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
-
-        edit_paper_url = reverse('workshops:author_upload', args=[paper_instance.secret_token])
 
         context = self.get_context(author_instances, paper_instance, 'confirm', edit_paper_url)
         return render(request, self.success_path, context)
