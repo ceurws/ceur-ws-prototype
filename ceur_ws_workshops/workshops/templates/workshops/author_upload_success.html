@@ -3,68 +3,74 @@
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paper Submitted Correctly</title>
-    <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
-    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paper Submitted Correctly</title>
+  <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
 </head>
+
 <body>
 
-    <h1>Paper Submitted Correctly</h1>
-    <p><p>Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_full_title }}</strong>.</p>
-    <fieldset class="paper-details">
-        <legend>Paper Details</legend>
-        <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
-        <p><strong>Pages:</strong> {{ paper.pages }}</p>
-        <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-        <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
-        <p><strong>Session:</strong> {{paper.session}}</p>
+  <h1>Paper Submitted Correctly</h1>
+  <p>
+  <p>Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_full_title }}</strong>.
+  </p>
+  <fieldset class="paper-details">
+    <legend>Paper Details</legend>
+    <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+    <p><strong>Pages:</strong> {{ paper.pages }}</p>
+    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
+      {{paper.uploaded_file.name}}</a></p>
+    <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">
+      {{paper.agreement_file.name }}</a></p>
+    <p><strong>Session:</strong> {{paper.session}}</p>
 
-    </fieldset>
-    <br>
-    <fieldset>
-        <legend>Paper Author Details:</legend>
-            <p>
-            <ul>
-                {% for author in paper.authors.all %}
-                    <li><strong>Name:</strong>  {{ author.author_name }}</li>
-                    <li><strong>University:</strong>{{ author.author_university }}</li>
-                    <li><strong>University URL:</strong>{{ author.author_uni_url }}</li>
-                    <hr>
-                {% endfor %}
-            </ul>
-        </p>
-    </fieldset>
+  </fieldset>
+  <br>
+  <fieldset>
+    <legend>Paper Author Details:</legend>
+    <p>
+    <ul>
+      {% for author in paper.authors.all %}
+      <li><strong>Name:</strong> {{ author.author_name }}</li>
+      <li><strong>University:</strong>{{ author.author_university }}</li>
+      <li><strong>University URL:</strong>{{ author.author_uni_url }}</li>
+      <li><strong>Email:</strong>{{ author.author_email }}</li>
+      <hr>
+      {% endfor %}
+    </ul>
+    </p>
+  </fieldset>
 
-    <!-- You can provide additional content or links here as needed. -->
-    {% if messages %}
-<div id="messageModal" class="modal" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Notice</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        {% for message in messages %}
+  {% if messages %}
+  <div id="messageModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Notice</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          {% for message in messages %}
           <p>{{ message }}</p>
-        {% endfor %}
+          {% endfor %}
+        </div>
       </div>
     </div>
   </div>
-</div>
-<script>
-  $(document).ready(function(){
-    $("#messageModal").modal('show');
-  });
-</script>
-{% endif %}
-    <i> If you would like to make further changes to this submission please contact {{workshop.submitted_by}} at {{workshop.email_address}}. </i>
+  <script>
+    $(document).ready(function () {
+      $("#messageModal").modal('show');
+    });
+  </script>
+  {% endif %}
 </body>
+
 </html>
 {% endblock %}
