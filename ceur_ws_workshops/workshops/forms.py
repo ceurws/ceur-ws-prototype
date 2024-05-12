@@ -109,19 +109,28 @@ class WorkshopForm(forms.ModelForm):
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        self.workshop = kwargs.pop('workshop', None)  # Capture the workshop instance from kwargs
         file_uploaded = kwargs.pop('file_uploaded', False)
+        self.workshop = kwargs.pop('workshop', None) 
         super(PaperForm, self).__init__(*args, **kwargs)
-
+    
         if file_uploaded:
             self.fields['uploaded_file'].label = 'Change current file'
         else:
             self.fields['uploaded_file'].label = 'Upload file'
 
-        # Dynamically set queryset for session field based on the workshop
-        if self.workshop:  # Now using self.workshop which is the instance attribute
+        if self.workshop: 
             self.fields['session'].queryset = self.workshop.sessions.all()
 
+    class Meta:
+        model = Paper
+        fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file']
+
+        widgets = {
+            'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper'}),
+            'pages': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the number of pages'}),
+            'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
+            'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
+        }
     # def clean(self):
     #     cleaned_data = super().clean()
     #     agreement_file = cleaned_data.get('agreement_file')
@@ -155,16 +164,7 @@ class PaperForm(forms.ModelForm):
     #             break
     #     return is_signed
 
-    class Meta:
-        model = Paper
-        fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file']
-
-        widgets = {
-            'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper'}),
-            'pages': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the number of pages'}),
-            'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
-        }
+   
 
 AuthorFormSet = modelformset_factory(
         Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=1,
