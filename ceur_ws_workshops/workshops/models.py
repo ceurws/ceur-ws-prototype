@@ -4,8 +4,6 @@ from django.utils import timezone
 from django.contrib import admin
 from datetime import date
 from django_countries.fields import CountryField
-from django.utils.text import slugify
-from django.db.models import Q
 
 class Editor(models.Model):
     editor_name = models.CharField(max_length=100)
