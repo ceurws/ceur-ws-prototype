@@ -1,5 +1,4 @@
-from typing import Any
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Workshop, Paper, Editor, Author, Session
 from django.conf import settings
 from django.urls import reverse
@@ -15,7 +14,6 @@ from signature_detect.extractor import Extractor
 from signature_detect.cropper import Cropper
 from signature_detect.judger import Judger
 from django.conf import settings
-from django.core.exceptions import ValidationError
 
 def index(request):
     """
@@ -317,7 +315,8 @@ class AuthorUpload(View):
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
 
-            return render(request, self.success_path, self.get_context(author_instances, paper_instance, 'confirm'))
+            return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, secret_token = self.kwargs['secret_token'])
+            # return render(request, self.success_path, self.get_context(author_instances, paper_instance, 'confirm'))
         else:
             print("Paperform not valid")
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
@@ -372,7 +371,15 @@ class AuthorUpload(View):
             print("Creating paper")
             return self.create_paper(request, author_formset, paper_form)
         
-def edit_author_post_view(request, paper_id):
-    context = {}
+def edit_author_post_view(request, paper_id, secret_token):
+    workshop = get_object_or_404(Workshop, secret_token=secret_token)
+    paper = get_object_or_404(Paper, secret_token=paper_id)
 
-    return render(request, 'workshops/author_upload_success.html', context)
+    context = {
+        'workshop' : workshop,
+        'paper' : paper
+    }
+    if request.method == "POST":
+        return render(request, 'workshops/author_upload_success.html', context)
+    else:
+        return render(request, 'workshops/author_upload_success.html', context)
