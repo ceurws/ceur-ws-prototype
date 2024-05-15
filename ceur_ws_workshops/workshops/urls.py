@@ -10,5 +10,5 @@ urlpatterns = [
     path('create_workshop/', CreateWorkshop.as_view(), name='create_workshop'),
     path('author_upload/<uuid:secret_token>/', AuthorUpload.as_view(), name='author_upload'),
     path('workshop_overview/<uuid:secret_token>/', WorkshopOverview.as_view(), name='workshop_overview'),
-    # path('author_upload/<paper_id:paper_id>/', views.edit_author_post_view, name='edit_author_post')
+    path('author_upload/<uuid:paper_id>/<uuid:secret_token>/', views.edit_author_post_view, name='edit_author_post')
 ]
