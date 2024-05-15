@@ -11,6 +11,8 @@ from signature_detect.extractor import Extractor
 from signature_detect.cropper import Cropper
 from signature_detect.judger import Judger
 from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 class DateInput(forms.DateInput):
     input_type = "date"
@@ -131,40 +133,46 @@ class PaperForm(forms.ModelForm):
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
         }
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     agreement_file = cleaned_data.get('agreement_file')
+    def clean(self):
+        cleaned_data = super().clean()
+        agreement_file = cleaned_data.get('agreement_file')
+        uploaded_file = cleaned_data.get('uploaded_file')
+        
+        if uploaded_file and agreement_file and self.workshop:
+            directory_path = os.path.join('agreement', f'VOL-{self.workshop.id}')
 
-    #     if agreement_file and self.workshop:
-    #         # Ensure the directory includes the workshop id
-    #         directory_path = os.path.join('agreement', f'VOL-{self.workshop.id}')
-    #         agreement_file_path = os.path.join(settings.MEDIA_ROOT, directory_path, agreement_file.name)
+            # agreement_file_name = os.path.join(directory_path, agreement_file.name)
+            agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
+            default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
+
+            self.instance.agreement_file = agreement_file.name
             
-    #         if not self._detect_signature_in_image(agreement_file_path):
-    #             raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
+            if not self._detect_signature_in_image(agreement_file_path):
+                raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
+    
+        else: 
+            raise ValidationError("Paper and/or agreement not saved.")
+        
+        return cleaned_data
 
-    #     return cleaned_data
+    def _detect_signature_in_image(self, file_path):
+        loader = Loader()
+        extractor = Extractor()
+        cropper = Cropper(border_ratio=0)
+        judger = Judger()
 
-    # def _detect_signature_in_image(self, file_path):
-    #     loader = Loader()
-    #     extractor = Extractor()
-    #     cropper = Cropper(border_ratio=0)
-    #     judger = Judger()
-
-    #     masks = loader.get_masks(file_path)
-    #     is_signed = False
-    #     for mask in masks:
-    #         labeled_mask = extractor.extract(mask)
-    #         results = cropper.run(labeled_mask)
-    #         for result in results.values():
-    #             is_signed = judger.judge(result["cropped_mask"])
-    #             if is_signed:
-    #                 break
-    #         if is_signed:
-    #             break
-    #     return is_signed
-
-   
+        masks = loader.get_masks(file_path)
+        is_signed = False
+        for mask in masks:
+            labeled_mask = extractor.extract(mask)
+            results = cropper.run(labeled_mask)
+            for result in results.values():
+                is_signed = judger.judge(result["cropped_mask"])
+                if is_signed:
+                    break
+            if is_signed:
+                break
+        return is_signed
 
 AuthorFormSet = modelformset_factory(
         Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=1,
