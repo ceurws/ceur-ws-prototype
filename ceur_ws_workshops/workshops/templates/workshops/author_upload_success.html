@@ -12,7 +12,28 @@
   <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
   <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous"> -->
 </head>
+{% if edit_mode %}
+<fieldset>
+  <legend>Paper Details</legend>
+  {{paper_form.as_p}}
+  <p>Uploaded File: <a href="{{ paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a></p>
+  <p>Agreement File: <a href="{{ paper_form.instance.agreement_file.url }}">{{ paper_form.instance.agreement_file.name }}</a></p>
+</fieldset>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $('#add_session').click(function() {
+    var form_idx = $('#id_session-TOTAL_FORMS').val();
+    $('#session-form').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+    $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+});
+</script>
+<fieldset>
+  <legend>Author Details</legend>
+  {{author_formset.as_p}}
+</fieldset>
 
+<input type="submit" name="submit_button" class="button-13" value="Confirm">
+{% else %}
 <body>
 
   <h1>Paper Submitted Correctly</h1>
@@ -23,10 +44,10 @@
     <legend>Paper Details</legend>
     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
     <p><strong>Pages:</strong> {{ paper.pages }}</p>
-    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
+     <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
       {{paper.uploaded_file.name}}</a></p>
     <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">
-      {{paper.agreement_file.name }}</a></p>
+      {{paper.agreement_file.name }}</a></p> 
     <p><strong>Session:</strong> {{paper.session}}</p>
 
   </fieldset>
@@ -45,6 +66,25 @@
     </ul>
     </p>
   </fieldset>
+
+  <p>
+    <div class="tooltip">
+      <i> If you wish to make further changes at a later stage please save this url:</i>
+      <br>
+    <a id = "author_url" href="{{ request.build_absolute_uri }}" target="_blank">Author edit URL</a>
+    <button class = "copy_clipboard" onclick="CopyText('organizer_url', 'myTooltip')" onmouseout="outFunc('myTooltip')">
+        <span class="tooltiptext" id="myTooltip">Copy to clipboard</span>
+    <!-- Copy to clipboard</button> -->
+    <img src="{% static 'workshops/icons8-copy-24.png' %}" alt="Copy to clipboard" width="20" height="20">
+    </div>
+    <br><br>
+
+</p>
+
+<form method="post" id="form-container" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input type="submit" name="edit_button" class = "button-13" value="Edit">
+</form>
 
   {% if messages %}
   <div id="messageModal" class="modal" tabindex="-1" role="dialog">
@@ -71,6 +111,7 @@
   </script>
   {% endif %}
 </body>
+{% endif %}
 
 </html>
 {% endblock %}

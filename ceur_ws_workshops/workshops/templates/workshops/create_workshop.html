@@ -4,109 +4,103 @@
 
 <form method="post" id="form-container" enctype="multipart/form-data">
   <h1 class="header-title">Create Workshop Volume</h1>
+  {% csrf_token %}
+
   <fieldset>
     <legend>Workshop Details</legend>
-    <i> Please provide details about the workshop in the following section. Optional fields can be left blank if not applicable. </i>
-    {% csrf_token %}
+    <i> Please provide details about the workshop in the following section. Optional fields can be left blank if not
+      applicable. </i>
     {{ form.as_p }}
   </fieldset>
-  <hr>    
+
+  <hr>
+
   <fieldset id="session_fieldset">
     <legend>Session</legend>
-    <i> If the workshop has different sessions, please provide the titles of these sessions in this section. If no splits exist, please leave blank.</i>
+    <i> If the workshop has different sessions, please provide the titles of these sessions in this section. If no
+      splits exist, please leave blank.</i>
+    <br>
+    <br>
+    {{ session_form.management_form }}
+    <div class="session-form" id="session-form">
+      {% for form in session_form %}
+      {{ form.as_p }}
       <br>
-      <br>
-      {{ session_form.management_form}}
-      <div class="session-form" id="session-form">
-        {% for form in session_form%}
-          {{ form }}
-          <br>
-          {% endfor %}
-        </div>
-  <input type="button" value="Add Session" class="button-13" id="add_session">
-  <div id="empty_form" style="display:none">
-    <table class='no_error'>
-        {{ session_form.empty_form }}
-        <br>
+      {% endfor %}
+    </div>
+    <input type="button" value="Add Session" class="button-13" id="add_session">
+  </fieldset>
 
-    </table>
-</div>
-
-</fieldset>
   <fieldset id="editor-fieldset">
     <legend>Editors</legend>
-    <i> Please provide details on the editors in this section. Also provide your own details if you are also an editor. </i>
+    <i> Please provide details on the editors in this section. Also provide your own details if you are also an editor.
+    </i>
+    <br>
+    <br>
     {{ editor_form.management_form }}
-    <div id="form-set">
-      {% for form in editor_form %}
-      <div class="editor-form">
-        {{ form.as_p }}
-        <hr>
-      </div>
+    <div class="editor-form" id="editor-form">
+      {% for editor in editor_form %}
+      {{ editor.as_p }}
+      <br>
       {% endfor %}
-      
     </div>
-    <button id="add-form" class="button-13">Add Editor</button>
+    <input type="button" value="Add Editor" class="button-13" id="add_editor">
   </fieldset>
   <br>
   <input type="submit" class="button-13" value="Save Workshop">
 </form>
 
+
+<div id="empty_editor_form" style="display:none">
+  <table class='no_error'>
+    {{ editor_form.empty_form }}
+    <br>
+  </table>
+</div>
+<div id="empty_session_form" style="display:none">
+  <table class='no_error'>
+    {{ session_form.empty_form }}
+    <br>
+  </table>
+</div>
+
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  $('#add_session').click(function() {
+  $('#add_session').click(function () {
     var form_idx = $('#id_session-TOTAL_FORMS').val();
-    $('#session-form').append($('#empty_form').html().replace(/__prefix__/g, form_idx));
+    $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
     $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);
-});
+  });
 
-  document.addEventListener('DOMContentLoaded', function() {
-    let addButton = document.querySelector("#add-form");
-    let formSet = document.querySelector("#editor-fieldset");
-    let totalForms = document.querySelector("#id_editor-TOTAL_FORMS"); // Update the ID selector
-    let startDateInput = document.querySelector('#id_workshop_begin_date');
-    let endDateInput = document.querySelector('#id_workshop_end_date');
+  $('#add_editor').click(function () {
+    var form_idx = $('#id_editor-TOTAL_FORMS').val();
+    $('#editor-form').append($('#empty_editor_form').html().replace(/__prefix__/g, form_idx));
+    $('#id_editor-TOTAL_FORMS').val(parseInt(form_idx) + 1);
+  });
 
-    function addForm(e) {
-        e.preventDefault();
-
-        let formNum = formSet.querySelectorAll(".editor-form").length - 1;
-        let newForm = formSet.querySelector(".editor-form").cloneNode(true);
-        let formRegex = RegExp(`editor-(\\d+)-`, 'g'); // Update the prefix
-
-        formNum++;
-
-        newForm.innerHTML = newForm.innerHTML.replace(formRegex, `editor-${formNum}-`); // Update the prefix
-        formSet.insertBefore(newForm, addButton);
-
-        totalForms.value = formNum + 1;
+  function updateEndDateMin() {
+    endDateInput.setAttribute('min', startDateInput.value);
+    if (endDateInput.value && startDateInput.value > endDateInput.value) {
+      endDateInput.value = startDateInput.value;
     }
+  }
 
-    addButton.addEventListener('click', addForm);
-
-    function updateEndDateMin() {
-        endDateInput.setAttribute('min', startDateInput.value);
-        if (endDateInput.value && startDateInput.value > endDateInput.value) {
-            endDateInput.value = startDateInput.value;
-        }
+  function updateStartDateMax() {
+    if (startDateInput.value && startDateInput.value > endDateInput.value) {
+      startDateInput.value = endDateInput.value;
     }
+  }
 
-    function updateStartDateMax() {
-        if (startDateInput.value && startDateInput.value > endDateInput.value) {
-            startDateInput.value = endDateInput.value;
-        }
-    }
+  startDateInput.addEventListener('change', updateEndDateMin);
 
-    startDateInput.addEventListener('change', updateEndDateMin);
+  endDateInput.addEventListener('change', updateStartDateMax);
 
-    endDateInput.addEventListener('change', updateStartDateMax);
-
-    if (startDateInput.value) {
-        updateEndDateMin();
-    } else if (endDateInput.value) {
-        updateStartDateMax();
-    }
-});
+  if (startDateInput.value) {
+    updateEndDateMin();
+  } else if (endDateInput.value) {
+    updateStartDateMax();
+  }
 </script>
 
 
