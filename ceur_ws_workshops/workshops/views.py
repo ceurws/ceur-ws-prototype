@@ -306,23 +306,30 @@ class AuthorUpload(View):
     def submit_paper(self, request, author_formset, paper_form):
 
         author_instances = None
-        
+
         if paper_form.is_valid() and author_formset.is_valid():
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = self.get_workshop()
             paper_instance.save()
+
             author_instances = author_formset.save()
+
+            if request.POST['session'] != '':
+                session_instance = Session.objects.get(pk=request.POST['session'])
+                paper_instance.session = session_instance
+            
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
+            print(author_formset)
 
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, secret_token = self.kwargs['secret_token'])
-            # return render(request, self.success_path, self.get_context(author_instances, paper_instance, 'confirm'))
         else:
             print("Paperform not valid")
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
         
     def create_paper(self, request, author_formset, paper_form):
-        author_instances = None
+        # author_instances = None
+        # session_instance = None
 
         # check whether files are signed
         if paper_form.is_valid() and author_formset.is_valid():
@@ -333,10 +340,14 @@ class AuthorUpload(View):
             paper_instance.agreement_file.name = self._get_agreement_filename(paper_instance, paper_instance.agreement_file.name)
             
             paper_instance.save()  
+            # author_instances = author_formset.save()
 
-            author_instances = author_formset.save() 
+            if request.POST['session'] != '':
+                session_instance = Session.objects.get(pk=request.POST['session'])
+                paper_instance.session = session_instance
 
-            paper_instance.authors.add(*author_instances)  
+            # paper_instance.authors.add(*author_instances)  
+            print(author_formset)
             self.get_workshop().accepted_papers.add(paper_instance)  
 
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
@@ -358,28 +369,36 @@ class AuthorUpload(View):
        
         # if no files are attached we extract the files uploaded 
         else:
-            print('no files found!')
             author_formset = AuthorFormSet(request.POST)
 
             paper_instance = Paper.objects.filter(paper_title=request.POST.get('paper_title'), workshop = self.get_workshop()).first()
 
             paper_form = PaperForm(request.POST, file_uploaded=True, workshop=self.get_workshop(), instance = paper_instance)
-
+        print(author_formset)
         if 'confirm_button' in request.POST:
             return self.submit_paper(request, author_formset, paper_form)
         else:
-            print("Creating paper")
             return self.create_paper(request, author_formset, paper_form)
         
 def edit_author_post_view(request, paper_id, secret_token):
     workshop = get_object_or_404(Workshop, secret_token=secret_token)
     paper = get_object_or_404(Paper, secret_token=paper_id)
+    
+    print(Author.objects.filter(paper = paper))
+    
+    paper_form = PaperForm(instance=paper, workshop=workshop)
+    
+    author_formset = AuthorFormSet(queryset=Author.objects.filter(paper = paper), prefix = 'author')
 
     context = {
         'workshop' : workshop,
-        'paper' : paper
+        'paper_form' : paper_form,
+        'paper' : paper, 
+        'author_formset' : author_formset,
+        'edit_mode': False
     }
-    if request.method == "POST":
+    if request.method == "POST" and request.POST['edit_button'] == "Edit":
+        context['edit_mode'] = True
         return render(request, 'workshops/author_upload_success.html', context)
     else:
         return render(request, 'workshops/author_upload_success.html', context)

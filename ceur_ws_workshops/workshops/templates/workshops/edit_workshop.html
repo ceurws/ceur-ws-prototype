@@ -73,13 +73,6 @@
     var form_idx = $('#id_session-TOTAL_FORMS').val();
     $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
     $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
-
-  // document.addEventListener('DOMContentLoaded', function () {
-  //   let messages = Array.from(document.querySelectorAll('#django-messages [data-message]')).map(el => el.getAttribute('data-message'));
-  //   if (messages.length > 0) {
-  //     alert(messages.join("\n"));
-  //   }
-  // });
 </script>
 
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Workshop, Author, Editor, Paper
+from .models import Workshop, Author, Editor, Paper, Session
 from django.forms import TextInput, Textarea, EmailInput, URLInput
 from django.db import models
 from django import forms
@@ -64,7 +64,13 @@ class EditorAdmin(admin.ModelAdmin):
     search_fields = ['editor_name']
     formfield_overrides = overrides
 
+class SessionAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in Session._meta.fields]
+    search_fields = ['session_title']
+    formfield_overrides = overrides
+
 admin.site.register(Workshop, WorkshopAdmin)
 admin.site.register(Author, AuthorAdmin)
 admin.site.register(Editor, EditorAdmin)
 admin.site.register(Paper, PaperAdmin)
+admin.site.register(Session, SessionAdmin)

@@ -20,7 +20,6 @@ class DateInput(forms.DateInput):
         kwargs["format"] = "%Y-%m-%d"
         super().__init__(**kwargs)
 
-
 class WorkshopForm(forms.ModelForm):
     workshop_language_iso = forms.ChoiceField(label="Language", choices=[], required=False)
 
@@ -104,8 +103,9 @@ class WorkshopForm(forms.ModelForm):
         if total_accepted_papers > total_submitted_papers:
             raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
 
-        if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
-            raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
+        if total_reg_acc_papers is not None and total_short_acc_papers is not None:
+            if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
+                raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
 
         return cleaned_data
 
@@ -122,6 +122,8 @@ class PaperForm(forms.ModelForm):
 
         if self.workshop: 
             self.fields['session'].queryset = self.workshop.sessions.all()
+        else:
+            self.fields['session'].queryset = Session.objects.none()  # No sessions available if workshop is not provided
 
     class Meta:
         model = Paper
@@ -175,7 +177,7 @@ class PaperForm(forms.ModelForm):
         return is_signed
 
 AuthorFormSet = modelformset_factory(
-        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=1,
+        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=0,
         # CSS styling but for formsets
         widgets = {
             'author_name': TextInput(attrs={'size': 70, 
@@ -189,7 +191,7 @@ AuthorFormSet = modelformset_factory(
         })
 
 EditorFormSet = modelformset_factory(
-    Editor, fields=('editor_name','editor_url' ,'institution', 'institution_country', 'institution_url', 'research_group'), extra=1,
+    Editor, fields=('editor_name','editor_url' ,'institution', 'institution_country', 'institution_url', 'research_group'), extra=0,
     # CSS styling but for formsets
     widgets = {
         'editor_name': TextInput(attrs={'size': 70, 
@@ -208,7 +210,7 @@ EditorFormSet = modelformset_factory(
 )
 
 SessionFormSet = modelformset_factory(
-    Session, fields=('session_title',), extra=1,
+    Session, fields=('session_title',), extra=0,
     # CSS styling but for formsets
     widgets = {
         'session_title': TextInput(attrs={'size': 70, 
