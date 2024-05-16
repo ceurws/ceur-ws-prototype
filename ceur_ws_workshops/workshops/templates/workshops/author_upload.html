@@ -24,44 +24,31 @@
   <hr>
   <fieldset id="author-fieldset">
     {{author_formset.management_form}}
-    <div id="form-set">
-      {% for form in author_formset %}
-      <div class="author-form">
+    <div id="author-form" class="author-form">
         {{form.as_p}}
-        <hr>
-      </div>
-      {% endfor %}
+
+    <hr>
     </div>
-    <button id="add-form" type="button" class="button-13">Add Author</button>
+    <input type="button" value="Add Author" class="button-13" id="add_author">
   </fieldset>
   <br>
-  
   
   <input type="submit" name="save_button" class="button-13" value="Save Paper">
 </form>
 
+<div id="empty_author_form" style="display:none">
+  <table class='no_error'>
+    {{ author_formset.empty_form }}
+    <br>
+  </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    let addButton = document.querySelector("#add-form");
-    let formSet = document.querySelector("#author-fieldset");
-    let totalForms = document.querySelector("#id_form-TOTAL_FORMS");
-
-    function addForm(e) {
-      e.preventDefault();
-
-      let formNum = formSet.querySelectorAll(".author-form").length - 1;
-      let newForm = formSet.querySelector(".author-form").cloneNode(true);
-      let formRegex = RegExp(`form-(\\d+)-`, 'g');
-
-      formNum++;
-      newForm.innerHTML = newForm.innerHTML.replace(formRegex, `form-${formNum}-`);
-
-      formSet.insertBefore(newForm, addButton);
-
-      totalForms.value = formNum + 1;
-    }
-
-    addButton.addEventListener('click', addForm);
+  $('#add_author').click(function () {
+    var form_idx = $('#id_author-TOTAL_FORMS').val();
+    $('#author-form').append($('#empty_author_form').html().replace(/__prefix__/g, form_idx));
+    $('#id_author-TOTAL_FORMS').val(parseInt(form_idx) + 1);
   });
 
 </script>

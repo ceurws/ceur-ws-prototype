@@ -30,16 +30,18 @@
                 {% for paperform in paper_forms %}
                     <li>
                         {{ paperform.as_p }}
+                        <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}"> Mark for deletion
                         {% if paperform.instance.uploaded_file %}
                             <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
                         {% endif %}
                         {% if paperform.instance.agreement_file %}
-                        <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
-                    {% endif %}</li>
+                            <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
+                        {% endif %}
+                    </li>
                 {% endfor %}
             </ul>
         </fieldset>
-        <input type="submit" name="submit_button" class = "button-13" value="Confirm">
+        <input type="submit" name="submit_button" class="button-13" value="Confirm">
     </form>
 
     {% else %}

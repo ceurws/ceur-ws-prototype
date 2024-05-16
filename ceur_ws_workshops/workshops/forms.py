@@ -1,20 +1,24 @@
 
 from .models import Workshop, Editor, Paper, Author, Session
 from django import forms
-from django.forms import modelformset_factory
-from django.forms import TextInput, FileInput, NumberInput
+from django.forms import modelformset_factory, TextInput, FileInput, NumberInput
 from django_countries.widgets import CountrySelectWidget
 from django.templatetags.static import static
-import os
-import json
-
+import os, json
+from django.core.exceptions import ValidationError
+from signature_detect.loader import Loader
+from signature_detect.extractor import Extractor
+from signature_detect.cropper import Cropper
+from signature_detect.judger import Judger
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 class DateInput(forms.DateInput):
     input_type = "date"
     def __init__(self, **kwargs):
         kwargs["format"] = "%Y-%m-%d"
         super().__init__(**kwargs)
-
 
 class WorkshopForm(forms.ModelForm):
     workshop_language_iso = forms.ChoiceField(label="Language", choices=[], required=False)
@@ -26,8 +30,12 @@ class WorkshopForm(forms.ModelForm):
                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
                 'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement']
         
-        help_texts = {'workshop_language_iso': '    <br/>Please select the ISO code from the following link: https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes'}
-        
+        help_texts = {'workshop_acronym': '''    <br/><br/>Please provide the acronym of the workshop.  
+                    the acronym of the workshop plus YYYY (year of the workshop)
+                    the acronym may contain '-'; between acronym and year is either a blank
+                    or a '-'. The year is exactly 4 digits, e.g. 2012''',
+                    'workshop_colocated': '''<br> <br> The name of the workshop with which this workshop was colocated. Usually, this is the name of the main conference. If the workshop was not colocated, leave this field empty.'''
+    }
         widgets = {
             'workshop_short_title': TextInput(attrs={'size': 70, 
                                             'placeholder': 'Provide the shorthand title of the workshop'}),
@@ -64,10 +72,10 @@ class WorkshopForm(forms.ModelForm):
             'total_reg_acc_papers': TextInput(attrs={'size': 70,
                                             'placeholder': '(optional) Provide the total number of regular length papers submitted'}),
             'total_short_acc_papers': TextInput(attrs={'size': 70,
-                                            'placeholder': '(optional) Provide the total number of short length papers submitted'})
+                                            'placeholder': '(optional) Provide the total number of short length papers submitted'}),
             'editor_agreement': FileInput(attrs={'accept': '.pdf', 
                                                  'placeholder': 'Upload the agreement file'}),
-                                        
+                                
        }
         
     def __init__(self, *args, **kwargs):
@@ -84,20 +92,38 @@ class WorkshopForm(forms.ModelForm):
         choices = [(data['639-2'], data['name']) for code, data in languages.items()]
         self.fields['workshop_language_iso'].choices = choices
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        total_submitted_papers = cleaned_data.get('total_submitted_papers')
+        total_accepted_papers = cleaned_data.get('total_accepted_papers')
+        total_reg_acc_papers = cleaned_data.get('total_reg_acc_papers', 0)  
+        total_short_acc_papers = cleaned_data.get('total_short_acc_papers', 0)  
+
+        if total_accepted_papers > total_submitted_papers:
+            raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
+
+        if total_reg_acc_papers is not None and total_short_acc_papers is not None:
+            if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
+                raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
+
+        return cleaned_data
+
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         file_uploaded = kwargs.pop('file_uploaded', False)
-        workshop = kwargs.pop('workshop', None)
+        self.workshop = kwargs.pop('workshop', None) 
         super(PaperForm, self).__init__(*args, **kwargs)
-
+    
         if file_uploaded:
             self.fields['uploaded_file'].label = 'Change current file'
         else:
             self.fields['uploaded_file'].label = 'Upload file'
 
-        # Dynamically set queryset for session field based on the workshop
-        if workshop:
-            self.fields['session'].queryset = workshop.sessions.all()
+        if self.workshop: 
+            self.fields['session'].queryset = self.workshop.sessions.all()
+        else:
+            self.fields['session'].queryset = Session.objects.none()  # No sessions available if workshop is not provided
 
     class Meta:
         model = Paper
@@ -109,9 +135,49 @@ class PaperForm(forms.ModelForm):
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
         }
+    def clean(self):
+        cleaned_data = super().clean()
+        agreement_file = cleaned_data.get('agreement_file')
+        uploaded_file = cleaned_data.get('uploaded_file')
+        
+        if uploaded_file and agreement_file and self.workshop:
+            directory_path = os.path.join('agreement', f'VOL-{self.workshop.id}')
+
+            # agreement_file_name = os.path.join(directory_path, agreement_file.name)
+            agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
+            default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
+
+            self.instance.agreement_file = agreement_file.name
+            
+            if not self._detect_signature_in_image(agreement_file_path):
+                raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
+    
+        else: 
+            raise ValidationError("Paper and/or agreement not saved.")
+        
+        return cleaned_data
+
+    def _detect_signature_in_image(self, file_path):
+        loader = Loader()
+        extractor = Extractor()
+        cropper = Cropper(border_ratio=0)
+        judger = Judger()
+
+        masks = loader.get_masks(file_path)
+        is_signed = False
+        for mask in masks:
+            labeled_mask = extractor.extract(mask)
+            results = cropper.run(labeled_mask)
+            for result in results.values():
+                is_signed = judger.judge(result["cropped_mask"])
+                if is_signed:
+                    break
+            if is_signed:
+                break
+        return is_signed
 
 AuthorFormSet = modelformset_factory(
-        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=1,
+        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=0,
         # CSS styling but for formsets
         widgets = {
             'author_name': TextInput(attrs={'size': 70, 
@@ -125,7 +191,7 @@ AuthorFormSet = modelformset_factory(
         })
 
 EditorFormSet = modelformset_factory(
-    Editor, fields=('editor_name','editor_url' ,'institution', 'institution_country', 'institution_url', 'research_group'), extra=1,
+    Editor, fields=('editor_name','editor_url' ,'institution', 'institution_country', 'institution_url', 'research_group'), extra=0,
     # CSS styling but for formsets
     widgets = {
         'editor_name': TextInput(attrs={'size': 70, 
@@ -144,7 +210,7 @@ EditorFormSet = modelformset_factory(
 )
 
 SessionFormSet = modelformset_factory(
-    Session, fields=('session_title',), extra=1,
+    Session, fields=('session_title',), extra=0,
     # CSS styling but for formsets
     widgets = {
         'session_title': TextInput(attrs={'size': 70, 
