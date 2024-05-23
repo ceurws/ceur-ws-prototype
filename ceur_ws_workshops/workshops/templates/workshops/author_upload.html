@@ -25,7 +25,10 @@
   <fieldset id="author-fieldset">
     {{author_formset.management_form}}
     <div id="author-form" class="author-form">
-        {{form.as_p}}
+      {% for author in author_formset %}
+      {{ author.as_p }}
+      <br>
+      {% endfor %}
 
     <hr>
     </div>
@@ -50,7 +53,6 @@
     $('#author-form').append($('#empty_author_form').html().replace(/__prefix__/g, form_idx));
     $('#id_author-TOTAL_FORMS').val(parseInt(form_idx) + 1);
   });
-
 </script>
 
 {% endblock %}
