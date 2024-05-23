@@ -1,7 +1,7 @@
 
 from .models import Workshop, Editor, Paper, Author, Session
 from django import forms
-from django.forms import modelformset_factory, TextInput, FileInput, NumberInput
+from django.forms import modelformset_factory, TextInput, FileInput, BaseModelFormSet
 from django_countries.widgets import CountrySelectWidget
 from django.templatetags.static import static
 import os, json
@@ -99,6 +99,7 @@ class WorkshopForm(forms.ModelForm):
         total_accepted_papers = cleaned_data.get('total_accepted_papers')
         total_reg_acc_papers = cleaned_data.get('total_reg_acc_papers', 0)  
         total_short_acc_papers = cleaned_data.get('total_short_acc_papers', 0)  
+        editor_agreement = cleaned_data.get('editor_agreement')
 
         if total_accepted_papers > total_submitted_papers:
             raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
@@ -106,8 +107,35 @@ class WorkshopForm(forms.ModelForm):
         if total_reg_acc_papers is not None and total_short_acc_papers is not None:
             if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
                 raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
+    #     if editor_agreement:
+    #         editor_agreement_file_path = os.path.join(settings.MEDIA_ROOT, editor_agreement.name)
+    #         default_storage.save(editor_agreement.name, ContentFile(editor_agreement.read()))
+    #         print(editor_agreement_file_path)
+    #         self.instance.agreement_file = editor_agreement.name
+            
+    #         if not self._detect_signature_in_image(editor_agreement_file_path):
+    #             raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
 
-        return cleaned_data
+    #     return cleaned_data
+    
+    # def _detect_signature_in_image(self, file_path):
+    #     loader = Loader()
+    #     extractor = Extractor()
+    #     cropper = Cropper(border_ratio=0)
+    #     judger = Judger()
+
+    #     masks = loader.get_masks(file_path)
+    #     is_signed = False
+    #     for mask in masks:
+    #         labeled_mask = extractor.extract(mask)
+    #         results = cropper.run(labeled_mask)
+    #         for result in results.values():
+    #             is_signed = judger.judge(result["cropped_mask"])
+    #             if is_signed:
+    #                 break
+    #         if is_signed:
+    #             break
+    #     return is_signed
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -140,21 +168,20 @@ class PaperForm(forms.ModelForm):
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
         
-        if uploaded_file and agreement_file and self.workshop:
-            directory_path = os.path.join('agreement', f'VOL-{self.workshop.id}')
+        # if uploaded_file and agreement_file and self.workshop:
 
-            # agreement_file_name = os.path.join(directory_path, agreement_file.name)
-            agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
-            default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
+        #     # agreement_file_name = os.path.join(directory_path, agreement_file.name)
+        #     agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
+        #     default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
 
-            self.instance.agreement_file = agreement_file.name
+        #     self.instance.agreement_file = agreement_file.name
             
-            if not self._detect_signature_in_image(agreement_file_path):
-                raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
-    
-        else: 
-            raise ValidationError("Paper and/or agreement not saved.")
+        #     if not self._detect_signature_in_image(agreement_file_path):
+        #         raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
+        # else: 
+        #     raise ValidationError("Paper and/or agreement not saved.")
         
+            
         return cleaned_data
 
     def _detect_signature_in_image(self, file_path):
@@ -175,6 +202,28 @@ class PaperForm(forms.ModelForm):
             if is_signed:
                 break
         return is_signed
+    
+class CustomAuthorFormSet(BaseModelFormSet):
+    def clean(self):
+        super().clean()
+        
+        for form in self.forms:
+            if self.can_delete and self._should_delete_form(form):
+                continue
+            
+            author_name = form.cleaned_data.get('author_name')
+            author_email = form.cleaned_data.get('author_email')
+            author_university = form.cleaned_data.get('author_university')
+            author_uni_url = form.cleaned_data.get('author_uni_url')
+
+            if not author_name:
+                form.add_error('author_name', 'Author name is required.')
+            if not author_email:
+                form.add_error('author_email', 'Author email is required.')
+            if not author_university:
+                form.add_error('author_university', 'Author university is required.')
+            if not author_uni_url:
+                form.add_error('author_uni_url', 'Author university URL is required.')
 
 AuthorFormSet = modelformset_factory(
         Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=0,
@@ -188,7 +237,9 @@ AuthorFormSet = modelformset_factory(
                                             'placeholder': 'Enter the URL of the university'}),
             'author_email': TextInput(attrs={'size': 50,
                                             'placeholder': 'Enter the email of the author'})
-        })
+        },
+        formset=CustomAuthorFormSet
+)
 
 EditorFormSet = modelformset_factory(
     Editor, fields=('editor_name','editor_url' ,'institution', 'institution_country', 'institution_url', 'research_group'), extra=0,
