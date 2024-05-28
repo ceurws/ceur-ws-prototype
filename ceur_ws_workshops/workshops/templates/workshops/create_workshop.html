@@ -11,6 +11,8 @@
     <i> Please provide details about the workshop in the following section. Optional fields can be left blank if not
       applicable. </i>
     {{ form.as_p }}
+    <input type="hidden" name="workshop_id" value="{{ form.instance.id }}">
+
   </fieldset>
 
   <hr>
