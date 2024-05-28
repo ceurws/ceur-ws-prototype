@@ -381,6 +381,7 @@ def edit_author_post_view(request, paper_id, secret_token):
 
         elif 'submit_button' in request.POST and paper_form.is_valid() and author_formset.is_valid():
             paper_form.save()
-            author_formset.save()
-            context.update({'paper_form': paper_form, 'author_formset': author_formset, 'edit_mode': False})
+        
+            paper.authors.add(*author_formset.save())
+            context.update({'paper_form': paper_form, 'paper': paper, 'edit_mode': False})
     return render(request, 'workshops/author_upload_success.html', context)
