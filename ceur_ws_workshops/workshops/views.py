@@ -34,25 +34,6 @@ class CreateWorkshop(View):
                    'session_form':session_form}
         return render(request, "workshops/create_workshop.html", context)
     
-    def _detect_signature_in_image(self, file_path):
-        loader = Loader()
-        extractor = Extractor()
-        cropper = Cropper(border_ratio=0)
-        judger = Judger()
-
-        masks = loader.get_masks(file_path)
-        is_signed = False
-        for mask in masks:
-            labeled_mask = extractor.extract(mask)
-            results = cropper.run(labeled_mask)
-            for result in results.values():
-                is_signed = judger.judge(result["cropped_mask"])
-                if is_signed:
-                    break
-            if is_signed:
-                break
-        return is_signed
-    
     def post(self,request):
         success_path = "workshops/workshop_edit_success.html"
         edit_path = "workshops/edit_workshop.html"
@@ -280,7 +261,7 @@ class WorkshopOverview(View):
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
             return self.submit_workshop(request, secret_token)
-
+        
 class AuthorUpload(View):
     upload_path = "workshops/author_upload.html"
     edit_path  = "workshops/edit_author.html"
@@ -320,7 +301,6 @@ class AuthorUpload(View):
             
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
-            print(author_formset)
 
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, secret_token = self.kwargs['secret_token'])
         else:
@@ -328,8 +308,6 @@ class AuthorUpload(View):
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
         
     def create_paper(self, request, author_formset, paper_form):
-        # author_instances = None
-        # session_instance = None
 
         # check whether files are signed
         if paper_form.is_valid() and author_formset.is_valid():
@@ -347,58 +325,63 @@ class AuthorUpload(View):
                 paper_instance.session = session_instance
 
             # paper_instance.authors.add(*author_instances)  
-            print(author_formset)
             self.get_workshop().accepted_papers.add(paper_instance)  
-
+            
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
         else:
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
 
     def get(self, request, secret_token):
-        author_formset = AuthorFormSet(queryset=Author.objects.none())
+        author_formset = AuthorFormSet(queryset=Author.objects.none(), prefix="author")
         paper_form = PaperForm(file_uploaded=False, workshop=self.get_workshop())
         context = self.get_context(author_formset, paper_form)
         return render(request, self.upload_path, context)
 
     def post(self, request, secret_token):
-
+        
         # if statement to check if request.FILES has any new files attached. 
         if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:
-            author_formset = AuthorFormSet(request.POST)
+            author_formset = AuthorFormSet(queryset=Author.objects.none(), data = request.POST, prefix="author")
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop())
        
         # if no files are attached we extract the files uploaded 
         else:
-            author_formset = AuthorFormSet(request.POST)
+            author_formset = AuthorFormSet(request.POST, prefix="author")
 
             paper_instance = Paper.objects.filter(paper_title=request.POST.get('paper_title'), workshop = self.get_workshop()).first()
 
             paper_form = PaperForm(request.POST, file_uploaded=True, workshop=self.get_workshop(), instance = paper_instance)
-        print(author_formset)
+        # print(author_formset)
         if 'confirm_button' in request.POST:
             return self.submit_paper(request, author_formset, paper_form)
+        
         else:
             return self.create_paper(request, author_formset, paper_form)
         
 def edit_author_post_view(request, paper_id, secret_token):
     workshop = get_object_or_404(Workshop, secret_token=secret_token)
     paper = get_object_or_404(Paper, secret_token=paper_id)
-    
-    print(Author.objects.filter(paper = paper))
-    
-    paper_form = PaperForm(instance=paper, workshop=workshop)
-    
-    author_formset = AuthorFormSet(queryset=Author.objects.filter(paper = paper), prefix = 'author')
 
     context = {
         'workshop' : workshop,
-        'paper_form' : paper_form,
+        'paper_form' : None,
         'paper' : paper, 
-        'author_formset' : author_formset,
+        'author_formset' : None,
         'edit_mode': False
     }
-    if request.method == "POST" and request.POST['edit_button'] == "Edit":
-        context['edit_mode'] = True
-        return render(request, 'workshops/author_upload_success.html', context)
-    else:
-        return render(request, 'workshops/author_upload_success.html', context)
+
+    if request.method == "POST":
+        paper_form = PaperForm(data=request.POST, instance=paper, workshop=workshop)
+        author_formset = AuthorFormSet(data = request.POST, queryset=Author.objects.filter(paper = paper), prefix = 'author')
+        
+        if 'edit_button' in request.POST:
+            paper_form = PaperForm(instance=paper, workshop=workshop)
+            author_formset = AuthorFormSet(queryset=Author.objects.filter(paper = paper), prefix = 'author')
+            context.update({'paper_form': paper_form, 'author_formset': author_formset, 'edit_mode': True})
+
+        elif 'submit_button' in request.POST and paper_form.is_valid() and author_formset.is_valid():
+            paper_form.save()
+        
+            paper.authors.add(*author_formset.save())
+            context.update({'paper_form': paper_form, 'paper': paper, 'edit_mode': False})
+    return render(request, 'workshops/author_upload_success.html', context)
