@@ -22,7 +22,21 @@ class DateInput(forms.DateInput):
 
 class WorkshopForm(forms.ModelForm):
     workshop_language_iso = forms.ChoiceField(label="Language", choices=[], required=False)
-
+    
+    def __init__(self, *args, **kwargs):
+        
+        ### Loads languages ###
+        super(WorkshopForm, self).__init__(*args, **kwargs)
+        json_file_path = os.path.join(os.path.dirname(__file__), 'static', 'workshops', 'languages.json')
+        
+        # Load JSON data from the file
+        with open(json_file_path, 'r') as file:
+            languages = json.load(file)
+        
+        # Populate dropdown choices from JSON data
+        choices = [(data['639-2'], data['name']) for code, data in languages.items()]
+        self.fields['workshop_language_iso'].choices = choices
+        
     class Meta:
         model = Workshop
         fields = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym',
@@ -78,64 +92,9 @@ class WorkshopForm(forms.ModelForm):
                                 
        }
         
-    def __init__(self, *args, **kwargs):
-        # loads language options and returns proper ISO
 
-        super(WorkshopForm, self).__init__(*args, **kwargs)
-        json_file_path = os.path.join(os.path.dirname(__file__), 'static', 'workshops', 'languages.json')
-        
-        # Load JSON data from the file
-        with open(json_file_path, 'r') as file:
-            languages = json.load(file)
-        
-        # Populate dropdown choices from JSON data
-        choices = [(data['639-2'], data['name']) for code, data in languages.items()]
-        self.fields['workshop_language_iso'].choices = choices
 
-    def clean(self):
-        cleaned_data = super().clean()
 
-        total_submitted_papers = cleaned_data.get('total_submitted_papers')
-        total_accepted_papers = cleaned_data.get('total_accepted_papers')
-        total_reg_acc_papers = cleaned_data.get('total_reg_acc_papers', 0)  
-        total_short_acc_papers = cleaned_data.get('total_short_acc_papers', 0)  
-        editor_agreement = cleaned_data.get('editor_agreement')
-
-        if total_accepted_papers > total_submitted_papers:
-            raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
-
-        if total_reg_acc_papers is not None and total_short_acc_papers is not None:
-            if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
-                raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
-    #     if editor_agreement:
-    #         editor_agreement_file_path = os.path.join(settings.MEDIA_ROOT, editor_agreement.name)
-    #         default_storage.save(editor_agreement.name, ContentFile(editor_agreement.read()))
-    #         print(editor_agreement_file_path)
-    #         self.instance.agreement_file = editor_agreement.name
-            
-    #         if not self._detect_signature_in_image(editor_agreement_file_path):
-    #             raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
-
-    #     return cleaned_data
-    
-    # def _detect_signature_in_image(self, file_path):
-    #     loader = Loader()
-    #     extractor = Extractor()
-    #     cropper = Cropper(border_ratio=0)
-    #     judger = Judger()
-
-    #     masks = loader.get_masks(file_path)
-    #     is_signed = False
-    #     for mask in masks:
-    #         labeled_mask = extractor.extract(mask)
-    #         results = cropper.run(labeled_mask)
-    #         for result in results.values():
-    #             is_signed = judger.judge(result["cropped_mask"])
-    #             if is_signed:
-    #                 break
-    #         if is_signed:
-    #             break
-    #     return is_signed
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -168,20 +127,19 @@ class PaperForm(forms.ModelForm):
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
         
-        # if uploaded_file and agreement_file and self.workshop:
+        if uploaded_file and agreement_file and self.workshop:
 
-        #     # agreement_file_name = os.path.join(directory_path, agreement_file.name)
-        #     agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
-        #     default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
+            # agreement_file_name = os.path.join(directory_path, agreement_file.name)
+            agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
+            default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
 
-        #     self.instance.agreement_file = agreement_file.name
+            self.instance.agreement_file = agreement_file.name
             
         #     if not self._detect_signature_in_image(agreement_file_path):
         #         raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
-        # else: 
-        #     raise ValidationError("Paper and/or agreement not saved.")
+        else: 
+            raise ValidationError("Paper and/or agreement not saved.")
         
-            
         return cleaned_data
 
     def _detect_signature_in_image(self, file_path):
