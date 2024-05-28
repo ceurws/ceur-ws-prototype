@@ -19,8 +19,9 @@
           font-weight: bold;
         }
     </style>
-      <!-- {{ form.non_field_errors }}  -->
     {{ form.as_p }}
+    <input type="hidden" name="workshop_id" value="{{ workshop.id }}">
+    {{ form.instance.editor_agreement }}
     </fieldset>
     <hr>
     <fieldset>
@@ -28,6 +29,7 @@
       <div class="session-form" id="session-form">
         {% for form in session_form%}
           {{ form.as_p }}
+          
           {% endfor %}
         </div>
    <input type="button" value="Add Session" class="button-13" id="add_session">

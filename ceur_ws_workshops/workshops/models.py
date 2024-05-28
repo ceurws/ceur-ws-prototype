@@ -37,13 +37,10 @@ class Session(models.Model):
         return self.session_title
     
 class Workshop(models.Model):
+    
     def workshop_agreement_file_path(instance, filename):
         acronym = instance.workshop_acronym
-
-        # Define the new filename
         filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
-
-        # Construct the path using the new filename
         workshop_id = instance.id
         return f"agreement/Vol-{workshop_id}/{filename}"
     
@@ -79,6 +76,7 @@ class Workshop(models.Model):
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
     accepted_papers = models.ManyToManyField('Paper', related_name='accepted_papers')
     sessions = models.ManyToManyField(Session, blank=True, related_name='workshop_sessions')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
@@ -108,11 +106,6 @@ class Language(models.Model):
 class Paper(models.Model):
 
     def paper_upload_path(instance, filename):
-        """
-        Generate a custom upload path for papers.
-        Assumes instance has a direct foreign key to Workshop.
-        Format: "papers/Vol-{workshop_volume}/{filename}"
-        """
         workshop_volume = instance.workshop.id
         return f"papers/Vol-{workshop_volume}/{filename}"
 
