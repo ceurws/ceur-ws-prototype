@@ -1,7 +1,7 @@
 {% extends "workshops/author_upload.html" %}
 {% load static %}
 {% block content %}
-
+{%load crispy_forms_tags %} 
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -27,16 +27,22 @@
     }
   </style>
     <legend>Paper Data</legend>
-    {{ paper_form.as_p }}
-    <p>Currently uploaded Paper: {{ paper_form.instance.uploaded_file }} </p>
-    <p>Currently uploaded Agreement: {{ paper_form.instance.agreement_file }}</p>
+    <!-- {{ paper_form.as_p }} -->
+    {{ paper_form|crispy }}
+    <input type="hidden" name="secret_token" value="{{ paper_instance.secret_token }}">
+
+
+    <p>Currently uploaded Paper: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a> </p>
+    <p>Currently uploaded Agreement:  <a href="{{paper_form.instance.agreement_file.url}}">{{paper_form.instance.agreement_file.name }}</a></p>
   </fieldset>
   <hr>
   <fieldset id="author-fieldset">
     {{ author_formset.management_form}}
     <div id="author-form" class="author-form">
       {% for form in author_formset %}
-        {{ form.as_p }}
+        <!-- {{ form.as_p }} -->
+        {{form|crispy}}
+          <hr>
       {% endfor %}
     </div>
     <input type="button" value="Add Author" class="button-13" id="add_author">
@@ -47,9 +53,10 @@
 
 <div id="empty_author_form" style="display:none">
   <table class='no_error'>
-    {{ author_formset.empty_form }}
-    <br>
+    {{ author_formset.empty_form|crispy }}
+    <!-- <br> -->
   </table>
+  <hr>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -1,8 +1,10 @@
 {% extends "workshops/create_workshop.html" %}
 {% block content %}
+{%load crispy_forms_tags %} 
   <p class="header-title">Are all the details correct?</p>
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
+    
     <fieldset>
       <legend>Workshop Details</legend>
       <style>
@@ -19,11 +21,12 @@
           font-weight: bold;
         }
     </style>
-    {{ form.as_p }}
-    <input type="hidden" name="workshop_id" value="{{ workshop.id }}">
-    {{ form.instance.editor_agreement }}
+    {% crispy form %}
+    <i>Currently uploaded file: {{ form.instance.editor_agreement }}</i>
+    <input type="hidden" name="workshop_id" value="{{ workshop_instance.id }}">
+
     </fieldset>
-    <hr>
+
     <fieldset>
       {{ session_form.management_form}}
       <div class="session-form" id="session-form">
@@ -34,7 +37,6 @@
         </div>
    <input type="button" value="Add Session" class="button-13" id="add_session">
   </fieldset>
-    <hr>
     <fieldset>
       {{ editor_form.management_form}}
       <div class="editor-form" id="editor-form">
@@ -45,8 +47,9 @@
    <input type="button" value="Add Editor" class="button-13" id="add_editor">
   </fieldset>
 
-  <br>
-    <input type="submit" name="submit_button" class = "button-13" value="Confirm">
+  <div class="submit-container">
+    <input type="submit" name = "submit_button "class="button-13" value="Confirm">
+  </div>
   </form>
 
 {% comment %} logic for session button {% endcomment %}

@@ -115,8 +115,8 @@ class Paper(models.Model):
         return f"agreement/Vol-{agreement_file}/{filename}"
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10)
-    uploaded_file = models.FileField(upload_to=paper_upload_path, null=True, blank=True)
-    agreement_file = models.FileField(upload_to=agreement_file_path, null=True, blank=True)
+    uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True)
+    agreement_file = models.FileField(upload_to=agreement_file_path, blank = True)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
 
     # KEYS

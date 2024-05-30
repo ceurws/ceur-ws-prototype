@@ -1,6 +1,7 @@
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
+{%load crispy_forms_tags %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,9 +12,21 @@
     <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
 </head>
 <body>
-
-    <h1>Workshop Overview for workshop {{workshop.id}}</h1>
-
+    <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
+    <style>
+        .delete_object {
+          color: red;
+          /* background-color: #f8d7da; */
+          border-color: #f5c6cb;
+          position: relative;
+          padding: .75rem 1.25rem;
+          /* margin-bottom: 1rem; */
+          border: 1px solid transparent;
+          /* border-radius: .25rem; */
+          text-align: center;
+          font-weight: bold;
+        }
+        </style>
     {% if edit_mode %}
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -30,7 +43,6 @@
                 {% for paperform in paper_forms %}
                     <li>
                         {{ paperform.as_p }}
-                        <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}"> Mark for deletion
                         {% if paperform.instance.uploaded_file %}
                             <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
                         {% endif %}
@@ -38,6 +50,7 @@
                             <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
                         {% endif %}
                     </li>
+                    <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}"><a class = "delete_object">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.</a>
                 {% endfor %}
             </ul>
         </fieldset>
@@ -76,7 +89,7 @@
     <fieldset>
         <legend>Papers</Legend>
         {% for session_title in session_title_list %}
-            <fieldset class="papers-list">
+            <fieldset class="inner_fieldset">
                 <legend>{{ session_title }}</legend>
                 <ul>
                     {% for paper in papers %}
@@ -125,7 +138,8 @@
     <form method="post" id="form-container" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="submit" name="submit_button" class = "button-13" value="Edit">
-        <input type="submit" name="submit_button" class = "button-13" value="Submit Workshop">
+        <input type="submit" name="submit_button" class = "button-13" value="Submit Workshop" onclick="return confirm('Are you sure you want to submit the workshop? You are unable to edit your workshop after submitting. ')">
+
     </form>
     {% endif %}
 

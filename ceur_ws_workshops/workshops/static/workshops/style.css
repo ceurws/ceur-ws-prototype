@@ -1,226 +1,163 @@
 body {
-    font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif;
+}
+
+.inner_fieldset {
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: 95%; /* Ensure all fieldsets have the same width */
+  margin-left: auto; /* Center the fieldset */
+  margin-right: auto; /* Center the fieldset */
 }
 
 fieldset {
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  padding: 10px;
+margin-bottom: 10px;
+border: 1px solid #ccc;
+padding: 10px;
+width: 50%; /* Ensure all fieldsets have the same width */
+margin-left: auto; /* Center the fieldset */
+margin-right: auto; /* Center the fieldset */
 }
 
 .header-title {
-    font-family: Arial, sans-serif; 
-    font-size: 32px;
-    color: #333; 
-    text-align: center; 
-    letter-spacing: 1px; 
-    line-height: 1.2; 
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px; 
-}
-.input-field {
-    background: #FFFFFF;
-    border: 1px solid #DADCE0;
-    box-sizing: border-box;
-    border-radius: 8px;
-    padding: 10px 16px;
-    margin: 10px 0;
-    font-size: 16px;
-    line-height: 24px;
-    display: block;
-    width: 100%;
-    box-shadow: none; /* Remove any existing box-shadow */
-    transition: border-color 300ms, box-shadow 300ms;
+  font-family: Arial, sans-serif; 
+  font-size: 32px;
+  color: #333; 
+  text-align: center; 
+  letter-spacing: 1px; 
+  line-height: 1.2; 
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px; 
 }
 
-.input-field:focus {
-    outline: none;
-    border-color: #174ea6;
-    box-shadow: 0 0 0 3px rgba(66,133,244,0.5); /* This adds a blue glow effect on focus */
+.input-field, .preview-field {
+  background: #FFFFFF;
+  border: 1px solid #DADCE0;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin: 10px 0;
+  font-size: 16px;
+  line-height: 24px;
+  display: block;
+  width: 100%;
+  box-shadow: none;
+  transition: border-color 300ms, box-shadow 300ms;
 }
 
-.input-field:hover {
-    border-color: #174ea6;
+.input-field:focus, .preview-field:focus {
+  outline: none;
+  border-color: #174ea6;
+  box-shadow: 0 0 0 3px rgba(66,133,244,0.5);
 }
 
-.preview-field {
-    background: #eee9e9;
-    border: 1px solid #636466;
-    box-sizing: border-box;
-    border-radius: 8px;
-    padding: 10px 16px;
-    margin: 10px 0;
-    font-size: 16px;
-    line-height: 24px;
-    display: block;
-    width: 100%;
-    box-shadow: none; /* Remove any existing box-shadow */
-    transition: border-color 300ms, box-shadow 300ms;
-}
-
-.preview-field:focus {
-    outline: none;
-    border-color: #174ea6;
-    box-shadow: 0 0 0 3px rgba(66,133,244,0.5); /* This adds a blue glow effect on focus */
-}
-
-.preview-field:hover {
-    border-color: #174ea6;
+.input-field:hover, .preview-field:hover {
+  border-color: #174ea6;
 }
 
 .button-group {
-  display: flex;
-  justify-content: space-between; /* Adjust as needed */
-  align-items: center; /* This will vertically align the buttons */
-  padding: 10px 0; /* Add some padding if necessary */
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 10px 0;
 }
 
 .button-77, .button-17 {
-  flex: 1; /* This will cause the buttons to share the available space */
-  margin: 0 5px; /* This adds a little space between the buttons */
+flex: 1;
+margin: 0 5px;
 }
 
-/* Style the label to look similar to Stripe's design */
 label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 16px;
-    line-height: 24px;
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+  line-height: 24px;
 }
 
-/* Adjust the button size and alignment as required */
 .button-17 {
-    font-size: 16px; 
-    padding: 10px 24px; 
-
+  font-size: 16px; 
+  padding: 10px 24px; 
 }
 
-
-form {
-    margin: 0;
-    padding: 0;
+.submit-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 0px; /* Add some space above the button if needed */
 }
 
-/* Align the form items */
-.form-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%; 
-}
-
-.form-container form {
-    width: auto; 
-}
-
-.form-container {
-    display: flex;
-    justify-content: center;
-    align-items: center; 
-    height: 100vh; 
-}
-
-form {
-    margin: 20px auto; 
-    width: 50%; 
-    
+h1{
+  text-align: center;
 }
 
 .button-13 {
-  background-color: #fff;
-  border: 1px solid #d5d9d9;
-  border-radius: 8px;
-  box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-  box-sizing: border-box;
-  color: #0f1111;
-  cursor: pointer;
-  display: inline-block;
-  font-family: "Amazon Ember",sans-serif;
-  font-size: 13px;
-  line-height: 29px;
-  padding: 0 10px 0 11px;
-  position: relative;
-  text-align: center;
-  text-decoration: none;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-  vertical-align: left;
-  width: fit-content;
+    background-color: #fff;
+    border: 1px solid #d5d9d9;
+    border-radius: 8px;
+    box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+    box-sizing: border-box;
+    color: #0f1111;
+    cursor: pointer;
+    display: inline-block;
+    font-family: "Amazon Ember", sans-serif;
+    font-size: 13px;
+    line-height: 29px;
+    padding: 0 10px 0 11px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: middle;
+    width: fit-content;
 }
 
 .button-13:hover {
-  background-color: #f7fafa;
+background-color: #f7fafa;
 }
 
 .button-13:focus {
-  border-color: #008296;
-  box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
-  outline: 0;
+border-color: #008296;
+box-shadow: rgba(213, 217, 217, .5) 0 2px 5px 0;
+outline: 0;
 }
 
 @media (min-width: 768px) {
-  .button-77 {
-    padding: 19px 32px;
-  }
+.button-77 {
+  padding: 19px 32px;
+}
 }
 
-#organizer_url:link, #organizer_url:visited {
-  /* display: flex; */
-  flex-direction: column;
-  align-items: center;
-  padding: 6px 14px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-  border-radius: 6px;
-  border: none;
-  color: #fff;
-  background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
-  background-origin: border-box;
-  box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
+#organizer_url:link, #organizer_url:visited, #author_url:link, #author_url:visited {
+flex-direction: column;
+align-items: center;
+padding: 6px 14px;
+font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+border-radius: 6px;
+border: none;
+color: #fff;
+background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
+background-origin: border-box;
+box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
+user-select: none;
+-webkit-user-select: none;
+touch-action: manipulation;
 }
 
-#organizer_url:hover {
-  background-color: white;
-}
-
-#author_url:link, #author_url:visited {
-  /* display: flex; */
-  flex-direction: column;
-  align-items: center;
-  padding: 6px 14px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-  border-radius: 6px;
-  border: none;
-  color: #fff;
-  background: linear-gradient(180deg, #4B91F7 0%, #367AF6 100%);
-  background-origin: border-box;
-  box-shadow: 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2);
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-}
-
-#author_url:hover {
-  background-color: white;
+#organizer_url:hover, #author_url:hover {
+background-color: white;
 }
 
 #author_url:focus {
-  box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
-  outline: 0;
-}
-
-#author_url:focus {
-  box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
-  outline: 0;
+box-shadow: inset 0px 0.8px 0px -0.25px rgba(255, 255, 255, 0.2), 0px 0.5px 1.5px rgba(54, 122, 246, 0.25), 0px 0px 0px 3.5px rgba(58, 108, 217, 0.5);
+outline: 0;
 }
 
 .tooltip {
   position: relative;
   display: inline-block;
+  padding: 5px;
 }
 
 .tooltip .tooltiptext {
@@ -234,8 +171,8 @@ form {
   position: absolute;
   z-index: 1;
   bottom: 150%;
-  left: 60%;
-  margin-left: -25px;
+  left: 50%;
+  transform: translateX(-50%);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -245,7 +182,7 @@ form {
   position: absolute;
   top: 100%;
   left: 50%;
-  margin-left: -5px;
+  transform: translateX(-50%);
   border-width: 5px;
   border-style: solid;
   border-color: #555 transparent transparent transparent;
@@ -256,6 +193,42 @@ form {
   opacity: 1;
 }
 
-.error-message {
+.form-group {
+position: relative;
+margin-bottom: 1rem;
+}
 
+.field-label {
+display: block;
+margin-bottom: .5rem;
+}
+
+.field-help {
+display: block;
+margin-bottom: .5rem;
+color: #6c757d;
+}
+
+.field-input {
+margin-top: -1.5rem;
+}
+
+.form-text {
+color: rgb(79, 79, 79);
+}
+
+.field-input input,
+.field-input textarea,
+.field-input select {
+display: block;
+width: 100%;
+padding: .375rem .75rem;
+font-size: 1rem;
+line-height: 1.5;
+color: #495057;
+background-color: #fff;
+background-clip: padding-box;
+border: 1px solid #ced4da;
+border-radius: .25rem;
+transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
