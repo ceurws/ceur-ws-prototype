@@ -1,7 +1,7 @@
 {% extends "workshops/workshop_edit_success.html" %}
 {% load static %}
 {% block content %}
-
+{%load crispy_forms_tags %} 
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -14,36 +14,37 @@
 
 <!-- Paper Form -->
 <form method="post" id="form-container" enctype="multipart/form-data">
-
   <fieldset>
     {% csrf_token %}
     <legend>Paper Details</legend>
-    {{ paper_form.as_p }}
+    <!-- {{ paper_form.as_p }} -->
+    {{ paper_form|crispy }}
   </fieldset>
 
-  <hr>
+  
   <fieldset id="author-fieldset">
     {{author_formset.management_form}}
     <div id="author-form" class="author-form">
       {% for author in author_formset %}
-      {{ author.as_p }}
-      <br>
+      <!-- {{ author.as_p }} -->
+      
+      {{ author|crispy}}
       {% endfor %}
-
-    <hr>
     </div>
     <input type="button" value="Add Author" class="button-13" id="add_author">
   </fieldset>
   <br>
-  
+  <div class="submit-container">
   <input type="submit" name="save_button" class="button-13" value="Save Paper">
+</div>
 </form>
 
 <div id="empty_author_form" style="display:none">
   <table class='no_error'>
-    {{ author_formset.empty_form }}
+    {{ author_formset.empty_form|crispy }}
     <br>
   </table>
+  <hr>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib import admin
 from datetime import date
 from django_countries.fields import CountryField
+import os 
 
 class Editor(models.Model):
     editor_name = models.CharField(max_length=100)
@@ -37,13 +38,10 @@ class Session(models.Model):
         return self.session_title
     
 class Workshop(models.Model):
+    
     def workshop_agreement_file_path(instance, filename):
         acronym = instance.workshop_acronym
-
-        # Define the new filename
         filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
-
-        # Construct the path using the new filename
         workshop_id = instance.id
         return f"agreement/Vol-{workshop_id}/{filename}"
     
@@ -79,24 +77,12 @@ class Workshop(models.Model):
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
     accepted_papers = models.ManyToManyField('Paper', related_name='accepted_papers')
     sessions = models.ManyToManyField(Session, blank=True, related_name='workshop_sessions')
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
     def __str__(self):
         return self.workshop_full_title
-
-def paper_upload_path(instance, filename):
-    """
-    Generate a custom upload path for papers.
-    Assumes instance has a direct foreign key to Workshop.
-    Format: "papers/Vol-{workshop_volume}/{filename}"
-    """
-    workshop_volume = instance.workshop.id
-    return f"papers/Vol-{workshop_volume}/{filename}"
-
-def agreement_file_path(instance, filename):
-    agreement_file = instance.workshop.id
-    return f"agreement/Vol-{agreement_file}/{filename}"
 
 class Language(models.Model):
     iso_639_2 = models.CharField(max_length=3, primary_key=True)
@@ -106,26 +92,23 @@ class Language(models.Model):
         return self.name
 
 class Paper(models.Model):
-
     def paper_upload_path(instance, filename):
-        """
-        Generate a custom upload path for papers.
-        Assumes instance has a direct foreign key to Workshop.
-        Format: "papers/Vol-{workshop_volume}/{filename}"
-        """
         workshop_volume = instance.workshop.id
         return f"papers/Vol-{workshop_volume}/{filename}"
 
     def agreement_file_path(instance, filename):
         agreement_file = instance.workshop.id
-
+        original_filename = instance.agreement_file.name
+        paper_title = instance.paper_title.replace(' ', '')
+        extension = os.path.splitext(original_filename)[1]
+        filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
         return f"agreement/Vol-{agreement_file}/{filename}"
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10)
-    uploaded_file = models.FileField(upload_to=paper_upload_path, null=True, blank=True)
-    agreement_file = models.FileField(upload_to=agreement_file_path, null=True, blank=True)
+    uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True)
+    agreement_file = models.FileField(upload_to=agreement_file_path, blank = True)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-
+    sort_order = models.PositiveIntegerField(default=0)
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')

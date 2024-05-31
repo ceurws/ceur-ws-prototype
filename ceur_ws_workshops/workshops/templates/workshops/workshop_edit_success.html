@@ -3,29 +3,43 @@
 {% block content %}
 <h1>Workshop Created Successfully</h1>
 
-<p> 
-Don't forget to share the following links with the organizers and authors and to store them somewhere safe!
-</p>
-<p>
+<fieldset> 
+    
+
+    Please save the following links and share them with the workshop editors and authors.
+    <br>
+    <br>
+
+
+<fieldset class="inner_fieldset">
+    <legend>Workshop Overview</legend>
+    <i>Share the workshop overview link with the other editors. This will allow them to edit author submissions and general information of the workshop.</i>
+    <br>
     <div class="tooltip">
-    <a id = "organizer_url" href="{{ organizer_url }}" target="_blank">Organizer URL</a>
+    <a id = "organizer_url" href="{{ organizer_url }}" target="_blank">Workshop Overview URL</a>
     <button class = "copy_clipboard" onclick="CopyText('organizer_url', 'myTooltip')" onmouseout="outFunc('myTooltip')">
         <span class="tooltiptext" id="myTooltip">Copy to clipboard</span>
     <!-- Copy to clipboard</button> -->
     <img src="{% static 'workshops/icons8-copy-24.png' %}" alt="Copy to clipboard" width="20" height="20">
     </div>
     <br><br>
+</fieldset>
 
+<fieldset class="inner_fieldset">
+    <legend>Author Upload URL</legend>
+    <i>Share the author upload link with each author that wants to upload a paper. Submissions will automatically appear in the workshop overview. </i>   
+    <br>
     <div class="tooltip">
-        <a id="author_url" href="{{ author_url }}" target="_blank">Author URL</a>
+        <a id="author_url" href="{{ author_url }}" target="_blank">Author Upload URL</a>
         <button class="copy_clipboard" onclick="CopyText('author_url', 'tooltip_author')" onmouseout="outFunc('tooltip_author')">
             <span class="tooltiptext" id="tooltip_author">Copy to clipboard</span>
         <img src="{% static 'workshops/icons8-copy-24.png' %}" alt="Copy to clipboard" width="20" height="20"></button>
     </div>
+    <br>
 </p>
-
+</fieldset>
 <input type = button value = "Back" onclick="javascript:history.go(-1)" class="button-13">
-
+</fieldset>
 <script> 
     function CopyText(elementId, tooltipId) {
         var url = document.getElementById(elementId).href;  
