@@ -118,7 +118,7 @@ class Paper(models.Model):
     uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True)
     agreement_file = models.FileField(upload_to=agreement_file_path, blank = True)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-
+    sort_order = models.PositiveIntegerField(default=0)
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')
