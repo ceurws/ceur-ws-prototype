@@ -1,6 +1,7 @@
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
+{%load crispy_forms_tags %} 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,42 +10,142 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workshop Overview</title>
     <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
 </head>
 <body>
-
-    <h1>Workshop Overview for workshop {{workshop.id}}</h1>
-
+    
+    <style>
+        .delete_object {
+          color: red;
+          /* background-color: #f8d7da; */
+          border-color: #f5c6cb;
+          position: relative;
+          padding: .75rem 1.25rem;
+          /* margin-bottom: 1rem; */
+          border: 1px solid transparent;
+          /* border-radius: .25rem; */
+          text-align: center;
+          font-weight: bold;
+        }
+        .errorlist {
+      color: #721c24;
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      position: relative;
+      padding: .75rem 1.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid transparent;
+      border-radius: .25rem;
+      text-align: center;
+      font-weight: bold;
+    }
+        </style>
     {% if edit_mode %}
+    <h1>Edit workshop: <i>{{workshop.workshop_short_title}}</i></h1>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <fieldset class="workshop-details">
             <legend>Workshop Details</legend>
-
             {{workshop_form.as_p}}
-
+            <i>Currently uploaded file: <a href ="{{workshop_form.instance.editor_agreement.url}}">{{ workshop_form.instance.editor_agreement.name }}</a></i>
         </fieldset>
-
+    
         <fieldset class="papers-list">
             <legend>Papers</legend>
-            <ul>
+            {% for paperform in paper_forms %}
+              <div class="paper-container">
+                <div class="paper-summary">
+                  <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                  <i class="arrow down toggle-details"></i>
+                </div>
+                <div  class="paper-details" style="display: none;">
+                  {{ paperform.as_p }}
+                  <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
+
+                  {% if paperform.instance.uploaded_file %}
+                    <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
+                  {% endif %}
+                  {% if paperform.instance.agreement_file %}
+                    <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
+                  {% endif %}
+                  <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}"> Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.
+                </div>
+                <hr>
+              </div>
+            {% endfor %}
+          </fieldset>
+          <style>
+            .paper-summary {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            .toggle-details {
+              cursor: pointer;
+              border: solid black;
+              border-width: 0 3px 3px 0;
+              display: inline-block;
+              padding: 3px;
+            }
+            .down {
+              transform: rotate(45deg);
+              -webkit-transform: rotate(45deg);
+            }
+            .up {
+              transform: rotate(-135deg);
+              -webkit-transform: rotate(-135deg);
+            }
+          </style>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script>
+          $(document).ready(function() {
+            function toggleDetails() {
+              const $detailsDiv = $(this).parent().next('.paper-details');
+              $detailsDiv.toggle();
+              $(this).toggleClass('down up');
+            }
+            // Initial binding for existing elements
+            $('.toggle-details').on('click', toggleDetails);
+          });
+        </script>
+        
+
+        <!-- <fieldset class="papers-list">
+            <legend>Papers</legend>
+            <div class="list-group" id="sortable-list">
                 {% for paperform in paper_forms %}
-                    <li>
+                    <div class="list-group-item sortable-item" data-paper-id="{{ paperform.instance.id }}">
                         {{ paperform.as_p }}
-                        <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}"> Mark for deletion
                         {% if paperform.instance.uploaded_file %}
                             <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
                         {% endif %}
                         {% if paperform.instance.agreement_file %}
                             <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
                         {% endif %}
-                    </li>
+                        <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.
+                    </div>
+                    {%if not forloop.last%}
+                    <hr>
+                    {%endif%}
                 {% endfor %}
-            </ul>
-        </fieldset>
+            </div>
+            <input type="hidden" id="sorted-order" name="sorted_order" value="">
+        </fieldset> -->
+        <div class= "submit-container">
         <input type="submit" name="submit_button" class="button-13" value="Confirm">
+        </div>
     </form>
+    
+    <!-- <script>
+    const sortable = document.getElementById('sortable-list')
+    new Sortable(sortable, {
+            group: 'shared',
+            animation: 150,
+            ghostClass: 'blue-background-class'});
+    </script> -->
 
     {% else %}
+    <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
     <fieldset class="workshop-details">
         <legend>Workshop Details</legend>
         <p><strong>Full title:</strong> {{ workshop.workshop_full_title }}</p>
@@ -63,11 +164,23 @@
 
         <p><strong>Editors:</strong></p>
         <ul class="editors-list">
-            {% for editor in workshop.editors.all %}
-            <li>{{ editor.editor_name }} (<i>{{ editor.institution}}, {{editor.institution_country}}</i>)</li>
-            {% endfor %}
-        </ul>
-        <p><strong>Editor agreement:</strong> {{workshop.editor_agreement}}</p>
+          {% for editor in workshop.editors.all %}
+          <li>
+              {% if editor.editor_url %}
+              <a href="{{ editor.editor_url }}" target="_blank">{{ editor.editor_name }}</a>
+              {%else%}
+              {{ editor.editor_name }}
+              {%endif%}
+              (<i>
+                  <a href="{{ editor.institution_url }}" target="_blank">{{ editor.institution }}</a>, 
+                  {{ editor.institution_country }}
+              </i>)
+          </li>
+          {% endfor %}
+      </ul>
+        <p><strong>Editor agreement:</strong>  
+          
+          <a href="{{workshop.editor_agreement.url}}" target="_blank">{{workshop.editor_agreement.name}}</a></p>
     </fieldset>
     
     {% if session_title_list %}
@@ -76,7 +189,7 @@
     <fieldset>
         <legend>Papers</Legend>
         {% for session_title in session_title_list %}
-            <fieldset class="papers-list">
+            <fieldset class="inner_fieldset">
                 <legend>{{ session_title }}</legend>
                 <ul>
                     {% for paper in papers %}
@@ -100,8 +213,9 @@
         {% endfor %}
     </fieldset>
     {% else %}
-        <legend>Papers</Legend>
+        
             <fieldset class="papers-list">
+                <legend>Papers</Legend>
             <ul>
             {% for paper in papers %}
                     <li>
@@ -123,9 +237,11 @@
 
     <br>
     <form method="post" id="form-container" enctype="multipart/form-data">
+        <div class = "submit-container">
         {% csrf_token %}
         <input type="submit" name="submit_button" class = "button-13" value="Edit">
-        <input type="submit" name="submit_button" class = "button-13" value="Submit Workshop">
+        <input type="submit" name="submit_button" class = "button-13" value="Submit Workshop" onclick="return confirm('Are you sure you want to submit the workshop? You are unable to edit your workshop after submitting. ')">
+    </div>
     </form>
     {% endif %}
 

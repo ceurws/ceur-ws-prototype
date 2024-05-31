@@ -1,6 +1,7 @@
 {% extends 'workshops/edit_author.html' %}
 {% load static %}
 {% block content %}
+{%load crispy_forms_tags %} 
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,36 +14,132 @@
 </head>
 
 <body>
+
   {% if edit_mode %}
+  <h1>Edit Paper Details</h1>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <fieldset>
-      <legend>Paper Details</legend>
-      {{ paper_form.as_p }}
+      <legend>Paper Details</legend> 
+      {{ paper_form|crispy }}
       <p>Uploaded File: <a href="{{ paper_form.instance.uploaded_file.url }}">{{ paper_form.instance.uploaded_file.name }}</a></p>
       <p>Agreement File: <a href="{{ paper_form.instance.agreement_file.url }}">{{ paper_form.instance.agreement_file.name }}</a></p>
     </fieldset>
+    <style>
+      .delete_object {
+        color: red;
+        /* background-color: #f8d7da; */
+        border-color: #f5c6cb;
+        position: relative;
+        padding: .75rem 1.25rem;
+        /* margin-bottom: 1rem; */
+        border: 1px solid transparent;
+        /* border-radius: .25rem; */
+        text-align: center;
+        font-weight: bold;
+      }
 
+    .toggle-details {
+    cursor: pointer;
+    border: solid black;
+    border-width: 0 3px 3px 0;
+    display: inline-block;
+    padding: 3px;
+    margin-left: 98%;
+  }
+      .arrow {
+      border: solid black;
+      border-width: 0 3px 3px 0;
+      display: inline-block;
+      padding: 3px;
+    }
+    .down {
+      transform: rotate(45deg);
+      -webkit-transform: rotate(45deg);
+    }
+    .up {
+      transform: rotate(-135deg);
+      -webkit-transform: rotate(-135deg);
+    }
+      </style>
     <fieldset id="author-fieldset">
       <legend>Author Details</legend>
-      {{ author_formset.management_form }}
       <div id="author-form" class="author-form">
-        <!-- {{ author_formset.as_p }} -->
-        {% for form in author_formset %}
-        {{ form.as_p }}
-      {% endfor %}
-    </div>
+          {{ author_formset.management_form }}
+          {% for form in author_formset %}
+          <div class="author-container">
+              <div class="author-summary">
+                  <span class="author-name">{{ form.author_name.value }}</span>
+                  <i class="arrow down toggle-details"></i>
+              </div>
+              <div class="author-details" style="display: none;">
+                  {{ form|crispy }}
+                  <input type="checkbox" name="authors_to_delete" value="{{ form.instance.id }}">
+                  <a class="delete_object">Select to delete an author from the paper.</a>
+              </div>
+              <hr>
+          </div>
+          {% endfor %}
+      </div>
       <input type="button" value="Add Author" class="button-13" id="add_author">
-    </fieldset>
-
+  </fieldset>
+  
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          function setupToggleIcons() {
+              const toggleIcons = document.querySelectorAll('.toggle-details');
+  
+              toggleIcons.forEach(icon => {
+                  icon.addEventListener('click', function() {
+                      const detailsDiv = this.parentElement.nextElementSibling;
+                      if (detailsDiv.style.display === 'none') {
+                          detailsDiv.style.display = 'block';
+                          this.classList.remove('down');
+                          this.classList.add('up');
+                      } else {
+                          detailsDiv.style.display = 'none';
+                          this.classList.remove('up');
+                          this.classList.add('down');
+                      }
+                  });
+              });
+          }
+  
+          setupToggleIcons();
+  
+          document.getElementById('add_author').addEventListener('click', function() {
+              const formContainer = document.getElementById('author-form');
+              const totalFormsInput = document.getElementById('id_author-TOTAL_FORMS');
+              let formCount = parseInt(totalFormsInput.value, 10);
+  
+              const newFormHtml = `
+                  <div class="author-container">
+                      <div class="author-summary">
+                          
+                      </div>
+                      <div class="author-details" style="display: none;">
+                          ${formContainer.children[1].innerHTML.replace(/author-\d+/g, `author-${formCount}`)}
+                          
+                      </div>
+                  </div>
+              `;
+              formContainer.insertAdjacentHTML('beforeend', newFormHtml);
+              setupToggleIcons();
+  
+              formCount++;
+              totalFormsInput.value = formCount;
+          });
+      });
+  </script>
     <input type="submit" name="submit_button" class="button-13" value="Confirm">
   </form>
 
   <div id="empty_author_form" style="display:none">
     <table class='no_error'>
-      {{ author_formset.empty_form }}
+      {{ author_formset.empty_form|crispy}}
       <br>
     </table>
+    <hr>
   </div>
   
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -57,16 +154,22 @@
       $('#id_author-TOTAL_FORMS').val(parseInt(form_idx) + 1);
     });
   </script>
+  
   {% else %}
   <h1>Paper Submitted Correctly</h1>
-  <p>Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_full_title }}</strong>.</p>
+  <p style = "text-align: center;">Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_full_title }}</strong>.</p>
   <fieldset class="paper-details">
     <legend>Paper Details</legend>
     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
     <p><strong>Pages:</strong> {{ paper.pages }}</p>
     <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
     <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
+    
+    {%if not paper.session%}
+    <i>The paper has not yet been assigned to a session.</i>
+    {%else%}
     <p><strong>Session:</strong> {{ paper.session }}</p>
+    {%endif%}
   </fieldset>
   <br>
   <fieldset>
@@ -82,47 +185,47 @@
     </ul>
   </fieldset>
 
+  <p style = "text-align:center"><i>If you wish to make further changes at a later stage to the paper or author details please save this url:</i></p>
+  <br>
+
+  <fieldset>
+  <div class="submit-container">
   <div class="tooltip">
-    <i>If you wish to make further changes at a later stage please save this url:</i>
-    <br>
-    <a id="author_url" href="{{ request.build_absolute_uri }}" target="_blank">Author edit URL</a>
-    <button class="copy_clipboard" onclick="CopyText('author_url', 'myTooltip')" onmouseout="outFunc('myTooltip')">
-      <span class="tooltiptext" id="myTooltip">Copy to clipboard</span>
+
+  <a id="author_url" href="{{ request.build_absolute_uri }}" target="_blank">Author edit URL</a>
+    <button class="copy_clipboard" onclick="CopyText('author_url', 'tooltip_edit_author')" onmouseout="outFunc('tooltip_edit_author')">
+      <span class="tooltiptext" id="tooltip_edit_author">Copy to clipboard</span>
       <img src="{% static 'workshops/icons8-copy-24.png' %}" alt="Copy to clipboard" width="20" height="20">
     </button>
   </div>
 
-  <form method="post" id="form-container" enctype="multipart/form-data">
+  <form method="post"  enctype="multipart/form-data">
     {% csrf_token %}
-    <input type="submit" name="edit_button" class="button-13" value="Edit">
-  </form>
-  {% endif %}
-
-  {% if messages %}
-  <div id="messageModal" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Notice</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          {% for message in messages %}
-          <p>{{ message }}</p>
-          {% endfor %}
-        </div>
-      </div>
-    </div>
+    <br>
+    <br>
+    <br>
+    <input  type="submit" name="edit_button" class="button-13" value="Edit" style="display: center;">
   </div>
-  <script>
-    $(document).ready(function () {
-      $("#messageModal").modal('show');
-    });
-  </script>
-  {% endif %}
-</body>
+  </form>
 
+</fieldset>
+  {% endif %}
+
+</body>
+<script> 
+  function CopyText(elementId, tooltipId) {
+      var url = document.getElementById(elementId).href;  
+      navigator.clipboard.writeText(url).then(() => {
+          console.log('Text copied to clipboard');
+          var tooltip = document.getElementById(tooltipId);
+          tooltip.innerHTML = "Copied to clipboard!";
+      });
+  }
+
+  function outFunc(tooltipId) {
+      var tooltip = document.getElementById(tooltipId);
+      tooltip.innerHTML = "Copy to clipboard";
+  }
+</script>
 </html>
 {% endblock %}

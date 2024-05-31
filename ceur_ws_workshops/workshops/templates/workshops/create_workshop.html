@@ -1,6 +1,7 @@
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
+{%load crispy_forms_tags %} 
 
 <form method="post" id="form-container" enctype="multipart/form-data">
   <h1 class="header-title">Create Workshop Volume</h1>
@@ -8,12 +9,18 @@
 
   <fieldset>
     <legend>Workshop Details</legend>
-    <i> Please provide details about the workshop in the following section. Optional fields can be left blank if not
-      applicable. </i>
-    {{ form.as_p }}
+    Please provide details about the workshop in the following section. Please take into account the following rules: 
+      <ul>
+        <li> If your workshop is colocated with another workshop, please fill out this form <u>only once</u> and provide the name with which this workshop was colocated in the correct field.
+        <li> Fields denoted with an asterisk are required fields.
+        <li> Optional fields can be left blank if they are not applicable.  
+      </ul>  
+      
+    {% crispy form %}
+    <input type="hidden" name="workshop_id" value="{{ form.instance.id }}">
+
   </fieldset>
 
-  <hr>
 
   <fieldset id="session_fieldset">
     <legend>Session</legend>
@@ -24,7 +31,7 @@
     {{ session_form.management_form }}
     <div class="session-form" id="session-form">
       {% for form in session_form %}
-      {{ form.as_p }}
+      {{form.as_p}}
       <br>
       {% endfor %}
     </div>
@@ -40,14 +47,16 @@
     {{ editor_form.management_form }}
     <div class="editor-form" id="editor-form">
       {% for editor in editor_form %}
-      {{ editor.as_p }}
+      {{editor|crispy}}
       <br>
       {% endfor %}
     </div>
     <input type="button" value="Add Editor" class="button-13" id="add_editor">
   </fieldset>
   <br>
-  <input type="submit" class="button-13" value="Save Workshop">
+  <div class="submit-container">
+    <input type="submit" class="button-13" value="Save Workshop">
+  </div>
 </form>
 
 
@@ -56,6 +65,7 @@
     {{ editor_form.empty_form }}
     <br>
   </table>
+  <hr>
 </div>
 <div id="empty_session_form" style="display:none">
   <table class='no_error'>

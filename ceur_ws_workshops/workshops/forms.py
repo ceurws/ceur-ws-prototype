@@ -1,9 +1,8 @@
 
 from .models import Workshop, Editor, Paper, Author, Session
 from django import forms
-from django.forms import modelformset_factory, TextInput, FileInput, BaseModelFormSet
+from django.forms import modelformset_factory, TextInput, FileInput, BaseModelFormSet, Textarea
 from django_countries.widgets import CountrySelectWidget
-from django.templatetags.static import static
 import os, json
 from django.core.exceptions import ValidationError
 from signature_detect.loader import Loader
@@ -13,6 +12,8 @@ from signature_detect.judger import Judger
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
 
 class DateInput(forms.DateInput):
     input_type = "date"
@@ -29,25 +30,19 @@ class WorkshopForm(forms.ModelForm):
                 'workshop_language_iso', 'workshop_description', 'workshop_country',  'workshop_city', 'year_final_papers', 'workshop_colocated',
                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
                 'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement']
-        
-        help_texts = {'workshop_acronym': '''    <br/><br/>Please provide the acronym of the workshop.  
-                    the acronym of the workshop plus YYYY (year of the workshop)
-                    the acronym may contain '-'; between acronym and year is either a blank
-                    or a '-'. The year is exactly 4 digits, e.g. 2012''',
-                    'workshop_colocated': '''<br> <br> The name of the workshop with which this workshop was colocated. Usually, this is the name of the main conference. If the workshop was not colocated, leave this field empty.'''
-    }
+
         widgets = {
-            'workshop_short_title': TextInput(attrs={'size': 70, 
+            'workshop_short_title': TextInput(attrs={'size': 100, 
                                             'placeholder': 'Provide the shorthand title of the workshop'}),
-            'workshop_full_title': TextInput(attrs={'size': 70, 
+            'workshop_full_title': TextInput(attrs={'size': 100, 
                                             'placeholder': 'Provide the full title of the workshop'}),
-            'workshop_acronym': TextInput(attrs={'size': 70, 
+            'workshop_acronym': TextInput(attrs={'size': 100, 
                                             'placeholder': 'Provide the acronym of the workshop'}),
-            'workshop_language_iso': TextInput(attrs={'size': 70, 
+            'workshop_language_iso': TextInput(attrs={'size': 100, 
                                             'placeholder': 'Enter ISO of the language of the workshop'}),
-            'workshop_description': TextInput(attrs={'size': 70,
+            'workshop_description': Textarea(attrs={'cols': 82, 'rows' : 10, 
                                                      'placeholder': 'Briefly describe the workshop'}),
-            'workshop_city': TextInput(attrs={'size': 70, 
+            'workshop_city': TextInput(attrs={'size': 100, 
                                             'placeholder': 'The city the workshop took place in'}),
             'workshop_country': CountrySelectWidget(),
 
@@ -55,23 +50,23 @@ class WorkshopForm(forms.ModelForm):
 
             'workshop_end_date': DateInput(attrs={'id': 'id_workshop_end_date'}),
 
-            'year_final_papers': TextInput(attrs={'size': 70, 
+            'year_final_papers': TextInput(attrs={'size': 100, 
                                             'placeholder': 'Provide the year the final papers of the proceedings were produced'}),
-            'workshop_colocated': TextInput(attrs={'size': 70, 
-                                            'placeholder': '(optional) Provide the workshop with which this workshop was colocated'}),
-            'license': TextInput(attrs={'size': 70, 
+            'workshop_colocated': TextInput(attrs={'size': 100, 
+                                            'placeholder': '(optional) Provide the workshop with which this workshop was colocated',}),
+            'license': TextInput(attrs={'size': 100, 
                                             'placeholder': 'MIT'}),
-            'volume_owner': TextInput(attrs={'size': 70,
+            'volume_owner': TextInput(attrs={'size': 100,
                                             'placeholder': 'Provide the volume creator\'s (your) name'}),
-            'volume_owner_email': TextInput(attrs={'size': 70,
+            'volume_owner_email': TextInput(attrs={'size': 100,
                                             'placeholder': 'Provide the volume creator\'s (your) e-mail'}),
-            'total_submitted_papers': TextInput(attrs={'size': 70,
+            'total_submitted_papers': TextInput(attrs={'size': 100,
                                             'placeholder': 'Provide the total number of papers submitted to the workshop'}),
-            'total_accepted_papers': TextInput(attrs={'size': 70,
+            'total_accepted_papers': TextInput(attrs={'size': 100,
                                             'placeholder': 'Provide the total number of accepted papers submitted to the workshop'}),
-            'total_reg_acc_papers': TextInput(attrs={'size': 70,
+            'total_reg_acc_papers': TextInput(attrs={'size': 100,
                                             'placeholder': '(optional) Provide the total number of regular length papers submitted'}),
-            'total_short_acc_papers': TextInput(attrs={'size': 70,
+            'total_short_acc_papers': TextInput(attrs={'size': 100,
                                             'placeholder': '(optional) Provide the total number of short length papers submitted'}),
             'editor_agreement': FileInput(attrs={'accept': '.pdf', 
                                                  'placeholder': 'Upload the agreement file'}),
@@ -91,6 +86,12 @@ class WorkshopForm(forms.ModelForm):
         # Populate dropdown choices from JSON data
         choices = [(data['639-2'], data['name']) for code, data in languages.items()]
         self.fields['workshop_language_iso'].choices = choices
+        self.helper = FormHelper(self)
+        self.helper.form_tag = False
+
+        self.fields['workshop_colocated'].help_text = "<i>Please provide the acronym (acronym-YYYY) of the conference with which this workshop was colocated; if the workshop was not colocated with any conference, leave this field empty.</i>"
+        self.fields['workshop_acronym'].help_text ='<i>Please provide the acronym of the workshop plus YYYY (year of the workshop in exactly 4 digits, e.g. 2012). Between the acronym and the year a \'-\' should be placed.</i>'
+
 
     def clean(self):
         cleaned_data = super().clean()
@@ -107,42 +108,48 @@ class WorkshopForm(forms.ModelForm):
         if total_reg_acc_papers is not None and total_short_acc_papers is not None:
             if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
                 raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
-    #     if editor_agreement:
-    #         editor_agreement_file_path = os.path.join(settings.MEDIA_ROOT, editor_agreement.name)
-    #         default_storage.save(editor_agreement.name, ContentFile(editor_agreement.read()))
-    #         print(editor_agreement_file_path)
-    #         self.instance.agreement_file = editor_agreement.name
             
-    #         if not self._detect_signature_in_image(editor_agreement_file_path):
-    #             raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
+        if not editor_agreement:
+            raise ValidationError("Please upload the agreement file.")
+        if editor_agreement:
+            pass
+            # editor_agreement_file_path = os.path.join(settings.MEDIA_ROOT, editor_agreement.name)
+            # default_storage.save(editor_agreement.name, ContentFile(editor_agreement.read()))
+            
+            # if not self._detect_signature_in_image(editor_agreement_file_path):
+            #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
 
-    #     return cleaned_data
+        return cleaned_data
     
-    # def _detect_signature_in_image(self, file_path):
-    #     loader = Loader()
-    #     extractor = Extractor()
-    #     cropper = Cropper(border_ratio=0)
-    #     judger = Judger()
+    def _detect_signature_in_image(self, file_path):
+        loader = Loader()
+        extractor = Extractor()
+        cropper = Cropper(border_ratio=0)
+        judger = Judger()
 
-    #     masks = loader.get_masks(file_path)
-    #     is_signed = False
-    #     for mask in masks:
-    #         labeled_mask = extractor.extract(mask)
-    #         results = cropper.run(labeled_mask)
-    #         for result in results.values():
-    #             is_signed = judger.judge(result["cropped_mask"])
-    #             if is_signed:
-    #                 break
-    #         if is_signed:
-    #             break
-    #     return is_signed
+        masks = loader.get_masks(file_path)
+        is_signed = False
+        for mask in masks:
+            labeled_mask = extractor.extract(mask)
+            results = cropper.run(labeled_mask)
+            for result in results.values():
+                is_signed = judger.judge(result["cropped_mask"])
+                if is_signed:
+                    break
+            if is_signed:
+                break
+        return is_signed
+        
+
+
+
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         file_uploaded = kwargs.pop('file_uploaded', False)
         self.workshop = kwargs.pop('workshop', None) 
         super(PaperForm, self).__init__(*args, **kwargs)
-    
+
         if file_uploaded:
             self.fields['uploaded_file'].label = 'Change current file'
         else:
@@ -157,12 +164,17 @@ class PaperForm(forms.ModelForm):
         model = Paper
         fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file']
 
+        help_texts = {'pages': '<br><i>Provide the length(number of pages) of the paper</i>.<br>',
+                      'agreement_file': '<br><i>The agreement file of the paper needs to be <b>hand signed</b>' }
         widgets = {
             'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper'}),
-            'pages': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the number of pages'}),
+            'pages': forms.TextInput(attrs={'size': 70, 
+                                            'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
         }
+
+        ordering = ['sort_order']
     def clean(self):
         cleaned_data = super().clean()
         agreement_file = cleaned_data.get('agreement_file')
@@ -170,18 +182,17 @@ class PaperForm(forms.ModelForm):
         
         # if uploaded_file and agreement_file and self.workshop:
 
-        #     # agreement_file_name = os.path.join(directory_path, agreement_file.name)
-        #     agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
-        #     default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
+            # agreement_file_name = os.path.join(directory_path, agreement_file.name)
+        agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
+        default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
 
-        #     self.instance.agreement_file = agreement_file.name
-            
-        #     if not self._detect_signature_in_image(agreement_file_path):
-        #         raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
+        self.instance.agreement_file = agreement_file.name
+        
+        if not self._detect_signature_in_image(agreement_file_path):
+            raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
         # else: 
         #     raise ValidationError("Paper and/or agreement not saved.")
         
-            
         return cleaned_data
 
     def _detect_signature_in_image(self, file_path):
@@ -203,28 +214,6 @@ class PaperForm(forms.ModelForm):
                 break
         return is_signed
     
-class CustomAuthorFormSet(BaseModelFormSet):
-    def clean(self):
-        super().clean()
-        
-        for form in self.forms:
-            if self.can_delete and self._should_delete_form(form):
-                continue
-            
-            author_name = form.cleaned_data.get('author_name')
-            author_email = form.cleaned_data.get('author_email')
-            author_university = form.cleaned_data.get('author_university')
-            author_uni_url = form.cleaned_data.get('author_uni_url')
-
-            if not author_name:
-                form.add_error('author_name', 'Author name is required.')
-            if not author_email:
-                form.add_error('author_email', 'Author email is required.')
-            if not author_university:
-                form.add_error('author_university', 'Author university is required.')
-            if not author_uni_url:
-                form.add_error('author_uni_url', 'Author university URL is required.')
-
 AuthorFormSet = modelformset_factory(
         Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=0,
         # CSS styling but for formsets
@@ -234,11 +223,13 @@ AuthorFormSet = modelformset_factory(
             'author_university': TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the university of the author'}),
             'author_uni_url': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the URL of the university'}),
+                                            'placeholder': 'Enter the URL of the university which the author is affiliated to'}),
             'author_email': TextInput(attrs={'size': 50,
                                             'placeholder': 'Enter the email of the author'})
         },
-        formset=CustomAuthorFormSet
+        labels = {
+            'author_uni_url': "University URL",
+        },
 )
 
 EditorFormSet = modelformset_factory(

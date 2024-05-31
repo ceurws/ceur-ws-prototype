@@ -9,11 +9,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json, os, zipfile
 from datetime import date
 from django.core.serializers.json import DjangoJSONEncoder
-from signature_detect.loader import Loader
-from signature_detect.extractor import Extractor
-from signature_detect.cropper import Cropper
-from signature_detect.judger import Judger
 from django.conf import settings
+from django.template import RequestContext
 
 def index(request):
     """
@@ -22,7 +19,13 @@ def index(request):
     return render(request, 'workshops/index.html')
     
 class CreateWorkshop(View):
-
+    success_path = "workshops/workshop_edit_success.html"
+    edit_path = "workshops/edit_workshop.html"
+    
+    def get_workshop(self, workshop_id):
+        workshop = get_object_or_404(Workshop, id = workshop_id)
+        return workshop
+    
     def get(self, request):
         form = WorkshopForm()
         editor_form = EditorFormSet(queryset=Editor.objects.none(), 
@@ -34,54 +37,75 @@ class CreateWorkshop(View):
                    'session_form':session_form}
         return render(request, "workshops/create_workshop.html", context)
     
-    def post(self,request):
-        success_path = "workshops/workshop_edit_success.html"
-        edit_path = "workshops/edit_workshop.html"
-
-        editor_form = EditorFormSet(queryset=Editor.objects.none(),data = request.POST,prefix="editor")
-        session_form = SessionFormSet(queryset=Session.objects.none(),data = request.POST,prefix="session")
-        form = WorkshopForm(data = request.POST, files = request.FILES)
-
+    def post(self, request):
+        # if statement to check if the submit button has been clicked.
         if 'submit_button' in request.POST:
-            if all([form.is_valid(), editor_form.is_valid(), session_form.is_valid()]):
-                workshop = form.save(commit=False)  
-                workshop.save()  
-                workshop.editor_agreement = request.FILES['editor_agreement']
-                editor_instances = editor_form.save()
-                session_instances = session_form.save()
+            workshop_instance = self.get_workshop(request.POST.get('workshop_id'))
+            # check if new editor agreement is uploaded
+            if bool(request.FILES.get('editor_agreement', False)) == True:
+                workshop_form = WorkshopForm(data = request.POST, 
+                                             files = request.FILES,
+                                             instance = workshop_instance)
 
+                editor_formset = EditorFormSet(queryset=Editor.objects.none(),
+                                              data = request.POST, 
+                                              prefix="editor")
+                session_formset = SessionFormSet(queryset=Session.objects.none(),data = request.POST, prefix="session")
+            
+            # if no new editor agreement is uploaded we extract the previous editor agreement
+            else:
+    
+                workshop_form = WorkshopForm(request.POST, instance = workshop_instance)
+                editor_formset = EditorFormSet(queryset=Editor.objects.none(),
+                                              data = request.POST, 
+                                              prefix="editor")
+                session_formset = SessionFormSet(queryset=Session.objects.none(),data = request.POST, prefix="session")
+
+            # Once forms have been bound (either using old or new editor agreement), we validate and save to the database.
+            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
+                workshop = workshop_form.save()  
+                
+                editor_instances = editor_formset.save()
+                session_instances = session_formset.save()
                 workshop.editors.add(*editor_instances)
                 workshop.sessions.add(*session_instances)
 
-                workshop.save()
-
-                organizer_url = reverse('workshops:workshop_overview', args=[workshop.secret_token])
-                author_url = reverse('workshops:author_upload', args=[workshop.secret_token])
                 context = {
-                    'organizer_url': organizer_url,
-                    'author_url': author_url
+                    'organizer_url': reverse('workshops:workshop_overview', args=[workshop.secret_token]),
+                    'author_url': reverse('workshops:author_upload', args=[workshop.secret_token])
                 }
-                return render(request, success_path, context)
+                return render(request, self.success_path, context)
             else:
-                context = {'form': form, 
-                           'editor_form':editor_form, 
-                           'session_form':session_form}
-                return render(request, edit_path, context)
+                print('problem validating')
+
+        # if no confirm button has been clicked we validate the data first with the user
         else:
-            if all([form.is_valid(), editor_form.is_valid(), session_form.is_valid()]):
-                form.save(commit=False)
-                if 'editor_agreement' not in request.FILES:
-                    print(request.FILES['editor_agreement'])
-                    workshop.editor_agreement = request.FILES['editor_agreement']
-                context = {'form': form, 
-                           'editor_form':editor_form, 
-                           'session_form':session_form}
-                return render(request, edit_path, context)
+
+            workshop_form = WorkshopForm(data = request.POST, 
+                                         files = request.FILES)
+            editor_formset = EditorFormSet(queryset=Editor.objects.none(),
+                                           data = request.POST, 
+                                           prefix="editor")
+            session_formset = SessionFormSet(queryset=Session.objects.none(),data = request.POST, prefix="session")
+            
+            # before rendering we check if the bound forms are valid and we save a workshop instance so that the editor agreement can be extracted in a later stage
+            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
+                workshop_instance = workshop_form.save()  
+                
+                bound_workshop_form = WorkshopForm(instance = workshop_instance)
+                context = {
+                           'form' : bound_workshop_form, 
+                           'editor_form' : editor_formset, 
+                           'session_form' : session_formset,
+                           'workshop_instance' : workshop_instance}
+                return render(request, self.edit_path, context) 
+            
             else:
-                context = {'form': form, 
-                           'editor_form':editor_form, 
-                           'session_form':session_form}
-                return render(request, edit_path, context)
+                # cleanfunction
+                context = {'form': workshop_form, 
+                           'editor_form':editor_formset, 
+                           'session_form':session_formset}
+                return render(request, self.edit_path, context)
 
 class WorkshopOverview(View):
     def get_workshop(self):
@@ -200,7 +224,7 @@ class WorkshopOverview(View):
     def _zip_agreement_files(self, workshop):
         agreement_path = os.path.join(settings.MEDIA_ROOT, 'agreement', f'Vol-{workshop.id}', )
         os.makedirs('zipped_agreements', exist_ok=True)
-        zip_filename = os.path.join(settings.BASE_DIR, 'zipped_agreements', f'AGREEMENTS-Vol-{workshop.id:04d}.zip')
+        zip_filename = os.path.join(settings.BASE_DIR, 'zipped_agreements', f'AGREEMENTS-Vol-{workshop.id}.zip')
     
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for root, _, files in os.walk(agreement_path):
@@ -229,34 +253,34 @@ class WorkshopOverview(View):
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
         elif request.POST["submit_button"] == "Confirm":
-            workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST)
+            workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST, files = request.FILES)
 
             if workshop_form.is_valid():
                 workshop_form.save()
-
-            uploaded_files = request.FILES.getlist('uploaded_file')
-            agreement_files = request.FILES.getlist('agreement_file')
-
             existing_paper_ids = request.POST.getlist('paper_id')  
             papers_to_delete = request.POST.getlist('papers_to_delete') 
 
             for paper_id in papers_to_delete:
                 Paper.objects.filter(id=paper_id).delete()
 
-            for i, paper_id in enumerate(existing_paper_ids):
+            for paper_id in existing_paper_ids:
                 if paper_id in papers_to_delete:
                     continue  
-
-                paper_instance = Paper.objects.filter(id=paper_id).first() if paper_id else None
-                paper_form_data = request.POST.copy()
-                if i < len(uploaded_files):
-                    paper_form_data['uploaded_file'] = uploaded_files[i]
-                if i < len(agreement_files):
-                    paper_form_data['agreement_file'] = agreement_files[i]
-
-                paper_form = PaperForm(paper_form_data, instance=paper_instance)
+                paper_instance = Paper.objects.filter(id=paper_id).first() 
+                
+                paper_form = PaperForm(data = request.POST, files = request.FILES, instance=paper_instance)
                 if paper_form.is_valid():
                     paper_form.save()
+
+
+            # Handle the sorted order
+            # sorted_order = request.POST.get('sorted_order', ',')
+            # if sorted_order:
+            #     sorted_ids = sorted_order.split(',')
+            #     for index, paper_id in enumerate(sorted_ids):
+            #         paper = Paper.objects.get(id=paper_id)
+            #         paper.sort_order = index
+            #         paper.save()
 
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
@@ -304,12 +328,11 @@ class AuthorUpload(View):
 
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, secret_token = self.kwargs['secret_token'])
         else:
-            print("Paperform not valid")
+            print("Paperform not valid 1")
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
         
     def create_paper(self, request, author_formset, paper_form):
 
-        # check whether files are signed
         if paper_form.is_valid() and author_formset.is_valid():
             paper_instance = paper_form.save(commit=False) 
             paper_instance.workshop = self.get_workshop()
@@ -318,7 +341,6 @@ class AuthorUpload(View):
             paper_instance.agreement_file.name = self._get_agreement_filename(paper_instance, paper_instance.agreement_file.name)
             
             paper_instance.save()  
-            # author_instances = author_formset.save()
 
             if request.POST['session'] != '':
                 session_instance = Session.objects.get(pk=request.POST['session'])
@@ -327,7 +349,13 @@ class AuthorUpload(View):
             # paper_instance.authors.add(*author_instances)  
             self.get_workshop().accepted_papers.add(paper_instance)  
             
-            return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
+            context = {
+                'author_formset' : author_formset, 
+                'paper_form' : paper_form,
+                'paper_instance' : paper_instance
+                }
+
+            return render(request, self.edit_path, context)
         else:
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
 
@@ -348,13 +376,12 @@ class AuthorUpload(View):
         else:
             author_formset = AuthorFormSet(request.POST, prefix="author")
 
-            paper_instance = Paper.objects.filter(paper_title=request.POST.get('paper_title'), workshop = self.get_workshop()).first()
+            paper_instance = Paper.objects.filter(secret_token=request.POST.get('secret_token'), workshop = self.get_workshop()).first()
 
             paper_form = PaperForm(request.POST, file_uploaded=True, workshop=self.get_workshop(), instance = paper_instance)
-        # print(author_formset)
+
         if 'confirm_button' in request.POST:
             return self.submit_paper(request, author_formset, paper_form)
-        
         else:
             return self.create_paper(request, author_formset, paper_form)
         
@@ -380,8 +407,21 @@ def edit_author_post_view(request, paper_id, secret_token):
             context.update({'paper_form': paper_form, 'author_formset': author_formset, 'edit_mode': True})
 
         elif 'submit_button' in request.POST and paper_form.is_valid() and author_formset.is_valid():
+
             paper_form.save()
-        
+
             paper.authors.add(*author_formset.save())
+            
+            authors_to_delete = request.POST.getlist('authors_to_delete')
+
+            for author_id in authors_to_delete:
+                author = get_object_or_404(Author, id=author_id)
+                paper.authors.remove(author)
+                author.delete()
             context.update({'paper_form': paper_form, 'paper': paper, 'edit_mode': False})
+    else:
+        paper_form = PaperForm(instance=paper)
+        author_formset = AuthorFormSet(queryset=paper.authors.all())
+
+    
     return render(request, 'workshops/author_upload_success.html', context)
