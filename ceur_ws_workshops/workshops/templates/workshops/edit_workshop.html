@@ -22,7 +22,8 @@
         }
     </style>
     {% crispy form %}
-    <i>Currently uploaded file: {{ form.instance.editor_agreement }}</i>
+    
+    <i>Currently uploaded file: <a href ="{{form.instance.editor_agreement.url}}">{{ form.instance.editor_agreement.name }}</a></i>
     <input type="hidden" name="workshop_id" value="{{ workshop_instance.id }}">
 
     </fieldset>

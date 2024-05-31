@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workshop Overview</title>
     <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
 </head>
 <body>
     <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
@@ -32,16 +33,14 @@
         {% csrf_token %}
         <fieldset class="workshop-details">
             <legend>Workshop Details</legend>
-
             {{workshop_form.as_p}}
-
         </fieldset>
-
+    
         <fieldset class="papers-list">
             <legend>Papers</legend>
-            <ul>
+            <div class="list-group" id="sortable-list">
                 {% for paperform in paper_forms %}
-                    <li>
+                    <div class="list-group-item sortable-item" data-paper-id="{{ paperform.instance.id }}">
                         {{ paperform.as_p }}
                         {% if paperform.instance.uploaded_file %}
                             <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
@@ -49,13 +48,27 @@
                         {% if paperform.instance.agreement_file %}
                             <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
                         {% endif %}
-                    </li>
-                    <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}"><a class = "delete_object">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.</a>
+                        <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.
+                    </div>
+                    {%if not forloop.last%}
+                    <hr>
+                    {%endif%}
                 {% endfor %}
-            </ul>
+            </div>
+            <input type="hidden" id="sorted-order" name="sorted_order" value="">
         </fieldset>
+        <div class= "submit-container">
         <input type="submit" name="submit_button" class="button-13" value="Confirm">
+        </div>
     </form>
+    
+    <script>
+    const sortable = document.getElementById('sortable-list')
+    new Sortable(sortable, {
+            group: 'shared',
+            animation: 150,
+            ghostClass: 'blue-background-class'});
+    </script>
 
     {% else %}
     <fieldset class="workshop-details">
@@ -80,7 +93,7 @@
             <li>{{ editor.editor_name }} (<i>{{ editor.institution}}, {{editor.institution_country}}</i>)</li>
             {% endfor %}
         </ul>
-        <p><strong>Editor agreement:</strong> {{workshop.editor_agreement}}</p>
+        <p><strong>Editor agreement:</strong>  <a href="{{workshop.editor_agreement.url}}" target="_blank">{{workshop.editor_agreement.name}}</a></p>
     </fieldset>
     
     {% if session_title_list %}
@@ -113,8 +126,9 @@
         {% endfor %}
     </fieldset>
     {% else %}
-        <legend>Papers</Legend>
+        
             <fieldset class="papers-list">
+                <legend>Papers</Legend>
             <ul>
             {% for paper in papers %}
                     <li>
@@ -136,10 +150,11 @@
 
     <br>
     <form method="post" id="form-container" enctype="multipart/form-data">
+        <div class = "submit-container">
         {% csrf_token %}
         <input type="submit" name="submit_button" class = "button-13" value="Edit">
         <input type="submit" name="submit_button" class = "button-13" value="Submit Workshop" onclick="return confirm('Are you sure you want to submit the workshop? You are unable to edit your workshop after submitting. ')">
-
+    </div>
     </form>
     {% endif %}
 

@@ -173,6 +173,8 @@ class PaperForm(forms.ModelForm):
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
         }
+
+        ordering = ['sort_order']
     def clean(self):
         cleaned_data = super().clean()
         agreement_file = cleaned_data.get('agreement_file')

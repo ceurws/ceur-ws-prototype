@@ -10,6 +10,7 @@ import json, os, zipfile
 from datetime import date
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
+from django.template import RequestContext
 
 def index(request):
     """
@@ -37,7 +38,6 @@ class CreateWorkshop(View):
         return render(request, "workshops/create_workshop.html", context)
     
     def post(self, request):
-        print('got here')
         # if statement to check if the submit button has been clicked.
         if 'submit_button' in request.POST:
             
@@ -225,7 +225,7 @@ class WorkshopOverview(View):
     def _zip_agreement_files(self, workshop):
         agreement_path = os.path.join(settings.MEDIA_ROOT, 'agreement', f'Vol-{workshop.id}', )
         os.makedirs('zipped_agreements', exist_ok=True)
-        zip_filename = os.path.join(settings.BASE_DIR, 'zipped_agreements', f'AGREEMENTS-Vol-{workshop.id:04d}.zip')
+        zip_filename = os.path.join(settings.BASE_DIR, 'zipped_agreements', f'AGREEMENTS-Vol-{workshop.id}.zip')
     
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for root, _, files in os.walk(agreement_path):
@@ -282,6 +282,15 @@ class WorkshopOverview(View):
                 paper_form = PaperForm(paper_form_data, instance=paper_instance)
                 if paper_form.is_valid():
                     paper_form.save()
+
+            # Handle the sorted order
+            sorted_order = request.POST.get('sorted_order', ',')
+            if sorted_order:
+                sorted_ids = sorted_order.split(',')
+                for index, paper_id in enumerate(sorted_ids):
+                    paper = Paper.objects.get(id=paper_id)
+                    paper.sort_order = index
+                    paper.save()
 
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
@@ -413,13 +422,16 @@ def edit_author_post_view(request, paper_id, secret_token):
 
             paper.authors.add(*author_formset.save())
             
-
             authors_to_delete = request.POST.getlist('authors_to_delete')
 
             for author_id in authors_to_delete:
                 author = get_object_or_404(Author, id=author_id)
                 paper.authors.remove(author)
                 author.delete()
-
             context.update({'paper_form': paper_form, 'paper': paper, 'edit_mode': False})
+    else:
+        paper_form = PaperForm(instance=paper)
+        author_formset = AuthorFormSet(queryset=paper.authors.all())
+
+    
     return render(request, 'workshops/author_upload_success.html', context)
