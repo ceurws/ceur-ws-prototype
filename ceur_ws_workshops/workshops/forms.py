@@ -1,7 +1,7 @@
 
 from .models import Workshop, Editor, Paper, Author, Session
 from django import forms
-from django.forms import modelformset_factory, TextInput, FileInput, BaseModelFormSet
+from django.forms import modelformset_factory, TextInput, FileInput, BaseModelFormSet, Textarea
 from django_countries.widgets import CountrySelectWidget
 import os, json
 from django.core.exceptions import ValidationError
@@ -40,7 +40,7 @@ class WorkshopForm(forms.ModelForm):
                                             'placeholder': 'Provide the acronym of the workshop'}),
             'workshop_language_iso': TextInput(attrs={'size': 100, 
                                             'placeholder': 'Enter ISO of the language of the workshop'}),
-            'workshop_description': TextInput(attrs={'size': 100,
+            'workshop_description': Textarea(attrs={'cols': 82, 'rows' : 10, 
                                                      'placeholder': 'Briefly describe the workshop'}),
             'workshop_city': TextInput(attrs={'size': 100, 
                                             'placeholder': 'The city the workshop took place in'}),
@@ -180,19 +180,18 @@ class PaperForm(forms.ModelForm):
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
         
-        print(uploaded_file, agreement_file, self.workshop)
-        if uploaded_file and agreement_file and self.workshop:
+        # if uploaded_file and agreement_file and self.workshop:
 
             # agreement_file_name = os.path.join(directory_path, agreement_file.name)
-            agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
-            default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
+        agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
+        default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
 
-            self.instance.agreement_file = agreement_file.name
-            
-        #     if not self._detect_signature_in_image(agreement_file_path):
-        #         raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
-        else: 
-            raise ValidationError("Paper and/or agreement not saved.")
+        self.instance.agreement_file = agreement_file.name
+        
+        if not self._detect_signature_in_image(agreement_file_path):
+            raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
+        # else: 
+        #     raise ValidationError("Paper and/or agreement not saved.")
         
         return cleaned_data
 
