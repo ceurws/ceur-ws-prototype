@@ -62,70 +62,6 @@
       -webkit-transform: rotate(-135deg);
     }
       </style>
-      <!-- <fieldset id="author-fieldset" data-total-forms="{{ author_formset.total_form_count }}">
-        <legend>Author Details</legend>
-        {{ author_formset.management_form }}
-        <div id="author-form" class="author-form">
-          {% for form in author_formset %}
-            <div class="author-container">
-              <div class="author-summary">
-                <span class="author-name">{{ form.author_name.value }}</span>
-                <i class="arrow down toggle-details"></i>
-              </div>
-              <div class="author-details" style="display: none;">
-                {{ form|crispy }}
-                <input type="checkbox" name="authors_to_delete" value="{{ form.instance.id }}">
-                <a class="delete_object">Select to delete an author from the paper.</a>
-              </div>
-              <hr>
-            </div>
-          {% endfor %}
-        </div>
-        <input type="button" value="Add Author" class="button-13" id="add_author">
-      </fieldset>
-      
-      Hidden template for new author form
-      <div id="empty-form-template" style="display: none;">
-        <div class="author-container">
-          <div class="author-summary">
-            <span class="author-name">New Author</span>
-            <i class="arrow down toggle-details"></i>
-          </div>
-          <div class="author-details" style="display: none;">
-            This will be replaced dynamically in JavaScript -->
-          <!-- </div>
-          <hr>
-        </div>
-      </div> -->
-
-      <!-- <script>
-        $(document).ready(function() {
-          function toggleDetails() {
-            const $detailsDiv = $(this).parent().next('.author-details');
-            $detailsDiv.toggle();
-            $(this).toggleClass('down up');
-          }
-      
-          // Initial binding for existing elements
-          $('.toggle-details').on('click', toggleDetails);
-      
-          let formCount = $('#author-fieldset').data('total-forms');
-          $('#add_author').on('click', function() {
-            const formIdx = formCount;
-            const $newForm = $('#empty-form-template').clone().removeAttr('id').show();
-            const formHtml = $('.author-form div').first().html().replace(/__prefix__/g, formIdx);
-            $newForm.find('.author-details').html(formHtml);
-      
-            $('#author-form').append($newForm);
-      
-            // Re-bind the click event to the new toggle-details elements
-            $newForm.find('.toggle-details').on('click', toggleDetails);
-      
-            formCount++;
-            $('#id_author_set-TOTAL_FORMS').val(formCount);
-          });
-        });
-      </script>  -->
     <fieldset id="author-fieldset">
       <legend>Author Details</legend>
       <div id="author-form" class="author-form">
@@ -262,13 +198,16 @@
       <img src="{% static 'workshops/icons8-copy-24.png' %}" alt="Copy to clipboard" width="20" height="20">
     </button>
   </div>
-</div>
-    <div class="submit-container">
+
   <form method="post"  enctype="multipart/form-data">
     {% csrf_token %}
-    <input  type="submit" name="edit_button" class="button-13" value="Edit" style="display: table-column;">
+    <br>
+    <br>
+    <br>
+    <input  type="submit" name="edit_button" class="button-13" value="Edit" style="display: center;">
+  </div>
   </form>
-</div>
+
 </fieldset>
   {% endif %}
 

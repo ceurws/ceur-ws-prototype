@@ -47,7 +47,7 @@
     {{ editor_form.management_form }}
     <div class="editor-form" id="editor-form">
       {% for editor in editor_form %}
-      {{editor.as_p}}
+      {{editor|crispy}}
       <br>
       {% endfor %}
     </div>

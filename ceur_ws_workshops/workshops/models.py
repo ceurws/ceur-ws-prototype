@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib import admin
 from datetime import date
 from django_countries.fields import CountryField
+import os 
 
 class Editor(models.Model):
     editor_name = models.CharField(max_length=100)
@@ -83,19 +84,6 @@ class Workshop(models.Model):
     def __str__(self):
         return self.workshop_full_title
 
-def paper_upload_path(instance, filename):
-    """
-    Generate a custom upload path for papers.
-    Assumes instance has a direct foreign key to Workshop.
-    Format: "papers/Vol-{workshop_volume}/{filename}"
-    """
-    workshop_volume = instance.workshop.id
-    return f"papers/Vol-{workshop_volume}/{filename}"
-
-def agreement_file_path(instance, filename):
-    agreement_file = instance.workshop.id
-    return f"agreement/Vol-{agreement_file}/{filename}"
-
 class Language(models.Model):
     iso_639_2 = models.CharField(max_length=3, primary_key=True)
     name = models.CharField(max_length=100)
@@ -104,14 +92,16 @@ class Language(models.Model):
         return self.name
 
 class Paper(models.Model):
-
     def paper_upload_path(instance, filename):
         workshop_volume = instance.workshop.id
         return f"papers/Vol-{workshop_volume}/{filename}"
 
     def agreement_file_path(instance, filename):
         agreement_file = instance.workshop.id
-
+        original_filename = instance.agreement_file.name
+        paper_title = instance.paper_title.replace(' ', '')
+        extension = os.path.splitext(original_filename)[1]
+        filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
         return f"agreement/Vol-{agreement_file}/{filename}"
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10)
