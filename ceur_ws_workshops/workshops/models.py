@@ -71,7 +71,8 @@ class Workshop(models.Model):
     license = models.CharField(max_length=50,null=True, blank=True)
     urn = models.CharField(max_length=50,null=True, blank=True)
 
-    editor_agreement = models.FileField(upload_to=workshop_agreement_file_path)
+    editor_agreement = models.FileField(upload_to=workshop_agreement_file_path, blank = True)
+    editor_agreement_signed = models.BooleanField()
 
     # KEYS
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  

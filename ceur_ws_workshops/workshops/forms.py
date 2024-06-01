@@ -1,7 +1,7 @@
 
 from .models import Workshop, Editor, Paper, Author, Session
 from django import forms
-from django.forms import modelformset_factory, TextInput, FileInput, BaseModelFormSet, Textarea
+from django.forms import modelformset_factory, TextInput, FileInput, Textarea, CheckboxInput
 from django_countries.widgets import CountrySelectWidget
 import os, json
 from django.core.exceptions import ValidationError
@@ -29,7 +29,8 @@ class WorkshopForm(forms.ModelForm):
         fields = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym',
                 'workshop_language_iso', 'workshop_description', 'workshop_country',  'workshop_city', 'year_final_papers', 'workshop_colocated',
                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
-                'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement']
+                'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement',
+                'editor_agreement_signed']
 
         widgets = {
             'workshop_short_title': TextInput(attrs={'size': 100, 
@@ -70,8 +71,14 @@ class WorkshopForm(forms.ModelForm):
                                             'placeholder': '(optional) Provide the total number of short length papers submitted'}),
             'editor_agreement': FileInput(attrs={'accept': '.pdf', 
                                                  'placeholder': 'Upload the agreement file'}),
-                                
+            'editor_agreement_signed': CheckboxInput(attrs={'required': True})
        }
+        
+        labels = {
+            'total_submitted_papers': "Total number of submitted papers",
+            'total_short_acc_papers': "Total number of short accepted papers",
+            'total_reg_acc_papers': "Total number of regular accepted papers",
+        },
         
     def __init__(self, *args, **kwargs):
         # loads language options and returns proper ISO
@@ -92,7 +99,6 @@ class WorkshopForm(forms.ModelForm):
         self.fields['workshop_colocated'].help_text = "<i>Please provide the acronym (acronym-YYYY) of the conference with which this workshop was colocated; if the workshop was not colocated with any conference, leave this field empty.</i>"
         self.fields['workshop_acronym'].help_text ='<i>Please provide the acronym of the workshop plus YYYY (year of the workshop in exactly 4 digits, e.g. 2012). Between the acronym and the year a \'-\' should be placed.</i>'
 
-
     def clean(self):
         cleaned_data = super().clean()
 
@@ -109,10 +115,10 @@ class WorkshopForm(forms.ModelForm):
             if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
                 raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
             
-        if not editor_agreement:
-            raise ValidationError("Please upload the agreement file.")
-        if editor_agreement:
-            pass
+        # if not editor_agreement:
+        #     raise ValidationError("Please upload the agreement file.")
+        # if editor_agreement:
+            # pass
             # editor_agreement_file_path = os.path.join(settings.MEDIA_ROOT, editor_agreement.name)
             # default_storage.save(editor_agreement.name, ContentFile(editor_agreement.read()))
             
@@ -139,10 +145,6 @@ class WorkshopForm(forms.ModelForm):
             if is_signed:
                 break
         return is_signed
-        
-
-
-
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -182,16 +184,15 @@ class PaperForm(forms.ModelForm):
         
         # if uploaded_file and agreement_file and self.workshop:
 
-            # agreement_file_name = os.path.join(directory_path, agreement_file.name)
-        agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
-        default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
+        # agreement_file_name = os.path.join(directory_path, agreement_file.name)
+        # agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
+        # default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
 
-        self.instance.agreement_file = agreement_file.name
+        # self.instance.agreement_file = agreement_file.name
         
-        if not self._detect_signature_in_image(agreement_file_path):
-            raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
-        # else: 
-        #     raise ValidationError("Paper and/or agreement not saved.")
+        # if not self._detect_signature_in_image(agreement_file_path):
+        #     print("Agreement file is not signed. Please upload a hand-signed agreement file.")
+        #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
         
         return cleaned_data
 
