@@ -257,11 +257,6 @@ class WorkshopOverview(View):
 
             if workshop_form.is_valid():
                 workshop_form.save()
-
-            else:
-                print('form not valid')
-                print(workshop_form.errors)
-
             existing_paper_ids = request.POST.getlist('paper_id')  
             papers_to_delete = request.POST.getlist('papers_to_delete') 
 

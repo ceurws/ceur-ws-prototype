@@ -1,0 +1,2 @@
+[console_scripts]
+ceur_ws_workshops_manage = ceur_ws_workshops.manage:main
