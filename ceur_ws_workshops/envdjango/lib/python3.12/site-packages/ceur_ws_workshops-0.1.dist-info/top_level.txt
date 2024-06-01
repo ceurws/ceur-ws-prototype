@@ -1,2 +1,0 @@
-ceur_ws_workshops
-workshops
