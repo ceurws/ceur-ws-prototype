@@ -2,6 +2,8 @@ from django.urls import path
 
 # from . import views
 from .views import index, CreateWorkshop, AuthorUpload, WorkshopOverview, edit_author_post_view
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.conf.urls import url, include
 
 app_name = "workshops"
 
@@ -12,3 +14,6 @@ urlpatterns = [
     path('workshop_overview/<uuid:secret_token>/', WorkshopOverview.as_view(), name='workshop_overview'),
     path('author_upload/<uuid:paper_id>/<uuid:secret_token>/', edit_author_post_view, name='edit_author_post')
 ]
+
+urlpatterns += staticfiles_urlpatterns()
+

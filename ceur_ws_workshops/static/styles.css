@@ -1,0 +1,24 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+fieldset {
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+legend {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.workshop-details p {
+    margin: 0;
+}
+
+.editors-list li {
+    list-style-type: none;
+}
+
+

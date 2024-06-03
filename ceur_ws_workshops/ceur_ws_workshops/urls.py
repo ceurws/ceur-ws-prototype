@@ -19,12 +19,14 @@ from django.urls import path, include
 
 from django.conf import settings
 from django.conf.urls.static import static
+from django.conf.urls import url
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("workshops/", include("workshops.urls")),
+    path('ceur-beta/admin/', admin.site.urls),
+    path('ceur-beta/workshops/', include("workshops.urls")),
 ]
 
 # Serve media files during development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
