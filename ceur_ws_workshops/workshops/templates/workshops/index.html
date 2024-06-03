@@ -16,12 +16,17 @@
 
     <nav>
         <!-- Navigation Links -->
+        
     </nav>
 
     <main>
         {% block content %}
         <form action="{% url 'workshops:create_workshop' %}" method="get">
             <button type="submit" class="button-13">Create New Workshop</button>
+          </form>
+        <br>
+          <form action="{% url 'workshops:open_review_workshop' %}" method="get">
+            <button type="submit" class="button-13">Create New Workshop with OpenReview Metadata</button>
           </form>
 
         {% endblock %}
