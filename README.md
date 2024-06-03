@@ -4,7 +4,7 @@ Welcome to the CEUR WS Workshops project. This guide will help you set up your e
 
 ## Prerequisites
 
-- Python 3.7 or higher
+- Python 3.10 or higher
 - pip (Python package installer)
 
 ## Installation Instructions
@@ -14,7 +14,7 @@ Welcome to the CEUR WS Workshops project. This guide will help you set up your e
 First, create a virtual environment to ensure that the dependencies are installed in an isolated environment, preventing any potential conflicts with other projects.
 
 ```sh
-python -m venv myenv
+python -m venv django_env
 ```
 
 ### 2. Activate the Virtual Environment 
@@ -22,7 +22,7 @@ python -m venv myenv
 Activate the virtual environment. The command to activate the environment varies based on your operating system:
 
 ```sh
-source myenv/bin/activate
+source django_env/bin/activate
 ```
 
 ### 3. Install the Project Dependencies 
@@ -30,7 +30,7 @@ source myenv/bin/activate
 Once the virtual environment is activated, use pip to install the project dependencies from the provided wheel file.
 
 ```sh
-pip install dist/ceur_ws_workshops-0.1-py3-none-any.whl
+pip install .
 ```
 
 
