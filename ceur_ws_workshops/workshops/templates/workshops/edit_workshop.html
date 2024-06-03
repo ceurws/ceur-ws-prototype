@@ -43,7 +43,10 @@
       <div class="editor-form" id="editor-form">
         {% for form in editor_form%}
           {{ form.as_p }}
-          {% endfor %}
+          <hr>
+      {% endfor %}
+
+          
         </div>
    <input type="button" value="Add Editor" class="button-13" id="add_editor">
   </fieldset>
@@ -58,8 +61,8 @@
   <table class='no_error'>
       {{ session_form.empty_form.as_p }}
       <br>
-
   </table>
+  <hr>
 </div>
 <div id="empty_editor_form" style="display:none">
   <table class='no_error'>
