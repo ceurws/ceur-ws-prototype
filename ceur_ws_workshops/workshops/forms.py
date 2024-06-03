@@ -5,10 +5,10 @@ from django.forms import modelformset_factory, TextInput, FileInput, Textarea, C
 from django_countries.widgets import CountrySelectWidget
 import os, json
 from django.core.exceptions import ValidationError
-from signature_detect.loader import Loader
-from signature_detect.extractor import Extractor
-from signature_detect.cropper import Cropper
-from signature_detect.judger import Judger
+# from signature_detect.loader import Loader
+# from signature_detect.extractor import Extractor
+# from signature_detect.cropper import Cropper
+# from signature_detect.judger import Judger
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile

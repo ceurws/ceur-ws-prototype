@@ -133,7 +133,6 @@ class WorkshopOverview(View):
         with zipfile.ZipFile(zip_filename, 'w') as zipf:
             for root, _, files in os.walk(agreement_path):
                 for file in files:
-                    print("Adding file", os.path.join(root, file))
                     zipf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), agreement_path))
     
     def submit_workshop(self, request, secret_token):
@@ -164,7 +163,6 @@ class WorkshopOverview(View):
                 workshop_form.save()
 
             else:
-                print('form not valid')
                 print(workshop_form.errors)
 
             existing_paper_ids = request.POST.getlist('paper_id')  
@@ -184,7 +182,6 @@ class WorkshopOverview(View):
 
                 workshop.accepted_papers.add(paper_instance)
 
-                # print(workshop.accepted_papers)
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
             return self.submit_workshop(request, secret_token)
