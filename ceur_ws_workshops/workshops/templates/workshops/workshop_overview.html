@@ -1,45 +1,68 @@
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
-{%load crispy_forms_tags %} 
+{%load crispy_forms_tags %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workshop Overview</title>
     <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
 </head>
+
 <body>
-    
+    <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
     <style>
         .delete_object {
-          color: red;
-          /* background-color: #f8d7da; */
-          border-color: #f5c6cb;
-          position: relative;
-          padding: .75rem 1.25rem;
-          /* margin-bottom: 1rem; */
-          border: 1px solid transparent;
-          /* border-radius: .25rem; */
-          text-align: center;
-          font-weight: bold;
+            color: red;
+            /* background-color: #f8d7da; */
+            border-color: #f5c6cb;
+            position: relative;
+            padding: .75rem 1.25rem;
+            /* margin-bottom: 1rem; */
+            border: 1px solid transparent;
+            /* border-radius: .25rem; */
+            font-weight: bold;
+            text-align: left;
+            display: flex;
+            align-items: center;
         }
-        .errorlist {
-      color: #721c24;
-      background-color: #f8d7da;
-      border-color: #f5c6cb;
-      position: relative;
-      padding: .75rem 1.25rem;
-      margin-bottom: 1rem;
-      border: 1px solid transparent;
-      border-radius: .25rem;
-      text-align: center;
-      font-weight: bold;
-    }
-        </style>
+
+        .delete_object input[type="checkbox"] {
+            margin-right: 0.5rem;
+        }
+
+        .delete_object label {
+            margin: 0;
+        }
+
+        .paper-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toggle-details {
+            cursor: pointer;
+            border: solid black;
+            border-width: 0 3px 3px 0;
+            display: inline-block;
+            padding: 3px;
+        }
+
+        .down {
+            transform: rotate(45deg);
+            -webkit-transform: rotate(45deg);
+        }
+
+        .up {
+            transform: rotate(-135deg);
+            -webkit-transform: rotate(-135deg);
+        }
+    </style>
     {% if edit_mode %}
     <h1>Edit workshop: <i>{{workshop.workshop_short_title}}</i></h1>
     <form method="post" enctype="multipart/form-data">
@@ -47,68 +70,61 @@
         <fieldset class="workshop-details">
             <legend>Workshop Details</legend>
             {{workshop_form.as_p}}
-            <i>Currently uploaded file: <a href ="{{workshop_form.instance.editor_agreement.url}}">{{ workshop_form.instance.editor_agreement.name }}</a></i>
+            <i>Currently uploaded file: <a href="{{workshop_form.instance.editor_agreement.url}}">
+                {{ workshop_form.instance.editor_agreement.name }}</a></i>
         </fieldset>
-    
+
         <fieldset class="papers-list">
             <legend>Papers</legend>
-            {% for paperform in paper_forms %}
-              <div class="paper-container">
-                <div class="paper-summary">
-                  <span class="paper-title">{{ paperform.instance.paper_title }}</span>
-                  <i class="arrow down toggle-details"></i>
-                </div>
-                <div  class="paper-details" style="display: none;">
-                  {{ paperform.as_p }}
-                  <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
-
-                  {% if paperform.instance.uploaded_file %}
-                    <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
-                  {% endif %}
-                  {% if paperform.instance.agreement_file %}
-                    <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
-                  {% endif %}
-                  <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}"> Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.
-                </div>
-                <hr>
-              </div>
+            {% for session_title in session_title_list %}
+            <fieldset class="inner_fieldset">
+                <legend>{{ session_title }}</legend>
+                <ul>
+                    {% for paperform in paper_forms %}
+                    {% if paperform.instance.session.session_title == session_title %}
+                    <li>
+                        <div class="paper-container">
+                            <div class="paper-summary">
+                                <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                                <i class="arrow down toggle-details"></i>
+                            </div>
+                            <div class="paper-details" style="display: none;">
+                                {{ paperform.as_p }}
+                                <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
+                                {% if paperform.instance.uploaded_file %}
+                                <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">
+                                    {{ paperform.instance.uploaded_file.name }}</a></p>
+                                {% endif %}
+                                {% if paperform.instance.agreement_file %}
+                                <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{paperform.instance.agreement_file.name }}</a></p>
+                                {% endif %}
+                                <div class="delete_object">
+                                    <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
+                                    <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.</label>
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </fieldset>
             {% endfor %}
-          </fieldset>
-          <style>
-            .paper-summary {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-            }
-            .toggle-details {
-              cursor: pointer;
-              border: solid black;
-              border-width: 0 3px 3px 0;
-              display: inline-block;
-              padding: 3px;
-            }
-            .down {
-              transform: rotate(45deg);
-              -webkit-transform: rotate(45deg);
-            }
-            .up {
-              transform: rotate(-135deg);
-              -webkit-transform: rotate(-135deg);
-            }
-          </style>
+        </fieldset>
+        
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
-          $(document).ready(function() {
-            function toggleDetails() {
-              const $detailsDiv = $(this).parent().next('.paper-details');
-              $detailsDiv.toggle();
-              $(this).toggleClass('down up');
-            }
-            // Initial binding for existing elements
-            $('.toggle-details').on('click', toggleDetails);
-          });
+            $(document).ready(function () {
+                function toggleDetails() {
+                    const $detailsDiv = $(this).parent().next('.paper-details');
+                    $detailsDiv.toggle();
+                    $(this).toggleClass('down up');
+                }
+                $('.toggle-details').on('click', toggleDetails);
+            });
         </script>
-        
+
 
         <!-- <fieldset class="papers-list">
             <legend>Papers</legend>
@@ -131,11 +147,11 @@
             </div>
             <input type="hidden" id="sorted-order" name="sorted_order" value="">
         </fieldset> -->
-        <div class= "submit-container">
-        <input type="submit" name="submit_button" class="button-13" value="Confirm">
+        <div class="submit-container">
+            <input type="submit" name="submit_button" class="button-13" value="Confirm">
         </div>
     </form>
-    
+
     <!-- <script>
     const sortable = document.getElementById('sortable-list')
     new Sortable(sortable, {
@@ -145,11 +161,11 @@
     </script> -->
 
     {% else %}
-    <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
     <fieldset class="workshop-details">
         <legend>Workshop Details</legend>
         <p><strong>Full title:</strong> {{ workshop.workshop_full_title }}</p>
-        <p><strong>Shorthand title:</strong> {{ workshop.workshop_short_title }} (<strong>{{ workshop.workshop_acronym}}</strong>)</p>
+        <p><strong>Shorthand title:</strong> {{ workshop.workshop_short_title }} (<strong>{{
+                workshop.workshop_acronym}}</strong>)</p>
         <p><strong>Colocated with:</strong> {{ workshop.workshop_colocated }}</p>
         <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
         <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
@@ -164,87 +180,81 @@
 
         <p><strong>Editors:</strong></p>
         <ul class="editors-list">
-          {% for editor in workshop.editors.all %}
-          <li>
-              {% if editor.editor_url %}
-              <a href="{{ editor.editor_url }}" target="_blank">{{ editor.editor_name }}</a>
-              {%else%}
-              {{ editor.editor_name }}
-              {%endif%}
-              (<i>
-                  <a href="{{ editor.institution_url }}" target="_blank">{{ editor.institution }}</a>, 
-                  {{ editor.institution_country }}
-              </i>)
-          </li>
-          {% endfor %}
-      </ul>
-        <p><strong>Editor agreement:</strong>  
-          
-          <a href="{{workshop.editor_agreement.url}}" target="_blank">{{workshop.editor_agreement.name}}</a></p>
+            {% for editor in workshop.editors.all %}
+            <li>{{ editor.editor_name }} (<i>{{ editor.institution}}, {{editor.institution_country}}</i>)</li>
+            {% endfor %}
+        </ul>
+        <p><strong>Editor agreement:</strong> {{workshop.editor_agreement}}</p>
     </fieldset>
-    
+
     {% if session_title_list %}
     {% regroup papers by session as papers_by_session %}
 
     <fieldset>
         <legend>Papers</Legend>
         {% for session_title in session_title_list %}
-            <fieldset class="inner_fieldset">
-                <legend>{{ session_title }}</legend>
-                <ul>
-                    {% for paper in papers %}
-                        {% if paper.session.session_title == session_title%}
-                        <li>
-                            <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
-                            <p><strong>Authors:</strong>
-                                {% for author in paper.authors.all %}
-                                    {{ author.author_name }}
-                                    {% if not forloop.last %}, {% endif %}
-                                {% endfor %}
-                            </p>
-                            <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                            <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-                            <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
-                        </li>
-                        {%endif%}
-                    {% endfor %}
-                </ul>
-            </fieldset>
-        {% endfor %}
-    </fieldset>
-    {% else %}
-        
-            <fieldset class="papers-list">
-                <legend>Papers</Legend>
+        <fieldset class="inner_fieldset">
+            <legend>{{ session_title }}</legend>
             <ul>
-            {% for paper in papers %}
-                    <li>
+                {% for paper in papers %}
+                {% if paper.session.session_title == session_title%}
+                <li>
                     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
                     <p><strong>Authors:</strong>
                         {% for author in paper.authors.all %}
-                            {{ author.author_name }}
-                            {% if not forloop.last %}, {% endif %}
+                        {{ author.author_name }}
+                        {% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </p>
                     <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-                    <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
+                    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
+                        {{ paper.uploaded_file.name }}</a></p>
+                    <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">
+                        {{ paper.agreement_file.name }}</a></p>
                 </li>
-            {% endfor %}
+                {%endif%}
+                {% endfor %}
             </ul>
-            </fieldset>
+        </fieldset>
+        {% endfor %}
+    </fieldset>
+    {% else %}
+    <legend>Papers</Legend>
+    <fieldset class="papers-list">
+        <ul>
+            {% for paper in papers %}
+            <li>
+                <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
+                <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+                <p><strong>Authors:</strong>
+                    {% for author in paper.authors.all %}
+                    {{ author.author_name }}
+                    {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <p><strong>Pages:</strong> {{ paper.pages }}</p>
+                <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{
+                        paper.uploaded_file.name }}</a></p>
+                <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{
+                        paper.agreement_file.name }}</a></p>
+            </li>
+            {% endfor %}
+        </ul>
+    </fieldset>
     {% endif %}
 
     <br>
     <form method="post" id="form-container" enctype="multipart/form-data">
-        <div class = "submit-container">
         {% csrf_token %}
-        <input type="submit" name="submit_button" class = "button-13" value="Edit">
-        <input type="submit" name="submit_button" class = "button-13" value="Submit Workshop" onclick="return confirm('Are you sure you want to submit the workshop? You are unable to edit your workshop after submitting. ')">
-    </div>
+        <div class="submit-container">
+            <input type="submit" name="submit_button" class="button-13" value="Edit">
+            <input type="submit" name="submit_button" class="button-13" value="Submit Workshop"
+                onclick="return confirm('Are you sure you want to submit the workshop? You are unable to edit your workshop after submitting. ')">
+        </div>
     </form>
     {% endif %}
 
 </body>
+
 </html>
 {% endblock %}
