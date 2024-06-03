@@ -33,4 +33,18 @@ Once the virtual environment is activated, use pip to install the project depend
 pip install .
 ```
 
+## Running the server instructions.
+
+### Initial setup
+After updating the server, you need to create a new, empty database. To do this, run the following commands:
+
+python3 manage.py makemigrations
+python3 manage.py migrate
+
+### Starting the server 
+After this the server can be run through the following command:
+
+python3 manage.py runserver
+
+
 
