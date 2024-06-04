@@ -22,7 +22,7 @@ class WorkshopOverview(View):
             'papers' : [paper for paper in workshop.accepted_papers.all()],
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop),
-            'paper_forms' : [PaperForm(instance=paper_instance) for paper_instance in workshop.accepted_papers.all()],
+            'paper_forms' : [PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all()],
             'session_title_list' : [session_object.session_title for session_object in workshop.sessions.all()],
             'edit_mode': edit_mode,
             

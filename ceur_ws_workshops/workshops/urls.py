@@ -3,7 +3,7 @@ from django.urls import path
 # from . import views
 from .views import index, CreateWorkshop, AuthorUpload, WorkshopOverview, edit_author_post_view
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.conf.urls import url, include
+from django.conf.urls import include
 
 app_name = "workshops"
 

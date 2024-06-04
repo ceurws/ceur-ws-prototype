@@ -46,7 +46,6 @@ class AuthorUpload(View):
 
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, secret_token = self.kwargs['secret_token'])
         else:
-            print("Paperform not valid 1")
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
         
     def create_paper(self, request, author_formset, paper_form):
