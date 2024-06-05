@@ -206,7 +206,7 @@
                         {% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </p>
-                    <p><strong>Session:</strong> {{ paper.session }}</p>
+                    <p><strong>Session:</strong> {{ paper.session.session_title }}</p>
                     <p><strong>Pages:</strong> {{ paper.pages }}</p>
                     <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
                         {{ paper.uploaded_file.name }}</a></p>

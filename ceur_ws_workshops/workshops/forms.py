@@ -158,11 +158,8 @@ class PaperForm(forms.ModelForm):
             self.fields['uploaded_file'].label = 'Upload file'
 
         if self.workshop: 
-            print('got a workshop')
-            print('sessions:',self.workshop.sessions.all())
             self.fields['session'].queryset = self.workshop.sessions.all()
         else:
-            print('found the error because there are no workshops')
             self.fields['session'].queryset = Session.objects.none()  # No sessions available if workshop is not provided
 
     class Meta:
