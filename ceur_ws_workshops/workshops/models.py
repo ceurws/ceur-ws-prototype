@@ -5,7 +5,7 @@ from django.contrib import admin
 from datetime import date
 from django_countries.fields import CountryField
 import os 
-
+from django.db.models.functions import Lower
 class Editor(models.Model):
     editor_name = models.CharField(max_length=100)
     editor_url = models.URLField(max_length=200,null=True, blank=True)
@@ -117,6 +117,9 @@ class Paper(models.Model):
 
     def __str__(self):
         return self.paper_title
+    
+    class Meta:
+        ordering = [Lower('paper_title')]
 
 
 
