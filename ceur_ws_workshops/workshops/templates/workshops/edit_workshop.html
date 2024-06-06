@@ -22,10 +22,9 @@
         }
     </style>
     {% crispy form %}
-    
-    <i>Currently uploaded file: <a href ="{{form.instance.editor_agreement.url}}">{{ form.instance.editor_agreement.name }}</a></i>
     <input type="hidden" name="workshop_id" value="{{ workshop_instance.id }}">
-
+    <i>Currently uploaded file: <a href ="{{form.instance.editor_agreement.url}}">{{ form.instance.editor_agreement.name }}</a></i>
+    
     </fieldset>
 
     <fieldset>
@@ -68,8 +67,8 @@
   <table class='no_error'>
       {{ editor_form.empty_form.as_p }}
       <br>
-
   </table>
+  <hr>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>

@@ -23,7 +23,6 @@ class DateInput(forms.DateInput):
 
 class WorkshopForm(forms.ModelForm):
     workshop_language_iso = forms.ChoiceField(label="Language", choices=[], required=False)
-
     class Meta:
         model = Workshop
         fields = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym',
@@ -31,25 +30,27 @@ class WorkshopForm(forms.ModelForm):
                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
                 'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement',
                 'editor_agreement_signed']
-
+        
         widgets = {
             'workshop_short_title': TextInput(attrs={'size': 100, 
-                                            'placeholder': 'Provide the shorthand title of the workshop'}),
+                                            'placeholder': 'Provide the shorthand title of the workshop'
+                                            }),
             'workshop_full_title': TextInput(attrs={'size': 100, 
                                             'placeholder': 'Provide the full title of the workshop'}),
             'workshop_acronym': TextInput(attrs={'size': 100, 
                                             'placeholder': 'Provide the acronym of the workshop'}),
             'workshop_language_iso': TextInput(attrs={'size': 100, 
-                                            'placeholder': 'Enter ISO of the language of the workshop'}),
+                                            'placeholder': 'Enter ISO of the language of the workshop'
+                                            },),
             'workshop_description': Textarea(attrs={'cols': 82, 'rows' : 10, 
                                                      'placeholder': 'Briefly describe the workshop'}),
             'workshop_city': TextInput(attrs={'size': 100, 
                                             'placeholder': 'The city the workshop took place in'}),
             'workshop_country': CountrySelectWidget(),
 
-            'workshop_begin_date': DateInput(attrs={'id': 'id_workshop_begin_date'}),
+            'workshop_begin_date': DateInput(attrs={'id': 'workshop_begin_date'}),
 
-            'workshop_end_date': DateInput(attrs={'id': 'id_workshop_end_date'}),
+            'workshop_end_date': DateInput(attrs={'id': 'workshop_end_date'}),
 
             'year_final_papers': TextInput(attrs={'size': 100, 
                                             'placeholder': 'Provide the year the final papers of the proceedings were produced'}),
@@ -95,6 +96,14 @@ class WorkshopForm(forms.ModelForm):
         self.fields['workshop_language_iso'].choices = choices
         self.helper = FormHelper(self)
         self.helper.form_tag = False
+        # default language 
+        self.fields['workshop_language_iso'].initial = 'eng'
+        self.fields['workshop_country'].initial = 'NL'
+        email = kwargs.pop('volume_owner_email', None)
+
+        self.fields['volume_owner_email'] = forms.EmailField(initial=email, required=True, max_length=200, label='Volume owner email', help_text='<br><i>Provide the email of the volume owner</i>')
+        self.fields['volume_owner_email'].widget.attrs['placeholder'] = 'Enter the email of the volume owner'
+        self.fields['volume_owner_email'].widget.attrs['size'] = 100
 
         self.fields['workshop_colocated'].help_text = "<i>Please provide the acronym (acronym-YYYY) of the conference with which this workshop was colocated; if the workshop was not colocated with any conference, leave this field empty.</i>"
         self.fields['workshop_acronym'].help_text ='<i>Please provide the acronym of the workshop plus YYYY (year of the workshop in exactly 4 digits, e.g. 2012). Between the acronym and the year a \'-\' should be placed.</i>'
@@ -102,11 +111,22 @@ class WorkshopForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
+        fields_to_strip = ['workshop_short_title', 'workshop_full_title', 'workshop_acronym', 
+                           'workshop_language_iso', 'workshop_description', 'workshop_city', 
+                           'workshop_colocated', 'volume_owner', 'volume_owner_email', 
+                           'total_submitted_papers', 'total_accepted_papers', 
+                           'total_reg_acc_papers', 'total_short_acc_papers']
+        
+        for field in fields_to_strip:
+            if field in cleaned_data and isinstance(cleaned_data[field], str):
+                cleaned_data[field] = cleaned_data[field].strip()
+
         total_submitted_papers = cleaned_data.get('total_submitted_papers')
         total_accepted_papers = cleaned_data.get('total_accepted_papers')
         total_reg_acc_papers = cleaned_data.get('total_reg_acc_papers', 0)  
         total_short_acc_papers = cleaned_data.get('total_short_acc_papers', 0)  
         editor_agreement = cleaned_data.get('editor_agreement')
+        email = cleaned_data.get('volume_owner_email')
 
         if total_accepted_papers > total_submitted_papers:
             raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
@@ -114,7 +134,7 @@ class WorkshopForm(forms.ModelForm):
         if total_reg_acc_papers is not None and total_short_acc_papers is not None:
             if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
                 raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
-            
+   
         # if not editor_agreement:
         #     raise ValidationError("Please upload the agreement file.")
         # if editor_agreement:
@@ -161,7 +181,7 @@ class PaperForm(forms.ModelForm):
             self.fields['session'].queryset = self.workshop.sessions.all()
         else:
             self.fields['session'].queryset = Session.objects.none()  # No sessions available if workshop is not provided
-
+    # paper_title = forms.CharField(strip=True)
     class Meta:
         model = Paper
         fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file']
@@ -177,10 +197,14 @@ class PaperForm(forms.ModelForm):
         }
 
         ordering = ['sort_order']
+
+        paper_title = forms.CharField(strip=True)
     def clean(self):
         cleaned_data = super().clean()
+
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
+
         
         # if uploaded_file and agreement_file and self.workshop:
 
@@ -214,23 +238,43 @@ class PaperForm(forms.ModelForm):
     #         if is_signed:
     #             break
     #     return is_signed
+
+
+class AuthorCustomForm(forms.ModelForm):
+    class Meta:
+        model = Author
+
+        fields = ['author_name', 'author_university', 'author_uni_url', 'author_email']
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Strip leading and trailing spaces from all relevant fields
+        fields_to_strip = ['author_name', 'author_university', 'author_uni_url', 'author_email']
+        
+        for field in fields_to_strip:
+            cleaned_data[field] = cleaned_data[field].strip()
+        
+        return cleaned_data
     
 AuthorFormSet = modelformset_factory(
-        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=0,
-        # CSS styling but for formsets
-        widgets = {
-            'author_name': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the name of the author'}),
-            'author_university': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the university of the author'}),
-            'author_uni_url': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the URL of the university which the author is affiliated to'}),
-            'author_email': TextInput(attrs={'size': 50,
-                                            'placeholder': 'Enter the email of the author'})
-        },
-        labels = {
-            'author_uni_url': "University URL",
-        },
+    Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=0,
+    # CSS styling but for formsets
+    widgets = {
+        'author_name': TextInput(attrs={'size': 70, 
+                                        'placeholder': 'Enter the name of the author'}),
+        'author_university': TextInput(attrs={'size': 70, 
+                                        'placeholder': 'Enter the university of the author'}),
+        'author_uni_url': TextInput(attrs={'size': 70, 
+                                        'placeholder': 'Enter the URL of the university which the author is affiliated to'}),
+        'author_email': TextInput(attrs={'size': 50,
+                                        'placeholder': 'Enter the email of the author'})
+    },
+    labels = {
+        'author_uni_url': "University URL",
+    },
+    # form = AuthorCustomForm
+
 )
 
 EditorFormSet = modelformset_factory(

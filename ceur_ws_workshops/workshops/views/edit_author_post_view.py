@@ -15,7 +15,6 @@ def edit_author_post_view(request, paper_id, secret_token):
     }
     if request.method == "POST":
         paper_form = PaperForm(data=request.POST, instance=paper, workshop=workshop)
-        print(paper_form.instance.session)
         author_formset = AuthorFormSet(data = request.POST, queryset=Author.objects.filter(paper = paper), prefix = 'author')
         
         if 'edit_button' in request.POST:
