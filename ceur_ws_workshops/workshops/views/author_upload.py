@@ -10,7 +10,7 @@ class AuthorUpload(View):
     success_path = "workshops/author_upload_success.html"
     
     def get_workshop(self):
-        workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
+        workshop = get_object_or_404(Workshop, author_upload_secret_token=self.kwargs['author_upload_secret_token'])
         return workshop
     
     def get_context(self, author_formset, paper_form, condition='default', edit_paper_url=None):
@@ -44,7 +44,7 @@ class AuthorUpload(View):
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
 
-            return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, secret_token = self.kwargs['secret_token'])
+            return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, author_upload_secret_token = self.kwargs['author_upload_secret_token'])
         else:
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
         
@@ -76,13 +76,13 @@ class AuthorUpload(View):
         else:
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
 
-    def get(self, request, secret_token):
+    def get(self, request, author_upload_secret_token):
         author_formset = AuthorFormSet(queryset=Author.objects.none(), prefix="author")
         paper_form = PaperForm(file_uploaded=False, workshop=self.get_workshop())
         context = self.get_context(author_formset, paper_form)
         return render(request, self.upload_path, context)
 
-    def post(self, request, secret_token):
+    def post(self, request, author_upload_secret_token):
         
         # if statement to check if request.FILES has any new files attached. 
         if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:

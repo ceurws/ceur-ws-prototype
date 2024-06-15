@@ -1,7 +1,7 @@
 
 from .models import Workshop, Editor, Paper, Author, Session
 from django import forms
-from django.forms import modelformset_factory, TextInput, FileInput, Textarea, CheckboxInput
+from django.forms import modelformset_factory, TextInput, FileInput, Textarea, CheckboxInput, URLInput
 from django_countries.widgets import CountrySelectWidget
 import os, json
 from django.core.exceptions import ValidationError
@@ -11,15 +11,36 @@ from django.core.exceptions import ValidationError
 # from signature_detect.judger import Judger
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from django.forms import URLField
+from functools import partial
+from django.core.files.base import ContentFile
+from django.core.validators import URLValidator
 
 class DateInput(forms.DateInput):
     input_type = "date"
     def __init__(self, **kwargs):
         kwargs["format"] = "%Y-%m-%d"
         super().__init__(**kwargs)
+
+def _detect_signature_in_image(file_path):
+        loader = Loader()
+        extractor = Extractor()
+        cropper = Cropper(border_ratio=0)
+        judger = Judger()
+
+        masks = loader.get_masks(file_path)
+        is_signed = False
+        for mask in masks:
+            labeled_mask = extractor.extract(mask)
+            results = cropper.run(labeled_mask)
+            for result in results.values():
+                is_signed = judger.judge(result["cropped_mask"])
+                if is_signed:
+                    break
+            if is_signed:
+                break
+        return is_signed
 
 class WorkshopForm(forms.ModelForm):
     workshop_language_iso = forms.ChoiceField(label="Language", choices=[], required=False)
@@ -70,8 +91,8 @@ class WorkshopForm(forms.ModelForm):
                                             'placeholder': '(optional) Provide the total number of regular length papers submitted'}),
             'total_short_acc_papers': TextInput(attrs={'size': 100,
                                             'placeholder': '(optional) Provide the total number of short length papers submitted'}),
-            'editor_agreement': FileInput(attrs={'accept': '.pdf', 
-                                                 'placeholder': 'Upload the agreement file'}),
+            # 'editor_agreement': FileInput(attrs={'accept': '.pdf', 
+            #                                      'placeholder': 'Upload the agreement file'}),
             'editor_agreement_signed': CheckboxInput(attrs={'required': True})
        }
         
@@ -128,43 +149,35 @@ class WorkshopForm(forms.ModelForm):
         editor_agreement = cleaned_data.get('editor_agreement')
         email = cleaned_data.get('volume_owner_email')
 
-        if total_accepted_papers > total_submitted_papers:
-            raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
+        if total_accepted_papers is not None and total_submitted_papers is not None:
+            if total_accepted_papers > total_submitted_papers:
+                self.add_error('total_accepted_papers', "The number of accepted papers cannot exceed the number of submitted papers.")
 
         if total_reg_acc_papers is not None and total_short_acc_papers is not None:
             if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
-                raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
+                self.add_error('total_reg_acc_papers', "The sum of regular and short accepted papers must equal the total number of accepted")
+                self.add_error('total_short_acc_papers', "The sum of regular and short accepted papers must equal the total number of accepted")
    
-        # if not editor_agreement:
-        #     raise ValidationError("Please upload the agreement file.")
-        # if editor_agreement:
-            # pass
-            # editor_agreement_file_path = os.path.join(settings.MEDIA_ROOT, editor_agreement.name)
-            # default_storage.save(editor_agreement.name, ContentFile(editor_agreement.read()))
+        if editor_agreement:
+            pass
+            # directory_path = os.path.join('agreement', f'Vol-{self.instance.id}')
+            # full_directory_path = os.path.join(settings.MEDIA_ROOT, directory_path)
+
+            # if not os.path.exists(full_directory_path):
+            #     os.makedirs(full_directory_path)
+            # editor_agreement_file_path = os.path.join(directory_path, editor_agreement.name)
+            # full_file_path = os.path.join(settings.MEDIA_ROOT, editor_agreement_file_path)
+            # default_storage.save(full_file_path, ContentFile(editor_agreement.read()))
+            # self.instance.editor_agreement = editor_agreement_file_path
             
-            # if not self._detect_signature_in_image(editor_agreement_file_path):
-            #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
+            # cleaned_data['editor_agreement'] = editor_agreement_file_path   
+        
+    #         if not self._detect_signature_in_image(editor_agreement_file_path):
+    #             raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
 
         return cleaned_data
-    
-    def _detect_signature_in_image(self, file_path):
-        loader = Loader()
-        extractor = Extractor()
-        cropper = Cropper(border_ratio=0)
-        judger = Judger()
 
-        masks = loader.get_masks(file_path)
-        is_signed = False
-        for mask in masks:
-            labeled_mask = extractor.extract(mask)
-            results = cropper.run(labeled_mask)
-            for result in results.values():
-                is_signed = judger.judge(result["cropped_mask"])
-                if is_signed:
-                    break
-            if is_signed:
-                break
-        return is_signed
+    
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -205,7 +218,6 @@ class PaperForm(forms.ModelForm):
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
 
-        
         # if uploaded_file and agreement_file and self.workshop:
 
         # agreement_file_name = os.path.join(directory_path, agreement_file.name)
@@ -219,26 +231,6 @@ class PaperForm(forms.ModelForm):
         #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
         
         return cleaned_data
-
-    # def _detect_signature_in_image(self, file_path):
-    #     loader = Loader()
-    #     extractor = Extractor()
-    #     cropper = Cropper(border_ratio=0)
-    #     judger = Judger()
-
-    #     masks = loader.get_masks(file_path)
-    #     is_signed = False
-    #     for mask in masks:
-    #         labeled_mask = extractor.extract(mask)
-    #         results = cropper.run(labeled_mask)
-    #         for result in results.values():
-    #             is_signed = judger.judge(result["cropped_mask"])
-    #             if is_signed:
-    #                 break
-    #         if is_signed:
-    #             break
-    #     return is_signed
-
 
 class AuthorCustomForm(forms.ModelForm):
     class Meta:
@@ -277,23 +269,22 @@ AuthorFormSet = modelformset_factory(
 
 )
 
-EditorFormSet = modelformset_factory(
-    Editor, fields=('editor_name','editor_url' ,'institution', 'institution_country', 'institution_url', 'research_group'), extra=0,
-    # CSS styling but for formsets
-    widgets = {
-        'editor_name': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Provide the name of the editor'}),
-        'editor_url': TextInput(attrs={'size': 70, 
-                                            'placeholder': '(optional) Provide the personal url of the editor'}),
-        'institution': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Provide the institution (company or university) of the editor'}),
-        'institution_country': CountrySelectWidget(),
+class EditorForm(forms.ModelForm):
+    
+    class Meta:
+        model = Editor
+        fields = ['editor_name', 'editor_url', 'institution', 'institution_country', 'institution_url', 'research_group']
+        widgets = {
+            'editor_name': forms.TextInput(attrs={'size': 100, 'placeholder': 'Provide the name of the editor'}),
+            'editor_url': forms.TextInput(attrs={'size': 100, 'placeholder': '(optional) Provide the URL of the editor e.g. https://www.example.com'}),
+            'institution': forms.TextInput(attrs={'size': 100, 'placeholder': 'Provide the institution (company or university)'}),
+            'institution_country': CountrySelectWidget(),
+            'institution_url': forms.TextInput(attrs={'size': 100, 'placeholder': 'Provide the URL of the institution e.g. https://www.example.com'}),
+            'research_group': forms.TextInput(attrs={'size': 70, 'placeholder': '(optional) Provide the research group of the editor'})
+        }
 
-        'institution_url': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Provide the URL of the institution (company or university)'}),
-        'research_group': TextInput(attrs={'size': 70, 
-                                            'placeholder': '(optional) Provide the research group of the editor'})
-    }
+EditorFormSet = modelformset_factory(
+    Editor, form=EditorForm, extra=0,
 )
 
 SessionFormSet = modelformset_factory(
