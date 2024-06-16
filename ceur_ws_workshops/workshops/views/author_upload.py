@@ -33,6 +33,7 @@ class AuthorUpload(View):
         if paper_form.is_valid() and author_formset.is_valid():
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = self.get_workshop()
+
             paper_instance.save()
 
             author_instances = author_formset.save()
@@ -43,7 +44,7 @@ class AuthorUpload(View):
             
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
-
+            
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, author_upload_secret_token = self.kwargs['author_upload_secret_token'])
         else:
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
@@ -51,6 +52,7 @@ class AuthorUpload(View):
     def create_paper(self, request, author_formset, paper_form):
 
         if paper_form.is_valid() and author_formset.is_valid():
+            
             paper_instance = paper_form.save(commit=False) 
             paper_instance.workshop = self.get_workshop()
             paper_instance.uploaded_file = request.FILES['uploaded_file']
@@ -58,7 +60,6 @@ class AuthorUpload(View):
             paper_instance.agreement_file.name = self._get_agreement_filename(paper_instance, paper_instance.agreement_file.name)
             
             paper_instance.save()  
-
             if request.POST['session'] != '':
                 session_instance = Session.objects.get(pk=request.POST['session'])
                 paper_instance.session = session_instance
@@ -66,6 +67,8 @@ class AuthorUpload(View):
             # paper_instance.authors.add(*author_instances)  
             self.get_workshop().accepted_papers.add(paper_instance)  
             
+            # paper_form = PaperForm(file_uploaded=True, workshop=self.get_workshop(), instance=paper_instance, pages=paper_form.cleaned_data['pages'])
+
             context = {
                 'author_formset' : author_formset, 
                 'paper_form' : paper_form,
@@ -78,7 +81,7 @@ class AuthorUpload(View):
 
     def get(self, request, author_upload_secret_token):
         author_formset = AuthorFormSet(queryset=Author.objects.none(), prefix="author")
-        paper_form = PaperForm(file_uploaded=False, workshop=self.get_workshop())
+        paper_form = PaperForm(file_uploaded=False, workshop=self.get_workshop(), hide_pages = True)
         context = self.get_context(author_formset, paper_form)
         return render(request, self.upload_path, context)
 
@@ -100,4 +103,5 @@ class AuthorUpload(View):
         if 'confirm_button' in request.POST:
             return self.submit_paper(request, author_formset, paper_form)
         else:
+            
             return self.create_paper(request, author_formset, paper_form)

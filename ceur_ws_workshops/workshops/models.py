@@ -80,7 +80,7 @@ class Workshop(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    author_upload_secret_token = models.UUIDField(default=uuid.uuid4, editable=False)
+    author_upload_secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique = True)
     def __str__(self):
         return self.workshop_full_title
 
@@ -104,7 +104,7 @@ class Paper(models.Model):
         filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
         return f"agreement/Vol-{agreement_file}/{filename}"
     paper_title = models.CharField(max_length=200)
-    pages = models.CharField(max_length=10)
+    pages = models.CharField(max_length=10, blank = True)
     uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True)
     agreement_file = models.FileField(upload_to=agreement_file_path, blank = True)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)

@@ -16,6 +16,7 @@ from django.forms import URLField
 from functools import partial
 from django.core.files.base import ContentFile
 from django.core.validators import URLValidator
+import PyPDF2
 
 class DateInput(forms.DateInput):
     input_type = "date"
@@ -183,6 +184,8 @@ class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         file_uploaded = kwargs.pop('file_uploaded', False)
         self.workshop = kwargs.pop('workshop', None) 
+        hide_pages = kwargs.pop('hide_pages', False)
+        pages = kwargs.pop('pages', None)
         super(PaperForm, self).__init__(*args, **kwargs)
 
         if file_uploaded:
@@ -194,7 +197,13 @@ class PaperForm(forms.ModelForm):
             self.fields['session'].queryset = self.workshop.sessions.all()
         else:
             self.fields['session'].queryset = Session.objects.none()  # No sessions available if workshop is not provided
-    # paper_title = forms.CharField(strip=True)
+
+        if hide_pages:
+            self.fields['pages'].widget = forms.HiddenInput()
+
+        if pages is not None:
+            self.fields['pages'].initial = pages
+
     class Meta:
         model = Paper
         fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file']
@@ -218,6 +227,10 @@ class PaperForm(forms.ModelForm):
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
 
+        
+        pdfReader = PyPDF2.PdfReader(uploaded_file)
+        num_pages = len(pdfReader.pages)
+        # cleaned_data['pages'] = num_pages
         # if uploaded_file and agreement_file and self.workshop:
 
         # agreement_file_name = os.path.join(directory_path, agreement_file.name)
@@ -231,6 +244,7 @@ class PaperForm(forms.ModelForm):
         #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
         
         return cleaned_data
+    
 
 class AuthorCustomForm(forms.ModelForm):
     class Meta:
