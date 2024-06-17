@@ -24,6 +24,10 @@
         <form action="{% url 'workshops:create_workshop' %}" method="get">
             <button type="submit" class="button-13">Create New Workshop</button>
           </form>
+
+          <form action="{% url 'workshops:open_review_workshop' %}" method="get">
+            <button type="submit" class="button-13">Create New Worskhop with OpenReview</button>
+          </form>
         
 
         {% endblock %}

@@ -1,7 +1,7 @@
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
-{%load crispy_forms_tags %} 
+{% load crispy_forms_tags %}
 
 <form method="post" id="form-container" enctype="multipart/form-data">
   <h1 class="header-title">Create Workshop Volume</h1>
@@ -9,58 +9,28 @@
 
   <fieldset>
     <legend>Workshop Details</legend>
-    Please provide details about the workshop in the following section. Please take into account the following rules: 
-      <ul>
-        <li> If your workshop is colocated with another workshop, please fill out this form <u>only once</u> and provide the name with which this workshop was colocated in the correct field.
-        <li> Fields denoted with an asterisk are required fields.
-        <li> Optional fields can be left blank if they are not applicable.  
-      </ul>  
-      
+    Please provide details about the workshop in the following section. Please take into account the following rules:
+    <ul>
+      <li>If your workshop is colocated with another workshop, please fill out this form <u>only once</u> and provide the name with which this workshop was colocated in the correct field.</li>
+      <li>Fields denoted with an asterisk are required fields.</li>
+      <li>Optional fields can be left blank if they are not applicable.</li>
+    </ul>
+
     {% crispy form %}
-    <script>
-      const startDateInput = document.getElementById('workshop_begin_date');
-      const endDateInput = document.getElementById('workshop_end_date');
-      function updateEndDateMin() {
-      endDateInput.setAttribute('min', startDateInput.value);
-      if (endDateInput.value && startDateInput.value > endDateInput.value) {
-        endDateInput.value = startDateInput.value;
-      }
-    }
-    
-    function updateStartDateMax() {
-      if (startDateInput.value && startDateInput.value > endDateInput.value) {
-        startDateInput.value = endDateInput.value;
-      }
-    }
+    <input type="hidden" name="openreview_url" value="{{ openreview_url }}">
 
-    startDateInput.addEventListener('change', updateEndDateMin);
-
-    endDateInput.addEventListener('change', updateStartDateMax);
-
-    if (startDateInput.value) {
-      updateEndDateMin();
-    }
-
-    else if (endDateInput.value) {
-      updateStartDateMax();
-    }
-    </script>
     <input type="hidden" name="workshop_id" value="{{ form.instance.id }}">
-
   </fieldset>
-
 
   <fieldset id="session_fieldset">
     <legend>Session</legend>
-    <i> If the workshop has different sessions, please provide the titles of these sessions in this section. If no
-      splits exist, please leave blank.</i>
-    <br>
-    <br>
+    <i>If the workshop has different sessions, please provide the titles of these sessions in this section. If no splits exist, please leave blank.</i>
+    <br><br>
     {{ session_form.management_form }}
     <div class="session-form" id="session-form">
       {% for form in session_form %}
-      {{form.as_p}}
-      <br>
+        {{ form.as_p }}
+        <br>
       {% endfor %}
     </div>
     <input type="button" value="Add Session" class="button-13" id="add_session">
@@ -68,15 +38,13 @@
 
   <fieldset id="editor-fieldset">
     <legend>Editors</legend>
-    <i> Please provide details on the editors in this section. Also provide your own details if you are also an editor.
-    </i>
-    <br>
-    <br>
+    <i>Please provide details on the editors in this section. Also provide your own details if you are also an editor.</i>
+    <br><br>
     {{ editor_form.management_form }}
     <div class="editor-form" id="editor-form">
       {% for editor in editor_form %}
-      {{editor|crispy}}
-      <br>
+        {{ editor|crispy }}
+        <br>
       {% endfor %}
     </div>
     <input type="button" value="Add Editor" class="button-13" id="add_editor">
@@ -86,7 +54,6 @@
     <input type="submit" class="button-13" value="Save Workshop">
   </div>
 </form>
-
 
 <div id="empty_editor_form" style="display:none">
   <table class='no_error'>
@@ -102,9 +69,18 @@
   </table>
 </div>
 
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+  $(document).ready(function () {
+    // Hide initial validation errors
+    $('.invalid-feedback').hide();
+
+    // Show errors only on submit
+    $('#form-container').on('submit', function () {
+      $('.invalid-feedback').show();
+    });
+  });
+
   $('#add_session').click(function () {
     var form_idx = $('#id_session-TOTAL_FORMS').val();
     $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
@@ -117,5 +93,28 @@
     $('#id_editor-TOTAL_FORMS').val(parseInt(form_idx) + 1);
   });
 
+
+  function updateEndDateMin() {
+    endDateInput.setAttribute('min', startDateInput.value);
+    if (endDateInput.value && startDateInput.value > endDateInput.value) {
+      endDateInput.value = startDateInput.value;
+    }
+  }
+
+  function updateStartDateMax() {
+    if (startDateInput.value && startDateInput.value > endDateInput.value) {
+      startDateInput.value = endDateInput.value;
+    }
+  }
+
+  startDateInput.addEventListener('change', updateEndDateMin);
+  endDateInput.addEventListener('change', updateStartDateMax);
+
+  if (startDateInput.value) {
+    updateEndDateMin();
+  } else if (endDateInput.value) {
+    updateStartDateMax();
+  }
 </script>
+
 {% endblock %}
