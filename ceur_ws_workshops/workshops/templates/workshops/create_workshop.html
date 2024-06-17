@@ -18,6 +18,7 @@
 
     {% crispy form %}
     <input type="hidden" name="openreview_url" value="{{ openreview_url }}">
+
     <input type="hidden" name="workshop_id" value="{{ form.instance.id }}">
   </fieldset>
 
@@ -91,6 +92,7 @@
     $('#editor-form').append($('#empty_editor_form').html().replace(/__prefix__/g, form_idx));
     $('#id_editor-TOTAL_FORMS').val(parseInt(form_idx) + 1);
   });
+
 
   function updateEndDateMin() {
     endDateInput.setAttribute('min', startDateInput.value);

@@ -18,13 +18,10 @@
     <style>
         .delete_object {
             color: red;
-            /* background-color: #f8d7da; */
             border-color: #f5c6cb;
             position: relative;
             padding: .75rem 1.25rem;
-            /* margin-bottom: 1rem; */
             border: 1px solid transparent;
-            /* border-radius: .25rem; */
             font-weight: bold;
             text-align: left;
             display: flex;
@@ -166,6 +163,7 @@
         <p><strong>Full title:</strong> {{ workshop.workshop_full_title }}</p>
         <p><strong>Shorthand title:</strong> {{ workshop.workshop_short_title }} </p> 
         <p><strong>Workshop Acronym: </strong>{{workshop.workshop_acronym}} </p>
+
         <p><strong>Colocated with:</strong> {{ workshop.workshop_colocated }}</p>
         <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
         <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
@@ -208,6 +206,7 @@
                         {% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </p>
+                    <p><strong>Session:</strong> {{ paper.session.session_title }}</p>
                     <p><strong>Pages:</strong> {{ paper.pages }}</p>
                     <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
                         {{ paper.uploaded_file.name }}</a></p>

@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from ..models import Workshop, Paper
+from ..models import Workshop, Paper, Session
 from django.conf import settings
 from django.urls import reverse
 from django.views import View
@@ -22,7 +22,7 @@ class WorkshopOverview(View):
             'papers' : [paper for paper in workshop.accepted_papers.all()],
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop),
-            'paper_forms' : [PaperForm(instance=paper_instance) for paper_instance in workshop.accepted_papers.all()],
+            'paper_forms' : [PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all()],
             'session_title_list' : [session_object.session_title for session_object in workshop.sessions.all()],
             'edit_mode': edit_mode,
             
@@ -145,7 +145,6 @@ class WorkshopOverview(View):
         self.add_papers_data(workshop, workshop_data)   
         self._save_workshop_data(workshop_data, workshop)
         request.session['json_saved'] = True
-
         self._zip_agreement_files(workshop)
         messages.success(request, 'Workshop submitted successfully.')
 
@@ -153,7 +152,7 @@ class WorkshopOverview(View):
     
     def post(self, request, secret_token):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
-        
+
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
         elif request.POST["submit_button"] == "Confirm":
@@ -178,7 +177,10 @@ class WorkshopOverview(View):
                 
                 paper_form = PaperForm(data = request.POST, files = request.FILES, instance=paper_instance, workshop = workshop)
                 if paper_form.is_valid():
-                    paper_form.save()
+                    saved_paper_instance = paper_form.save()
+                
+                saved_session_instance = Session.objects.get(pk=request.POST['session'])
+                saved_paper_instance.session = saved_session_instance
 
                 workshop.accepted_papers.add(paper_instance)
 

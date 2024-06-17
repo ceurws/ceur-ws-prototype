@@ -4,6 +4,7 @@ from django.urls import path
 from .views import index, CreateWorkshop, AuthorUpload, WorkshopOverview, edit_author_post_view, OpenReviewClass
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
+
 app_name = "workshops"
 
 urlpatterns = [

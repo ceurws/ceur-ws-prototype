@@ -46,7 +46,7 @@ class Workshop(models.Model):
         return f"agreement/Vol-{workshop_id}/{filename}"
     
     # Filled in by user
-    workshop_full_title = models.CharField(max_length=200,)
+    workshop_full_title = models.CharField(max_length=200)
     workshop_short_title = models.CharField(max_length=200)
     workshop_acronym = models.CharField(max_length=50)
     workshop_description = models.TextField(max_length=500)
