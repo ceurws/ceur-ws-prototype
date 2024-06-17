@@ -2,7 +2,6 @@
 examples
 ceur_ws_workshops/__pycache__/
 ceur_ws_workshops/ceur_ws_workshops/__pycache__/
-ceur_ws_workshops/views/__pycache__
 ceur_ws_workshops/workshops/__pycache__/
 ceur_ws_workshops/db.sqlite3
 ceur_ws_workshops/.env
@@ -14,7 +13,6 @@ ceur_ws_workshops/build
 ceur_ws_workshops/ceur_ws_workshops.egg-info
 new_env
 ceur_ws_workshops/workshops/views/__pycache__
-
 ceur_ws_workshops/workshops/migrations/__pycache__
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -178,4 +176,3 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
-
