@@ -12,7 +12,6 @@ ceur_ws_workshops/zipped_agreements
 ceur_ws_workshops/djangoenv
 ceur_ws_workshops/build
 ceur_ws_workshops/ceur_ws_workshops.egg-info
-new_env
 ceur_ws_workshops/workshops/views/__pycache__
 
 ceur_ws_workshops/workshops/migrations/__pycache__
