@@ -96,6 +96,9 @@
   });
 
 
+
+  const startDateInput = document.getElementById('workshop_begin_date');
+  const endDateInput = document.getElementById('workshop_end_date');
   function updateEndDateMin() {
     endDateInput.setAttribute('min', startDateInput.value);
     if (endDateInput.value && startDateInput.value > endDateInput.value) {
