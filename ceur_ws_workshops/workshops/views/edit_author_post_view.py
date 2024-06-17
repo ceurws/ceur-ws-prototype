@@ -1,6 +1,13 @@
 from django.shortcuts import render, get_object_or_404
 from ..models import Workshop, Paper, Author
 from ..forms import AuthorFormSet, PaperForm
+import PyPDF2, os
+
+def _get_agreement_filename(paper_instance, original_filename):
+        paper_title = paper_instance.paper_title.replace(' ', '')
+        extension = os.path.splitext(original_filename)[1]
+        new_filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
+        return new_filename
 
 def edit_author_post_view(request, paper_id, author_upload_secret_token):
     workshop = get_object_or_404(Workshop, author_upload_secret_token=author_upload_secret_token)
@@ -24,7 +31,17 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
 
         elif 'submit_button' in request.POST and paper_form.is_valid() and author_formset.is_valid():
 
-            paper_form.save()
+            paper_instance = paper_form.save(commit = False)
+
+            if request.FILES.get('uploaded_file', False):
+                paper_instance.uploaded_file = request.FILES['uploaded_file']
+                pdfReader = PyPDF2.PdfReader(paper_instance.uploaded_file)
+                paper_instance.pages = len(pdfReader.pages)
+            if request.FILES.get('agreement_file', False):
+                paper_instance.agreement_file = request.FILES['agreement_file']
+                paper_instance.agreement_file.name = _get_agreement_filename(paper_instance, paper_instance.agreement_file.name)
+
+            paper_instance.save()
 
             paper.authors.add(*author_formset.save())
             
@@ -38,6 +55,7 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
     else:
         paper_form = PaperForm(instance=paper)
         author_formset = AuthorFormSet(queryset=paper.authors.all())
+
 
     
     return render(request, 'workshops/author_upload_success.html', context)

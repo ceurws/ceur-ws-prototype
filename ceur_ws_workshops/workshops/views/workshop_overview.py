@@ -173,9 +173,7 @@ class WorkshopOverview(View):
                 if paper_id in papers_to_delete:
                     continue  
 
-                print("before instance of paper")
                 paper_instance = Paper.objects.filter(id=paper_id, workshop = workshop).first()
-                print("AFter instance of paper")
                 paper_form = PaperForm(data = request.POST, files = request.FILES, instance=paper_instance, workshop = workshop)
                 if paper_form.is_valid():
                     saved_paper_instance = paper_form.save()

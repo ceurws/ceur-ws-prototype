@@ -16,68 +16,68 @@
 <body>
     <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
     <style>
-        .delete_object {
-            color: red;
-            border-color: #f5c6cb;
-            position: relative;
-            padding: .75rem 1.25rem;
-            border: 1px solid transparent;
-            font-weight: bold;
-            text-align: left;
-            display: flex;
-            align-items: center;
-        }
+    .delete_object {
+        color: red;
+        border-color: #f5c6cb;
+        position: relative;
+        padding: .75rem 1.25rem;
+        border: 1px solid transparent;
+        font-weight: bold;
+        text-align: left;
+        display: flex;
+        align-items: center;
+    }
 
-        .delete_object input[type="checkbox"] {
-            margin-right: 0.5rem;
-        }
+    .delete_object input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
 
-        .delete_object label {
-            margin: 0;
-        }
+    .delete_object label {
+        margin: 0;
+    }
 
-        .paper-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .paper-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-        .toggle-details {
-            cursor: pointer;
-            border: solid black;
-            border-width: 0 3px 3px 0;
-            display: inline-block;
-            padding: 3px;
-        }
+    .toggle-details {
+        cursor: pointer;
+        border: solid black;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 3px;
+    }
 
-        .down {
-            transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-        }
+    .down {
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+    }
 
-        .up {
-            transform: rotate(-135deg);
-            -webkit-transform: rotate(-135deg);
-        }
-        .handle {
-            display: inline-block;
-            border-top: 3px solid var(--dark);
-            width: 30px;
-            padding-top: 5px;
-            cursor: grab;
-        }
-        .handle:after, .handle:before {
-            display: block;
-            content: "";
-            padding-top: 5px;
-            border-top: 3px solid var(--dark);
-        }
-        .handle:hover, .handle:hover:before, .handle:hover:after {
-            border-color: var(--primary);
-        }
-        .handle:active, .handle:active:before, .handle:active:after {
-            cursor: grabbing;
-        }
+    .up {
+        transform: rotate(-135deg);
+        -webkit-transform: rotate(-135deg);
+    }
+    .handle {
+        display: inline-block;
+        border-top: 3px solid var(--dark);
+        width: 30px;
+        padding-top: 5px;
+        cursor: grab;
+    }
+    .handle:after, .handle:before {
+        display: block;
+        content: "";
+        padding-top: 5px;
+        border-top: 3px solid var(--dark);
+    }
+    .handle:hover, .handle:hover:before, .handle:hover:after {
+        border-color: var(--primary);
+    }
+    .handle:active, .handle:active:before, .handle:active:after {
+        cursor: grabbing;
+    }
         
 
     .paper-item {
@@ -136,7 +136,7 @@
     </style>
     {% if edit_mode %}
     <h1>Edit workshop: <i>{{workshop.workshop_short_title}}</i></h1>
-    <form method="post"  enctype="multipart/form-data" id = "workshop-form">
+    <form method="post"  enctype="multipart/form-data">
         {% csrf_token %}
         <fieldset class="workshop-details">
             <legend>Workshop Details</legend>
@@ -161,7 +161,7 @@
             {% for session_title in session_title_list %}
             <fieldset class="inner_fieldset">
                 <legend>{{ session_title }}</legend>
-                <form method="post"  enctype="multipart/form-data" class="sortable " id=" paper-form">
+                <form method="post"  enctype="multipart/form-data" class="sortable" id="sortable-{{ session_title|slugify }}">
                     {% csrf_token %}
                     {% for paperform in paper_forms %}
                     {% if paperform.instance.session.session_title == session_title %}
@@ -237,14 +237,17 @@
                     </div>
                 </li>
                 {% endfor %}
-                
+                </form>
         </fieldset>
-        <div class="submit-container">
-            <input type="submit" name="submit_button" class="button-13" value="Confirm">
-        </div>
-        </form>
-        {% endif %}
 
+        <form method="post" id="form-container" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="submit-container">
+                <input type="submit" name="submit_button" class="button-13" value="Confirm">
+        </div>
+            
+
+        {% endif %}
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@latest/dist/htmx.min.js"></script>
@@ -278,22 +281,8 @@
             });
         });
     });
-
-    function submitForms() {
-            var workshopForm = document.getElementById('workshop-form');
-            var paperForm = document.getElementById('sortable-list');
-
-            var iframe = document.createElement('iframe');
-            iframe.name = 'hidden_iframe';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-
-            paperForm.target = 'hidden_iframe';
-
-            workshopForm.submit();
-            paperForm.submit();
-        }
     </script>
+   
    
 
     {% else %}
@@ -434,8 +423,10 @@
                 <p><strong>Pages:</strong> {{ paper.pages }}</p>
                 <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
                     {{paper.uploaded_file.name }}</a></p>
+                {% if paper.agreement_file %}
                 <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">
                     {{paper.agreement_file.name }}</a></p>
+                {% endif %}
             </li>
             {% endfor %}
         </ul>

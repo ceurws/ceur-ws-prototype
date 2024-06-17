@@ -186,6 +186,9 @@ class PaperForm(forms.ModelForm):
         self.workshop = kwargs.pop('workshop', None) 
         hide_pages = kwargs.pop('hide_pages', False)
         pages = kwargs.pop('pages', None)
+        hide_agreement = kwargs.pop('hide_agreement', False)
+        hide_has_third_party_material = kwargs.pop('hide_has_third_party_material', True)
+        agreement_file = kwargs.pop('agreement_file', False)
         super(PaperForm, self).__init__(*args, **kwargs)
 
         if file_uploaded:
@@ -196,7 +199,7 @@ class PaperForm(forms.ModelForm):
         if self.workshop: 
             self.fields['session'].queryset = self.workshop.sessions.all()
         else:
-            self.fields['session'].queryset = Session.objects.none()  # No sessions available if workshop is not provided
+            self.fields['session'].queryset = Session.objects.none()
 
         if hide_pages:
             self.fields['pages'].widget = forms.HiddenInput()
@@ -204,12 +207,23 @@ class PaperForm(forms.ModelForm):
         if pages is not None:
             self.fields['pages'].initial = pages
 
+        if hide_agreement:
+            self.fields['agreement_file'].widget = forms.HiddenInput()
+
+        if hide_has_third_party_material:
+            self.fields['has_third_party_material'].widget = forms.HiddenInput()
+
+        if not agreement_file:
+            self.fields['agreement_file'].label = 'Please Upload the hand signed agreement file'
+        else:
+            self.fields['agreement_file'].label = 'Upload agreement file'
     class Meta:
         model = Paper
-        fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file']
+        fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file', 'has_third_party_material']
 
         help_texts = {'pages': '<br><i>Provide the length(number of pages) of the paper</i>.<br>',
-                      'agreement_file': '<br><i>The agreement file of the paper needs to be <b>hand signed</b>' }
+                    #   'agreement_file': '<br><i>The agreement file of the paper needs to be <b>hand signed</b>',
+                       'has_third_party_material': '<i>Check this box if the paper contains third-party material</i>'}
         widgets = {
             'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper'}),
             'pages': forms.TextInput(attrs={'size': 70, 
@@ -227,15 +241,16 @@ class PaperForm(forms.ModelForm):
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
 
-        
         pdfReader = PyPDF2.PdfReader(uploaded_file)
         num_pages = len(pdfReader.pages)
-        # cleaned_data['pages'] = num_pages
-        # if uploaded_file and agreement_file and self.workshop:
+        cleaned_data['pages'] = num_pages
 
-        # agreement_file_name = os.path.join(directory_path, agreement_file.name)
-        # agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
-        # default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
+        # if uploaded_file and agreement_file and self.workshop:
+        # if agreement_file: 
+        #     directory_path = os.path.join('agreement', f'Vol-{self.workshop.id}')
+        #     agreement_file_name = os.path.join(directory_path, agreement_file.name)
+        #     agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
+        #     default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
 
         # self.instance.agreement_file = agreement_file.name
         

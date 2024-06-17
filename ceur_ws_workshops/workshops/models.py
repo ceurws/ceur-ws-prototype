@@ -101,8 +101,9 @@ class Paper(models.Model):
         original_filename = instance.agreement_file.name
         paper_title = instance.paper_title.replace(' ', '')
         extension = os.path.splitext(original_filename)[1]
-        filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
+        filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}.html'
         return f"agreement/Vol-{agreement_file}/{filename}"
+    
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10, blank = True)
     uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True)
@@ -113,6 +114,7 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True)
+    has_third_party_material = models.BooleanField(default=False)
     def __str__(self):
         return self.paper_title
     

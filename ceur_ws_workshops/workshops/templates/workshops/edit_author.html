@@ -28,11 +28,15 @@
   </style>
     <legend>Paper Data</legend>
     <!-- {{ paper_form.as_p }} -->
+    
+    <!-- <a href="{{download_url}}" download> Download the agreement form</a> -->
+
     {{ paper_form|crispy }}
+
     <input type="hidden" name="secret_token" value="{{ paper_instance.secret_token }}">
 
     <p>Currently uploaded Paper: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a> </p>
-    <p>Currently uploaded Agreement:  <a href="{{paper_form.instance.agreement_file.url}}">{{paper_form.instance.agreement_file.name }}</a></p>
+  <p>Currently uploaded Agreement:  <a href="{{paper_form.instance.agreement_file.url}}">{{paper_form.instance.agreement_file.name }}</a></p>
   </fieldset>
   <fieldset id="author-fieldset">
     {{ author_formset.management_form}}
