@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from ..models import Workshop, Paper, Author, Session
 from django.views import View
-from ..forms import AuthorFormSet, PaperForm
+from ..forms import PaperForm, get_author_formset
 import os
 
 class AuthorUpload(View):
@@ -78,7 +78,7 @@ class AuthorUpload(View):
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
 
     def get(self, request, secret_token):
-        author_formset = AuthorFormSet(queryset=Author.objects.none(), prefix="author")
+        author_formset = get_author_formset()(queryset=Author.objects.none(), prefix="author")
         paper_form = PaperForm(file_uploaded=False, workshop=self.get_workshop())
         context = self.get_context(author_formset, paper_form)
         return render(request, self.upload_path, context)
@@ -87,12 +87,12 @@ class AuthorUpload(View):
         
         # if statement to check if request.FILES has any new files attached. 
         if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:
-            author_formset = AuthorFormSet(queryset=Author.objects.none(), data = request.POST, prefix="author")
+            author_formset = get_author_formset()(queryset=Author.objects.none(), data = request.POST, prefix="author")
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop())
        
         # if no files are attached we extract the files uploaded 
         else:
-            author_formset = AuthorFormSet(request.POST, prefix="author")
+            author_formset = get_author_formset()(request.POST, prefix="author")
 
             paper_instance = Paper.objects.filter(secret_token=request.POST.get('secret_token'), workshop = self.get_workshop()).first()
 

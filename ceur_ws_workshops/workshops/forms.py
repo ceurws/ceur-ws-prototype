@@ -102,18 +102,18 @@ class WorkshopForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-        total_submitted_papers = cleaned_data.get('total_submitted_papers')
-        total_accepted_papers = cleaned_data.get('total_accepted_papers')
-        total_reg_acc_papers = cleaned_data.get('total_reg_acc_papers', 0)  
-        total_short_acc_papers = cleaned_data.get('total_short_acc_papers', 0)  
-        editor_agreement = cleaned_data.get('editor_agreement')
+        # total_submitted_papers = cleaned_data.get('total_submitted_papers')
+        # total_accepted_papers = cleaned_data.get('total_accepted_papers')
+        # total_reg_acc_papers = cleaned_data.get('total_reg_acc_papers', 0)  
+        # total_short_acc_papers = cleaned_data.get('total_short_acc_papers', 0)  
+        # editor_agreement = cleaned_data.get('editor_agreement')
 
-        if total_accepted_papers > total_submitted_papers:
-            raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
+        # if total_accepted_papers > total_submitted_papers:
+        #     raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
 
-        if total_reg_acc_papers is not None and total_short_acc_papers is not None:
-            if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
-                raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
+        # if total_reg_acc_papers is not None and total_short_acc_papers is not None:
+        #     if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
+        #         raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
             
         # if not editor_agreement:
         #     raise ValidationError("Please upload the agreement file.")
@@ -127,24 +127,24 @@ class WorkshopForm(forms.ModelForm):
 
         return cleaned_data
     
-    def _detect_signature_in_image(self, file_path):
-        loader = Loader()
-        extractor = Extractor()
-        cropper = Cropper(border_ratio=0)
-        judger = Judger()
+    # def _detect_signature_in_image(self, file_path):
+    #     loader = Loader()
+    #     extractor = Extractor()
+    #     cropper = Cropper(border_ratio=0)
+    #     judger = Judger()
 
-        masks = loader.get_masks(file_path)
-        is_signed = False
-        for mask in masks:
-            labeled_mask = extractor.extract(mask)
-            results = cropper.run(labeled_mask)
-            for result in results.values():
-                is_signed = judger.judge(result["cropped_mask"])
-                if is_signed:
-                    break
-            if is_signed:
-                break
-        return is_signed
+    #     masks = loader.get_masks(file_path)
+    #     is_signed = False
+    #     for mask in masks:
+    #         labeled_mask = extractor.extract(mask)
+    #         results = cropper.run(labeled_mask)
+    #         for result in results.values():
+    #             is_signed = judger.judge(result["cropped_mask"])
+    #             if is_signed:
+    #                 break
+    #         if is_signed:
+    #             break
+    #     return is_signed
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -196,29 +196,30 @@ class PaperForm(forms.ModelForm):
         
         return cleaned_data
 
-    def _detect_signature_in_image(self, file_path):
-        loader = Loader()
-        extractor = Extractor()
-        cropper = Cropper(border_ratio=0)
-        judger = Judger()
+    # def _detect_signature_in_image(self, file_path):
+    #     loader = Loader()
+    #     extractor = Extractor()
+    #     cropper = Cropper(border_ratio=0)
+    #     judger = Judger()
 
-        masks = loader.get_masks(file_path)
-        is_signed = False
-        for mask in masks:
-            labeled_mask = extractor.extract(mask)
-            results = cropper.run(labeled_mask)
-            for result in results.values():
-                is_signed = judger.judge(result["cropped_mask"])
-                if is_signed:
-                    break
-            if is_signed:
-                break
-        return is_signed
+    #     masks = loader.get_masks(file_path)
+    #     is_signed = False
+    #     for mask in masks:
+    #         labeled_mask = extractor.extract(mask)
+    #         results = cropper.run(labeled_mask)
+    #         for result in results.values():
+    #             is_signed = judger.judge(result["cropped_mask"])
+    #             if is_signed:
+    #                 break
+    #         if is_signed:
+    #             break
+    #     return is_signed
     
-AuthorFormSet = modelformset_factory(
-        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=0,
-        # CSS styling but for formsets
-        widgets = {
+# function to generate formsets, so the extra parameter can be set dynamically in case of initial data.
+def get_author_formset(extra=0):
+    return modelformset_factory(
+        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=extra,
+        widgets={
             'author_name': TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the name of the author'}),
             'author_university': TextInput(attrs={'size': 70, 
@@ -228,10 +229,10 @@ AuthorFormSet = modelformset_factory(
             'author_email': TextInput(attrs={'size': 50,
                                             'placeholder': 'Enter the email of the author'})
         },
-        labels = {
+        labels={
             'author_uni_url': "University URL",
         },
-)
+    )
 
 EditorFormSet = modelformset_factory(
     Editor, fields=('editor_name','editor_url' ,'institution', 'institution_country', 'institution_url', 'research_group'), extra=0,

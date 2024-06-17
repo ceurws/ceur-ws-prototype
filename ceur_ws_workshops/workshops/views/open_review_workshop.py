@@ -1,17 +1,27 @@
 from django.views import View
-import openreview
-from django.shortcuts import render
+from . import CreateWorkshop
+from django.shortcuts import render, redirect
 from ..forms import WorkshopForm, EditorFormSet, SessionFormSet
 from ..models import Editor, Session
+from urllib.parse import urlparse, parse_qs
+from django.http import HttpResponse
+
 
 
 class OpenReviewClient:
     def __init__(self, baseurl, username, password):
-        self.client = openreview.Client(baseurl=baseurl, username=username, password=password)
+        import openreview
+        self.client = openreview.api.OpenReviewClient(baseurl=baseurl, username=username, password=password)
 
     def check_workshop(self, venue_id):
         submissions = self.client.get_all_notes(content={'venueid': venue_id})
         return list(submissions)
+    
+    def find_ws_id(self, url):
+        parsed_url = urlparse(url)
+        query_params = parse_qs(parsed_url.query)
+        venue_id = query_params.get('id', [None])[0]
+        return venue_id
 
     def get_workshop_metadata(self, submission):
         metadata = {
@@ -24,49 +34,69 @@ class OpenReviewClient:
         }
         return metadata
 
-    # client = openreview.api.OpenReviewClient(
-    # baseurl='https://api2.openreview.net',
-    # username='filipmorris@duck.com', 
-    # password='MxFNF93fXpGZ*3.'
-    # )
-    # venues = client.get_group(id='venues').members
 
-    # # Find the id for your venue. For ICLR 2024 it's 'ICLR.cc/2024/Conference'
-    # for v in venues:
-    #     # if 'ICLR.cc/2024' in v:
-    #         print(v)
-
-class WorkshopView:
+class OpenReviewClass(View):
     def __init__(self):
-        self.openreview_client = OpenReviewClient(
-            baseurl='https://api2.openreview.net',
-            username='filipmorris@duck.com', 
-            password='MxFNF93fXpGZ*3.'
-        )
+        super().__init__()
+        self.query = None
+        try:
+            self.openreview_object = OpenReviewClient(
+                baseurl='https://api2.openreview.net',
+                username='filipmorris@duck.com', 
+                password='MxFNF93fXpGZ*3.'
+            )
+        except Exception as e:
+            # Log the error or handle it as needed
+            print("Error initializing OpenReviewClient:", e)
+
 
     def post(self, request):
-        # Handle form submission
-        pass
+        print('now')
+        create_workshop_view = CreateWorkshop.as_view(openreview_url = self.query)
+        return create_workshop_view(request)
 
-    def get(self, request):
-        form = WorkshopForm()
-        editor_form = EditorFormSet(queryset=Editor.objects.none(), prefix='editor')
-        session_form = SessionFormSet(queryset=Session.objects.none(), prefix='session')
+    def get(self, request):        
+        # search function
+        results = []
+        query = request.GET.get('query')
+        if query:
+            self.query = query
+            self.venue_id = self.openreview_object.find_ws_id(query)
 
-        # This is not correct, we need to check whether the workshop is present based on some filled in value like the workshop short title or something similar
-        venue_id = request.GET.get('venue_id')
-        if venue_id:
-            submissions = self.openreview_client.check_workshop(venue_id)
-            if submissions:
-                metadata = self.openreview_client.get_workshop_metadata(submissions[0])
-                form = WorkshopForm(initial={
-                    'workshop_full_title': metadata['title'],
-                    'workshop_description': metadata['abstract']
-                })
+            if self.venue_id:
+                try:
+                    venue_group = self.openreview_object.client.get_group(id=self.venue_id)
+                    results = venue_group.members
+                    submission_name = venue_group.content['submission_name']['value']
+                    all_submissions = self.openreview_object.client.get_all_notes(invitation=f'{self.venue_id}/-/{submission_name}')
+
+                except:
+                    pass 
+                # accepted_submissions = self.openreview_object.client.get_all_notes(content={'venueid':self.venue_id} )
+  
+                data = {
+                'workshop_city' : venue_group.content['location']['value'].split(',')[0],
+                'workshop_country' : venue_group.content['location']['value'].split(',')[-1],
+                'workshop_full_title' : venue_group.content['title']['value'],
+                'workshop_acronym' : venue_group.content['subtitle']['value'],
+                'workshop_begin_date' : venue_group.content['start_date']['value'],
+                'total_submitted_papers' : len(all_submissions),
+                }
+                # perhaps more data can be extracted? 
+                
+                workshop_form = WorkshopForm(data = data)
+                editor_form = EditorFormSet(queryset=Editor.objects.none(), 
+                                    prefix='editor')
+                session_form = SessionFormSet(queryset=Session.objects.none(), 
+                                      prefix='session')
+                context = {'form':workshop_form,
+                           'editor_form':editor_form,
+                           'session_form':session_form,
+                           'openreview_url':query}
+
+                return render(request, "workshops/create_workshop.html", context)
 
         context = {
-            'form': form,
-            'editor_form': editor_form,
-            'session_form': session_form
+            'query' : query
         }
-        return render(request, "workshops/create_workshop.html", context)
+        return render(request, "workshops/open_review_workshop.html", context)
