@@ -32,7 +32,7 @@
         <div id="author-form" class="author-form">
         {% for form in author_formset %}
         <p>Authored by: {{form.author_name.value}}</p>
-        <p>Affiliation: {{form.affiliation.value}}</p>
+        <p>Affiliation: {{form.author_uni_url.value}}</p>
         <p>Email: {{form.author_email.value}}</p>
 
         {% endfor %}

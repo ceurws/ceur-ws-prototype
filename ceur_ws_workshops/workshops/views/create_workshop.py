@@ -110,6 +110,7 @@ class CreateWorkshop(View):
 
     def post(self, request):
         if 'submit_button' in request.POST: 
+               
             workshop_instance = self.get_workshop(request.POST.get('workshop_id')) if request.POST.get('workshop_id') else None
 
             editor_formset = EditorFormSet(queryset=Editor.objects.none(), data=request.POST, prefix="editor")
@@ -117,15 +118,10 @@ class CreateWorkshop(View):
 
             workshop_form = WorkshopForm(data=request.POST, files=request.FILES, instance=workshop_instance)
 
-            if workshop_form.is_valid() and editor_formset.is_valid() and session_formset.is_valid():
-                workshop = workshop_form.save()
-
             # Once forms have been bound (either using old or new editor agreement), we validate and save to the database.
             if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
 
                 workshop = workshop_form.save()  
-
-
 
                 editor_instances = editor_formset.save()
                 session_instances = session_formset.save()
@@ -141,14 +137,13 @@ class CreateWorkshop(View):
                     }
                     return render(request, 'workshops/open_review_editpage.html', context)
                     
-
-
-                context = {
-                    'form': workshop_form,
-                    'editor_form': editor_formset,
-                    'session_form': session_formset
-                }
-                return render(request, self.edit_path, context)
+                return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
+                # context = {
+                #     'form': workshop_form,
+                #     'editor_form': editor_formset,
+                #     'session_form': session_formset
+                # }
+                # return render(request, self.edit_path, context)
 
         else:
 
