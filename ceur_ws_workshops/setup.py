@@ -14,10 +14,13 @@ setup(
         'django-countries==7.6.1',
         'django-crispy-forms==2.1',
         'pip==24.0',
-        'setuptools==70.0.0',
+        'setuptools==65.5.1',
         'sqlparse==0.5.0',
         'typing_extensions==4.12.1',
         'wheel==0.43.0',
+
+        'openreview-py==1.39.7'
+
         'PyPDF2==3.0.1',
     ],
     python_requires='>=3.10',

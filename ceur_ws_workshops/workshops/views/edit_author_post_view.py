@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from ..models import Workshop, Paper, Author
-from ..forms import AuthorFormSet, PaperForm
+from ..forms import get_author_formset, PaperForm
 import PyPDF2, os
+
 
 def _get_agreement_filename(paper_instance, original_filename):
         paper_title = paper_instance.paper_title.replace(' ', '')
@@ -22,11 +23,13 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
     }
     if request.method == "POST":
         paper_form = PaperForm(data=request.POST, instance=paper, workshop=workshop)
-        author_formset = AuthorFormSet(data = request.POST, queryset=Author.objects.filter(paper = paper), prefix = 'author')
+
+        author_formset = get_author_formset()(data = request.POST, queryset=Author.objects.filter(paper = paper), prefix = 'author')
+
         
         if 'edit_button' in request.POST:
             paper_form = PaperForm(instance=paper, workshop=workshop)
-            author_formset = AuthorFormSet(queryset=Author.objects.filter(paper = paper), prefix = 'author')
+            author_formset = get_author_formset()(queryset=Author.objects.filter(paper = paper), prefix = 'author')
             context.update({'paper_form': paper_form, 'author_formset': author_formset, 'edit_mode': True})
 
         elif 'submit_button' in request.POST and paper_form.is_valid() and author_formset.is_valid():
@@ -54,7 +57,7 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
             context.update({'paper_form': paper_form, 'paper': paper, 'edit_mode': False})
     else:
         paper_form = PaperForm(instance=paper)
-        author_formset = AuthorFormSet(queryset=paper.authors.all())
+        author_formset = get_author_formset()(queryset=paper.authors.all())
 
 
     

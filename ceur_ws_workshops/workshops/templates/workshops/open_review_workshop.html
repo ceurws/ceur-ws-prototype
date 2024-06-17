@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search OpenReview</title>
+</head>
+<body>
+    Please type the OpenReview <b>URL</b> of your workshop in the search bar.
+    <form method="GET" action="{% url 'workshops:open_review_workshop' %}">
+        <input type="text" name="query" placeholder="Search OpenReview" value="{{ query }}" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if query %}
+        <p>
+            No results found in OpenReview database for "{{ query }}". Please try again.    
+    {% endif %}
+</body>
+</html>
