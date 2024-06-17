@@ -1,4 +1,4 @@
-{% extends "workshops/workshop_edit_success.html" %}
+{% extends "workshops/workshop_overview.html" %}
 {% load static %}
 {% block content %}
 {%load crispy_forms_tags %} 
@@ -20,13 +20,11 @@
     <!-- {{ paper_form.as_p }} -->
     {{ paper_form|crispy }}
   </fieldset>
-
   
   <fieldset id="author-fieldset">
     {{author_formset.management_form}}
     <div id="author-form" class="author-form">
       {% for author in author_formset %}
-      <!-- {{ author.as_p }} -->
       
       {{ author|crispy}}
       {% endfor %}

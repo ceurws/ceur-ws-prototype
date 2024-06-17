@@ -22,10 +22,9 @@
         }
     </style>
     {% crispy form %}
-    
-    <i>Currently uploaded file: <a href ="{{form.instance.editor_agreement.url}}">{{ form.instance.editor_agreement.name }}</a></i>
     <input type="hidden" name="workshop_id" value="{{ workshop_instance.id }}">
-
+    <i>Currently uploaded file: <a href ="{{form.instance.editor_agreement.url}}">{{ form.instance.editor_agreement.name }}</a></i>
+    
     </fieldset>
 
     <fieldset>
@@ -68,8 +67,8 @@
   <table class='no_error'>
       {{ editor_form.empty_form.as_p }}
       <br>
-
   </table>
+  <hr>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -82,6 +81,39 @@
     var form_idx = $('#id_session-TOTAL_FORMS').val();
     $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
     $('#id_session-TOTAL_FORMS').val(parseInt(form_idx) + 1);});
+
+  
+    const startDateInput = document.getElementById('workshop_begin_date');
+    const endDateInput = document.getElementById('workshop_end_date');
+
+    function updateEndDateMin() {
+      endDateInput.setAttribute('min', startDateInput.value);
+      if (endDateInput.value && startDateInput.value > endDateInput.value) {
+        endDateInput.value = startDateInput.value;
+      }
+      else if (startDateInput.value && startDateInput.value <= endDateInput.value) {
+        endDateInput.value = startDateInput.value;
+      }
+    }
+    
+    function updateStartDateMax() {
+      if (startDateInput.value && startDateInput.value > endDateInput.value) {
+        startDateInput.value = endDateInput.value;
+      }
+    }
+
+    startDateInput.addEventListener('change', updateEndDateMin);
+
+    endDateInput.addEventListener('change', updateStartDateMax);
+
+    if (startDateInput.value) {
+      updateEndDateMin();
+    }
+
+    else if (endDateInput.value) {
+      updateStartDateMax();
+    }
+
 </script>
 
 {% endblock %}

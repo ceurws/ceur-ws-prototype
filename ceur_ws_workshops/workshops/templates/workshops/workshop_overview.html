@@ -16,87 +16,216 @@
 <body>
     <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
     <style>
-        .delete_object {
-            color: red;
-            /* background-color: #f8d7da; */
-            border-color: #f5c6cb;
-            position: relative;
-            padding: .75rem 1.25rem;
-            /* margin-bottom: 1rem; */
-            border: 1px solid transparent;
-            /* border-radius: .25rem; */
-            font-weight: bold;
-            text-align: left;
-            display: flex;
-            align-items: center;
-        }
+    .delete_object {
+        color: red;
+        border-color: #f5c6cb;
+        position: relative;
+        padding: .75rem 1.25rem;
+        border: 1px solid transparent;
+        font-weight: bold;
+        text-align: left;
+        display: flex;
+        align-items: center;
+    }
 
-        .delete_object input[type="checkbox"] {
-            margin-right: 0.5rem;
-        }
+    .delete_object input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
 
-        .delete_object label {
-            margin: 0;
-        }
+    .delete_object label {
+        margin: 0;
+    }
 
-        .paper-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .paper-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-        .toggle-details {
-            cursor: pointer;
-            border: solid black;
-            border-width: 0 3px 3px 0;
-            display: inline-block;
-            padding: 3px;
-        }
+    .toggle-details {
+        cursor: pointer;
+        border: solid black;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 3px;
+    }
 
-        .down {
-            transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-        }
+    .down {
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+    }
 
-        .up {
-            transform: rotate(-135deg);
-            -webkit-transform: rotate(-135deg);
-        }
+    .up {
+        transform: rotate(-135deg);
+        -webkit-transform: rotate(-135deg);
+    }
+    .handle {
+        display: inline-block;
+        border-top: 3px solid var(--dark);
+        width: 30px;
+        padding-top: 5px;
+        cursor: grab;
+    }
+    .handle:after, .handle:before {
+        display: block;
+        content: "";
+        padding-top: 5px;
+        border-top: 3px solid var(--dark);
+    }
+    .handle:hover, .handle:hover:before, .handle:hover:after {
+        border-color: var(--primary);
+    }
+    .handle:active, .handle:active:before, .handle:active:after {
+        cursor: grabbing;
+    }
+        
+
+    .paper-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        list-style: none; 
+    }
+
+    .paper-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        background: #f9f9f9;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .handle {
+        cursor: grab;
+        padding: 0 10px;
+        font-size: 1.5em;
+        color: #666;
+    }
+
+    .paper-summary {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .paper-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .toggle-details {
+        cursor: pointer;
+    }
+
+    .paper-details {
+        display: none;
+        padding: 10px 0 0 30px;
+    }
+
+    .delete_object {
+        margin-top: 10px;
+    }
+
+    .blue-background-class {
+        background-color: #e0f7fa;
+    }
     </style>
     {% if edit_mode %}
     <h1>Edit workshop: <i>{{workshop.workshop_short_title}}</i></h1>
-    <form method="post" enctype="multipart/form-data">
+    <form method="post"  enctype="multipart/form-data">
         {% csrf_token %}
         <fieldset class="workshop-details">
             <legend>Workshop Details</legend>
             {{workshop_form.as_p}}
-            <i>Currently uploaded file: <a href="{{workshop_form.instance.editor_agreement.url}}">
-                {{ workshop_form.instance.editor_agreement.name }}</a></i>
         </fieldset>
-
+        <fieldset class="editor-details">
+            <legend>Editor Details</legend>
+            {% for editor_form in editor_forms %}
+                <div class="editor-form">
+                    {{ editor_form.as_p }}
+                    {% if not forloop.last %}
+                    <hr>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </fieldset>
+    </form>
+        {% if session_title_list %}
+        <div class="htmx-indicator">Drag and drop to reorder papers</div>
         <fieldset class="papers-list">
             <legend>Papers</legend>
             {% for session_title in session_title_list %}
             <fieldset class="inner_fieldset">
                 <legend>{{ session_title }}</legend>
-                <ul>
+                <form method="post"  enctype="multipart/form-data" class="sortable" id="sortable-{{ session_title|slugify }}">
+                    {% csrf_token %}
                     {% for paperform in paper_forms %}
                     {% if paperform.instance.session.session_title == session_title %}
-                    <li>
+                    <li class="paper-item">
                         <div class="paper-container">
+                            <div class="handle">&#9776;</div> <!-- Burger bar handle -->
                             <div class="paper-summary">
                                 <span class="paper-title">{{ paperform.instance.paper_title }}</span>
                                 <i class="arrow down toggle-details"></i>
                             </div>
                             <div class="paper-details" style="display: none;">
+                                <div>
+                                    <input type='hidden' name='paper_order' value="{{paperform.instance.order}}">
+                                    {{ paperform.as_p }}
+                                    <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
+                                    {% if paperform.instance.uploaded_file %}
+                                    <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
+                                    {% endif %}
+                                    {% if paperform.instance.agreement_file %}
+                                    <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
+                                    {% endif %}
+                                    <div class="delete_object">
+                                        <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
+                                        <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.</label>
+                                    </div>
+                                </div>
+                                <hr>
+                            </div>
+                        </div>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+            <div class="submit-container">
+                <input type="submit" name="submit_button" class="button-13" value="Confirm">
+            </div>
+            </form>
+            </fieldset>
+            
+            {% endfor %}
+        </fieldset>
+    
+        {% else %}
+        <fieldset class="papers-list">
+            <legend>Papers</legend>
+            <form method="post"  enctype="multipart/form-data" class="sortable" id="sortable-list">
+                {% csrf_token %}
+                {% for paperform in paper_forms %}
+                <li class="paper-item">
+                    <div class="paper-container">
+                        <div class="handle">&#9776;</div> 
+                        <div class="paper-summary">
+                            <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                            <i class="arrow down toggle-details"></i>
+                        </div>
+                        <div class="paper-details" style="display: none;">
+                            <div>
+                                <input type='hidden' name='paper_order' value="{{paperform.instance.order}}">
                                 {{ paperform.as_p }}
                                 <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
                                 {% if paperform.instance.uploaded_file %}
-                                <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">
-                                    {{ paperform.instance.uploaded_file.name }}</a></p>
+                                <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
                                 {% endif %}
                                 {% if paperform.instance.agreement_file %}
-                                <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{paperform.instance.agreement_file.name }}</a></p>
+                                <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
                                 {% endif %}
                                 <div class="delete_object">
                                     <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
@@ -105,67 +234,113 @@
                             </div>
                             <hr>
                         </div>
-                    </li>
-                    {% endif %}
-                    {% endfor %}
-                </ul>
-            </fieldset>
-            {% endfor %}
-        </fieldset>
-        
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
-            $(document).ready(function () {
-                function toggleDetails() {
-                    const $detailsDiv = $(this).parent().next('.paper-details');
-                    $detailsDiv.toggle();
-                    $(this).toggleClass('down up');
-                }
-                $('.toggle-details').on('click', toggleDetails);
-            });
-        </script>
-
-
-        <!-- <fieldset class="papers-list">
-            <legend>Papers</legend>
-            <div class="list-group" id="sortable-list">
-                {% for paperform in paper_forms %}
-                    <div class="list-group-item sortable-item" data-paper-id="{{ paperform.instance.id }}">
-                        {{ paperform.as_p }}
-                        {% if paperform.instance.uploaded_file %}
-                            <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
-                        {% endif %}
-                        {% if paperform.instance.agreement_file %}
-                            <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
-                        {% endif %}
-                        <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.
                     </div>
-                    {%if not forloop.last%}
-                    <hr>
-                    {%endif%}
+                </li>
                 {% endfor %}
-            </div>
-            <input type="hidden" id="sorted-order" name="sorted_order" value="">
-        </fieldset> -->
-        <div class="submit-container">
-            <input type="submit" name="submit_button" class="button-13" value="Confirm">
-        </div>
-    </form>
+                </form>
+        </fieldset>
 
-    <!-- <script>
-    const sortable = document.getElementById('sortable-list')
-    new Sortable(sortable, {
-            group: 'shared',
-            animation: 150,
-            ghostClass: 'blue-background-class'});
-    </script> -->
+        <form method="post" id="form-container" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="submit-container">
+                <input type="submit" name="submit_button" class="button-13" value="Confirm">
+        </div>
+            
+
+        {% endif %}
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@latest/dist/htmx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function toggleDetails() {
+                const $detailsDiv = $(this).parent().next('.paper-details');
+                $detailsDiv.toggle();
+                $(this).toggleClass('down up');
+            }
+            $('.toggle-details').on('click', toggleDetails);
+        });
+    
+        document.addEventListener('DOMContentLoaded', function() {
+        var sortables = document.querySelectorAll(".sortable");
+        sortables.forEach(function(sortable) {
+            new Sortable(sortable, {
+                animation: 150,
+                ghostClass: 'blue-background-class',
+                handle: '.handle',
+                onEnd: function (evt) {
+                    var items = sortable.querySelectorAll('.paper-item');
+                    items.forEach(function(item, index) {
+                        var orderInput = item.querySelector('input[name^="order_"]');
+                        if (orderInput) {
+                            orderInput.value = index + 1;
+                        }
+                    });
+                }
+            });
+        });
+    });
+    </script>
+   
+   
 
     {% else %}
+
+    <fieldset> 
+        Please save the following links and share them with the workshop editors and authors.
+        <br>
+        <br>    
+    <fieldset class="inner_fieldset">
+        <legend>Workshop Overview</legend>
+        <i>Share the workshop overview link with the other editors. This will allow them to edit author submissions and general information of the workshop.</i>
+        <br>
+        <div class="tooltip">
+        <a id = "organizer_url" href="{{ organizer_url }}" target="_blank">Workshop Overview URL</a>
+        <button class = "copy_clipboard" onclick="CopyText('organizer_url', 'myTooltip')" onmouseout="outFunc('myTooltip')">
+            <span class="tooltiptext" id="myTooltip">Copy to clipboard</span>
+        <!-- Copy to clipboard</button> -->
+        <img src="{% static 'workshops/icons8-copy-24.png' %}" alt="Copy to clipboard" width="20" height="20">
+        </div>
+        <br><br>
+    </fieldset>
+    
+    <fieldset class="inner_fieldset">
+        <legend>Author Upload URL</legend>
+        <i>Share the author upload link with each author that wants to upload a paper. Submissions will automatically appear in the workshop overview. </i>   
+        <br>
+        <div class="tooltip">
+            <a id="author_url" href="{{ author_url }}" target="_blank">Author Upload URL</a>
+            <button class="copy_clipboard" onclick="CopyText('author_url', 'tooltip_author')" onmouseout="outFunc('tooltip_author')">
+                <span class="tooltiptext" id="tooltip_author">Copy to clipboard</span>
+            <img src="{% static 'workshops/icons8-copy-24.png' %}" alt="Copy to clipboard" width="20" height="20"></button>
+        </div>
+        <br>
+    </p>
+    </fieldset>
+    <!-- <input type = button value = "Back" onclick="javascript:history.go(-1)" class="button-13"> -->
+    </fieldset>
+    <script> 
+        function CopyText(elementId, tooltipId) {
+            var url = document.getElementById(elementId).href;  
+            navigator.clipboard.writeText(url).then(() => {
+                console.log('Text copied to clipboard');
+                var tooltip = document.getElementById(tooltipId);
+                tooltip.innerHTML = "Copied to clipboard!";
+            });
+        }
+    
+        function outFunc(tooltipId) {
+            var tooltip = document.getElementById(tooltipId);
+            tooltip.innerHTML = "Copy to clipboard";
+        }
+      </script>
     <fieldset class="workshop-details">
         <legend>Workshop Details</legend>
         <p><strong>Full title:</strong> {{ workshop.workshop_full_title }}</p>
         <p><strong>Shorthand title:</strong> {{ workshop.workshop_short_title }} </p> 
         <p><strong>Workshop Acronym: </strong>{{workshop.workshop_acronym}} </p>
+
         <p><strong>Colocated with:</strong> {{ workshop.workshop_colocated }}</p>
         <p><strong>Description:</strong> {{ workshop.workshop_description }}</p>
         <p><strong>Location:</strong> {{ workshop.workshop_city }}, {{ workshop.workshop_country }}</p>
@@ -183,10 +358,21 @@
         <p><strong>Editors:</strong></p>
         <ul class="editors-list">
             {% for editor in workshop.editors.all %}
-            <li>{{ editor.editor_name }} (<i>{{ editor.institution}}, {{editor.institution_country}}</i>)</li>
+
+            {% if editor.editor_url %}
+            <li> <a href ="{{editor.editor_url}}"> {{ editor.editor_name}}</a> 
+            {% else %}
+            <li> {{ editor.editor_name}}
+                (<i> <a href ="{{editor.institution_url }}"> {{ editor.institution}}</a>, 
+                    {{editor.institution_country}}</i>)</li>
+            {% endif %}
             {% endfor %}
         </ul>
-        <p><strong>Editor agreement:</strong> {{workshop.editor_agreement}}</p>
+        {% if workshop.editor_agreement %}
+        <p><strong>Editor agreement:</strong> <a href ="{{workshop.editor_agreement.url}}">
+            {{ workshop.editor_agreement }}</a></p>
+        {% endif %}
+
     </fieldset>
 
     {% if session_title_list %}
@@ -201,6 +387,7 @@
                 {% for paper in papers %}
                 {% if paper.session.session_title == session_title%}
                 <li>
+                    <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
                     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
                     <p><strong>Authors:</strong>
                         {% for author in paper.authors.all %}
@@ -208,6 +395,7 @@
                         {% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </p>
+                    <p><strong>Session:</strong> {{ paper.session.session_title }}</p>
                     <p><strong>Pages:</strong> {{ paper.pages }}</p>
                     <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
                         {{ paper.uploaded_file.name }}</a></p>
@@ -221,8 +409,10 @@
         {% endfor %}
     </fieldset>
     {% else %}
+
     <fieldset class="papers-list">
         <legend>Papers</Legend>
+
 
         <ul>
             {% for paper in papers %}
@@ -236,10 +426,12 @@
                     {% endfor %}
                 </p>
                 <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{
-                        paper.uploaded_file.name }}</a></p>
-                <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{
-                        paper.agreement_file.name }}</a></p>
+                <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
+                    {{paper.uploaded_file.name }}</a></p>
+                {% if paper.agreement_file %}
+                <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">
+                    {{paper.agreement_file.name }}</a></p>
+                {% endif %}
             </li>
             {% endfor %}
         </ul>

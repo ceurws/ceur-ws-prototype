@@ -1,18 +1,18 @@
 from django.db import models
 import uuid
-from django.utils import timezone
-from django.contrib import admin
 from datetime import date
 from django_countries.fields import CountryField
 import os 
+from django.db.models.functions import Lower
+
 
 class Editor(models.Model):
     editor_name = models.CharField(max_length=100)
-    editor_url = models.URLField(max_length=200,null=True, blank=True)
+    editor_url = models.CharField(max_length=200,null=True, blank=True)
     institution = models.CharField(max_length=200)
     editor_country_choices = [('', 'Select a country')] + list(CountryField().choices)
     institution_country = models.CharField(max_length=200, choices=editor_country_choices)
-    institution_url = models.URLField(max_length=200,null=True, blank=True)
+    institution_url = models.CharField(max_length=200)
     editor_agreement = models.FileField(upload_to='agreement',null=True, blank=True)
     # optional
     research_group = models.CharField(max_length=100,null=True, blank=True)
@@ -24,7 +24,7 @@ class Editor(models.Model):
 class Author(models.Model):
     author_name = models.CharField(max_length=100)
     author_university = models.CharField(max_length=100)
-    author_uni_url = models.URLField(max_length=200)
+    author_uni_url = models.CharField(max_length=200)
     author_email = models.EmailField(max_length=200)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
@@ -44,9 +44,8 @@ class Workshop(models.Model):
         filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
         workshop_id = instance.id
         return f"agreement/Vol-{workshop_id}/{filename}"
-    
-    # Filled in by user
-    workshop_full_title = models.CharField(max_length=200,)
+ 
+    workshop_full_title = models.CharField(max_length=200)
     workshop_short_title = models.CharField(max_length=200)
     workshop_acronym = models.CharField(max_length=50)
     workshop_description = models.TextField(max_length=500)
@@ -82,7 +81,7 @@ class Workshop(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    
+    author_upload_secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique = True)
     def __str__(self):
         return self.workshop_full_title
 
@@ -103,21 +102,25 @@ class Paper(models.Model):
         original_filename = instance.agreement_file.name
         paper_title = instance.paper_title.replace(' ', '')
         extension = os.path.splitext(original_filename)[1]
-        filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
+        filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}.html'
         return f"agreement/Vol-{agreement_file}/{filename}"
+    
     paper_title = models.CharField(max_length=200)
-    pages = models.CharField(max_length=10)
+    pages = models.CharField(max_length=10, blank = True)
     uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True)
     agreement_file = models.FileField(upload_to=agreement_file_path, blank = True)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    sort_order = models.PositiveIntegerField(default=0)
+    order = models.IntegerField(default=0)
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')
     session = models.ForeignKey(Session, on_delete=models.SET_NULL, null=True, blank=True)
-
+    has_third_party_material = models.BooleanField(default=False)
     def __str__(self):
         return self.paper_title
+    
+    class Meta:
+        ordering = [Lower('paper_title')]
 
 
 

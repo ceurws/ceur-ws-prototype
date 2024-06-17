@@ -9,6 +9,7 @@
 
   <fieldset>
     <legend>Workshop Details</legend>
+
     Please provide details about the workshop in the following section. Please take into account the following rules:
     <ul>
       <li>If your workshop is colocated with another workshop, please fill out this form <u>only once</u> and provide the name with which this workshop was colocated in the correct field.</li>
@@ -16,8 +17,10 @@
       <li>Optional fields can be left blank if they are not applicable.</li>
     </ul>
 
+
     {% crispy form %}
     <input type="hidden" name="openreview_url" value="{{ openreview_url }}">
+
     <input type="hidden" name="workshop_id" value="{{ form.instance.id }}">
   </fieldset>
 
@@ -92,6 +95,7 @@
     $('#id_editor-TOTAL_FORMS').val(parseInt(form_idx) + 1);
   });
 
+
   function updateEndDateMin() {
     endDateInput.setAttribute('min', startDateInput.value);
     if (endDateInput.value && startDateInput.value > endDateInput.value) {
@@ -113,6 +117,7 @@
   } else if (endDateInput.value) {
     updateStartDateMax();
   }
+
 </script>
 
 {% endblock %}
