@@ -34,7 +34,6 @@ class OpenReviewClient:
         }
         return metadata
 
-
 class OpenReviewClass(View):
     def __init__(self):
         super().__init__()
