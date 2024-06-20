@@ -101,7 +101,7 @@
   const endDateInput = document.getElementById('workshop_end_date');
   function updateEndDateMin() {
     endDateInput.setAttribute('min', startDateInput.value);
-    if (endDateInput.value && startDateInput.value > endDateInput.value) {
+    if (endDateInput.value && startDateInput.value) {
       endDateInput.value = startDateInput.value;
     }
   }
@@ -120,6 +120,7 @@
   } else if (endDateInput.value) {
     updateStartDateMax();
   }
+
 
 </script>
 

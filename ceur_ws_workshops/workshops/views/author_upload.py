@@ -24,13 +24,12 @@ class AuthorUpload(View):
             return {'workshop': self.get_workshop(), 'paper': paper_form, 'authors': author_formset, 'edit_paper_url': edit_paper_url}
         return {'workshop': self.get_workshop(), 'author_formset': author_formset, 'paper_form': paper_form}
     
-    
-    
     def generate_agreement_html(self, paper, author_upload_secret_token, author_formset):
         template_name = 'workshops/ntp_agreement.html' if not paper.has_third_party_material else 'workshops/tp_agreement.html'
         context = {'paper': paper, 
                    'author_upload_secret_token': author_upload_secret_token,
-                   'author_formset': author_formset}
+                   'author_formset': author_formset,
+                   'workshop': self.get_workshop()}
         html_content = render_to_string(template_name, context)
         return html_content, paper.has_third_party_material
 
@@ -40,7 +39,7 @@ class AuthorUpload(View):
         response = HttpResponse(html_content, content_type='text/html')
         name = 'ntp_agreement.html' if not has_third_party_material else'tp_agreement.html'
         response['Content-Disposition'] = f'attachment; filename="{name}"'
-        return response, name, html_content
+        return name, html_content
     
     def submit_paper(self, request, author_formset, paper_form):
 
@@ -58,7 +57,6 @@ class AuthorUpload(View):
         
             if request.FILES.get('agreement_file', False):
                 paper_instance.agreement_file = request.FILES['agreement_file']
-                paper_instance.agreement_file.name = self._get_agreement_filename(paper_instance, paper_instance.agreement_file.name)
             paper_instance.save()
 
             author_instances = author_formset.save()
@@ -94,26 +92,20 @@ class AuthorUpload(View):
             paper_form = PaperForm(file_uploaded=True, workshop=self.get_workshop(), instance=paper_instance, pages=paper_form.cleaned_data['pages'])
 
             # Build path 
-            _, name, agreement_html_content = self.generate_agreement(request, paper_instance.id, author_upload_secret_token, author_formset)
+            name, agreement_html_content = self.generate_agreement(request, paper_instance.id, author_upload_secret_token, author_formset)
             print(name)
 
             paper_instance.agreement_file.save(name, ContentFile(agreement_html_content.encode('utf-8')))
-            paper_instance.save()            
+            paper_instance.save()           
 
-            # if not agreement_file_path.endswith('.html'):
-            #     agreement_file_path += '.html'
-    
-            # os.makedirs(os.path.dirname(agreement_file_path), exist_ok=True)
-            
-            # # Write the HTML content to the file
-            # with open(agreement_file_path, 'w', encoding='utf-8') as agreement_file:
-            #     agreement_file.write(agreement_html_content)
-            
-            
+            # request.session['author_formset_data'] = request.POST
+
+            download_url = paper_instance.agreement_file
             context = {
                 'author_formset' : author_formset, 
                 'paper_form' : paper_form,
                 'paper_instance' : paper_instance,
+                'download_url' : download_url,
                 }
 
             return render(request, self.edit_path, context)
@@ -122,6 +114,9 @@ class AuthorUpload(View):
 
 
     def get(self, request, author_upload_secret_token):
+        # if 'author_formset_data' in request.session:
+        #     author_formset = get_author_formset()(data=request.session['author_formset_data'], prefix="author")
+        # else:
         author_formset = get_author_formset()(queryset=Author.objects.none(), prefix="author")
         paper_form = PaperForm(file_uploaded=False, 
                                workshop=self.get_workshop(), 
@@ -141,7 +136,6 @@ class AuthorUpload(View):
             author_formset = get_author_formset()(queryset=Author.objects.none(), data = request.POST, prefix="author")
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop(), agreement_file = True)
 
-       
         # if no files are attached we extract the files uploaded 
         else:
             author_formset = get_author_formset()(request.POST, prefix="author")

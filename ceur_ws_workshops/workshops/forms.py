@@ -51,23 +51,31 @@ class WorkshopForm(forms.ModelForm):
                 'workshop_language_iso', 'workshop_description', 'workshop_country',  'workshop_city', 'year_final_papers', 'workshop_colocated',
                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
                 'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement',
-                'editor_agreement_signed']
+                'editor_agreement_signed', 'has_preface', 'preface']
         
         widgets = {
             'workshop_short_title': TextInput(attrs={'size': 100, 
-                                            'placeholder': 'Provide the shorthand title of the workshop'
+                                            'placeholder': 'Provide the shorthand title of the workshop',
+                                            'strip':True,
                                             }),
             'workshop_full_title': TextInput(attrs={'size': 100, 
-                                            'placeholder': 'Provide the full title of the workshop'}),
+                                            'placeholder': 'Provide the full title of the workshop',
+                                            'strip':True,
+                                            }),
             'workshop_acronym': TextInput(attrs={'size': 100, 
-                                            'placeholder': 'Provide the acronym of the workshop'}),
+                                            'placeholder': 'Provide the acronym of the workshop',
+                                            'strip':True,}),
             'workshop_language_iso': TextInput(attrs={'size': 100, 
-                                            'placeholder': 'Enter ISO of the language of the workshop'
+                                            'placeholder': 'Enter ISO of the language of the workshop',
+                                            'strip':True,
                                             },),
             'workshop_description': Textarea(attrs={'cols': 82, 'rows' : 10, 
-                                                     'placeholder': 'Briefly describe the workshop'}),
+                                                     'placeholder': 'Briefly describe the workshop',
+                                                        'strip':True,
+                                                     }),
             'workshop_city': TextInput(attrs={'size': 100, 
-                                            'placeholder': 'The city the workshop took place in'}),
+                                            'placeholder': 'The city the workshop took place in',
+                                            'strip':True,}),
             'workshop_country': CountrySelectWidget(),
 
             'workshop_begin_date': DateInput(attrs={'id': 'workshop_begin_date'}),
@@ -75,26 +83,38 @@ class WorkshopForm(forms.ModelForm):
             'workshop_end_date': DateInput(attrs={'id': 'workshop_end_date'}),
 
             'year_final_papers': TextInput(attrs={'size': 100, 
-                                            'placeholder': 'Provide the year the final papers of the proceedings were produced'}),
+                                            'placeholder': 'Provide the year the final papers of the proceedings were produced',
+                                            'strip':True,}),
             'workshop_colocated': TextInput(attrs={'size': 100, 
-                                            'placeholder': '(optional) Provide the workshop with which this workshop was colocated',}),
+                                            'placeholder': '(optional) Provide the workshop with which this workshop was colocated',
+                                            'strip':True,}),
             'license': TextInput(attrs={'size': 100, 
-                                            'placeholder': 'MIT'}),
+                                            'placeholder': 'MIT',
+                                            'strip':True,}),
             'volume_owner': TextInput(attrs={'size': 100,
-                                            'placeholder': 'Provide the volume creator\'s (your) name'}),
+                                            'placeholder': 'Provide the volume creator\'s (your) name',
+                                            'strip':True,}),
             'volume_owner_email': TextInput(attrs={'size': 100,
-                                            'placeholder': 'Provide the volume creator\'s (your) e-mail'}),
+                                            'placeholder': 'Provide the volume creator\'s (your) e-mail',
+                                            'strip':True,}),
             'total_submitted_papers': TextInput(attrs={'size': 100,
-                                            'placeholder': 'Provide the total number of papers submitted to the workshop'}),
+                                            'placeholder': 'Provide the total number of papers submitted to the workshop',
+                                            'strip':True,}),
             'total_accepted_papers': TextInput(attrs={'size': 100,
-                                            'placeholder': 'Provide the total number of accepted papers submitted to the workshop'}),
+                                            'placeholder': 'Provide the total number of accepted papers submitted to the workshop',
+                                            'strip':True,}),
             'total_reg_acc_papers': TextInput(attrs={'size': 100,
-                                            'placeholder': '(optional) Provide the total number of regular length papers submitted'}),
+                                            'placeholder': '(optional) Provide the total number of regular length papers submitted',
+                                            'strip':True,}),
             'total_short_acc_papers': TextInput(attrs={'size': 100,
-                                            'placeholder': '(optional) Provide the total number of short length papers submitted'}),
-            # 'editor_agreement': FileInput(attrs={'accept': '.pdf', 
-            #                                      'placeholder': 'Upload the agreement file'}),
-            'editor_agreement_signed': CheckboxInput(attrs={'required': True})
+                                            'placeholder': '(optional) Provide the total number of short length papers submitted',
+                                            'strip':True,}),
+            'editor_agreement': FileInput(attrs={'accept': '.pdf', 
+                                                 'placeholder': 'Upload the agreement file'}),                
+            'editor_agreement_signed': CheckboxInput(attrs={'required': True}),
+            'has_preface': CheckboxInput(attrs={'label': 'Check this box if the workshop has a preface'}),
+            'preface': FileInput(attrs={'accept': '.pdf',
+                                        'placeholder': 'Upload the preface of the workshop'}),
        }
         
         labels = {
@@ -105,7 +125,7 @@ class WorkshopForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         # loads language options and returns proper ISO
-
+        is_preface_present = kwargs.pop('is_preface_present', False)
         super(WorkshopForm, self).__init__(*args, **kwargs)
         json_file_path = os.path.join(os.path.dirname(__file__), 'static', 'workshops', 'languages.json')
         
@@ -130,6 +150,32 @@ class WorkshopForm(forms.ModelForm):
         self.fields['workshop_colocated'].help_text = "<i>Please provide the acronym (acronym-YYYY) of the conference with which this workshop was colocated; if the workshop was not colocated with any conference, leave this field empty.</i>"
         self.fields['workshop_acronym'].help_text ='<i>Please provide the acronym of the workshop plus YYYY (year of the workshop in exactly 4 digits, e.g. 2012). Between the acronym and the year a \'-\' should be placed.</i>'
 
+        if not is_preface_present:
+            self.fields['has_preface'].widget = forms.HiddenInput()
+        else:
+            self.fields['has_preface'].label = 'Check this box if the workshop has a preface'
+
+
+    def is_valid(self):
+        valid = super().is_valid()
+        if not valid:
+            return valid
+
+        total_submitted_papers = self.cleaned_data.get('total_submitted_papers', 0)
+        total_accepted_papers = self.cleaned_data.get('total_accepted_papers', 0)
+        total_reg_acc_papers = self.cleaned_data.get('total_reg_acc_papers', 0)  
+        total_short_acc_papers = self.cleaned_data.get('total_short_acc_papers', 0)  
+    
+        if total_accepted_papers > total_submitted_papers:
+            self.add_error('total_accepted_papers', "The number of accepted papers cannot exceed the number of submitted papers.")
+            return False
+
+        if total_reg_acc_papers is not None and total_short_acc_papers is not None:
+            if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
+                self.add_error('total_reg_acc_papers', "The sum of regular and short accepted papers must equal the total number of accepted")
+                return False
+            
+        return True
     def clean(self):
         cleaned_data = super().clean()
 
@@ -232,11 +278,12 @@ class PaperForm(forms.ModelForm):
                     #   'agreement_file': '<br><i>The agreement file of the paper needs to be <b>hand signed</b>',
                        'has_third_party_material': '<i>Check this box if the paper contains third-party material</i>'}
         widgets = {
-            'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper'}),
+            'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper',
+                                                  'strip':True}),
             'pages': forms.TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': forms.FileInput(attrs={'accept': '.pdf'}),
+            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
         }
 
         ordering = ['sort_order']
@@ -295,13 +342,17 @@ def get_author_formset(extra=0):
         Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=extra,
         widgets={
             'author_name': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the name of the author'}),
+                                            'placeholder': 'Enter the name of the author',
+                                            'strip':True,}),
             'author_university': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the university of the author'}),
+                                            'placeholder': 'Enter the university of the author',
+                                            'strip':True,}),
             'author_uni_url': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the URL of the university which the author is affiliated to'}),
+                                            'placeholder': 'Enter the URL of the university which the author is affiliated to',
+                                            'strip':True,}),
             'author_email': TextInput(attrs={'size': 50,
-                                            'placeholder': 'Enter the email of the author'})
+                                            'placeholder': 'Enter the email of the author',
+                                            'strip':True,}),
         },
         labels={
             'author_uni_url': "University URL",
@@ -315,12 +366,22 @@ class EditorForm(forms.ModelForm):
         model = Editor
         fields = ['editor_name', 'editor_url', 'institution', 'institution_country', 'institution_url', 'research_group']
         widgets = {
-            'editor_name': forms.TextInput(attrs={'size': 100, 'placeholder': 'Provide the name of the editor'}),
-            'editor_url': forms.TextInput(attrs={'size': 100, 'placeholder': '(optional) Provide the URL of the editor e.g. https://www.example.com'}),
-            'institution': forms.TextInput(attrs={'size': 100, 'placeholder': 'Provide the institution (company or university)'}),
+            'editor_name': forms.TextInput(attrs={'size': 100, 
+                                                  'placeholder': 'Provide the name of the editor',
+                                                  'strip':True,}),
+            'editor_url': forms.TextInput(attrs={'size': 100, 
+                                                 'placeholder': '(optional) Provide the URL of the editor e.g. https://www.example.com',
+                                                 'strip':True,}),
+            'institution': forms.TextInput(attrs={'size': 100, 
+                                                  'placeholder': 'Provide the institution (company or university)',
+                                                  'strip':True,}),
             'institution_country': CountrySelectWidget(),
-            'institution_url': forms.TextInput(attrs={'size': 100, 'placeholder': 'Provide the URL of the institution e.g. https://www.example.com'}),
-            'research_group': forms.TextInput(attrs={'size': 70, 'placeholder': '(optional) Provide the research group of the editor'})
+            'institution_url': forms.TextInput(attrs={'size': 100, 
+                                                      'placeholder': 'Provide the URL of the institution e.g. https://www.example.com',
+                                                      'strip':True,}),
+            'research_group': forms.TextInput(attrs={'size': 70, 
+                                                     'placeholder': '(optional) Provide the research group of the editor',
+                                                     'strip':True,}),
         }
 
 EditorFormSet = modelformset_factory(

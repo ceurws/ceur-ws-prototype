@@ -26,6 +26,11 @@
     {%if form.instance.editor_agreement %}
     <i>Currently uploaded file: <a href ="{{form.instance.editor_agreement.url}}">{{ form.instance.editor_agreement.name }}</a></i>
     {%endif%}
+    <br>
+    <br>
+    {%if form.instance.preface %}
+    <i>Currently uploaded preface: <a href ="{{form.instance.preface.url}}">{{ form.instance.preface.name }}</a></i>
+    {%endif%}
     
     </fieldset>
 
@@ -87,17 +92,13 @@
   
     const startDateInput = document.getElementById('workshop_begin_date');
     const endDateInput = document.getElementById('workshop_end_date');
-
     function updateEndDateMin() {
       endDateInput.setAttribute('min', startDateInput.value);
-      if (endDateInput.value && startDateInput.value > endDateInput.value) {
-        endDateInput.value = startDateInput.value;
-      }
-      else if (startDateInput.value && startDateInput.value <= endDateInput.value) {
+      if (endDateInput.value && startDateInput.value) {
         endDateInput.value = startDateInput.value;
       }
     }
-    
+
     function updateStartDateMax() {
       if (startDateInput.value && startDateInput.value > endDateInput.value) {
         startDateInput.value = endDateInput.value;
@@ -105,16 +106,14 @@
     }
 
     startDateInput.addEventListener('change', updateEndDateMin);
-
     endDateInput.addEventListener('change', updateStartDateMax);
 
     if (startDateInput.value) {
       updateEndDateMin();
-    }
-
-    else if (endDateInput.value) {
+    } else if (endDateInput.value) {
       updateStartDateMax();
     }
+
 
 </script>
 

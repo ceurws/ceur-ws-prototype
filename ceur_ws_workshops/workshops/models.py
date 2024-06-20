@@ -44,6 +44,12 @@ class Workshop(models.Model):
         filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
         workshop_id = instance.id
         return f"agreement/Vol-{workshop_id}/{filename}"
+    
+    def workshop_preface_file_path(instance, filename):
+        acronym = instance.workshop_acronym
+        filename = f"WORKSHOP-PREFACE-{acronym}.pdf"
+        workshop_id = instance.id
+        return f"preface/Vol-{workshop_id}/{filename}"
  
     workshop_full_title = models.CharField(max_length=200)
     workshop_short_title = models.CharField(max_length=200)
@@ -71,8 +77,10 @@ class Workshop(models.Model):
     license = models.CharField(max_length=50,null=True, blank=True)
     urn = models.CharField(max_length=50,null=True, blank=True)
 
-    editor_agreement = models.FileField(upload_to=workshop_agreement_file_path, blank = True)
+    editor_agreement = models.FileField(upload_to=workshop_agreement_file_path)
     editor_agreement_signed = models.BooleanField()
+    preface = models.FileField(upload_to =workshop_preface_file_path, blank = True, null = True )
+    has_preface = models.BooleanField()
 
     # KEYS
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
@@ -111,6 +119,7 @@ class Paper(models.Model):
     agreement_file = models.FileField(upload_to=agreement_file_path, blank = True)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     order = models.IntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')

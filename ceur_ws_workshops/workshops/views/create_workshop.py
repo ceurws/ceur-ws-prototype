@@ -97,7 +97,7 @@ class CreateWorkshop(View):
         return paper_author_combinations
     
     def get(self, request):
-        form = WorkshopForm()
+        form = WorkshopForm(is_preface_present = True)
         editor_form = EditorFormSet(queryset=Editor.objects.none(), 
                                     prefix='editor')
         session_form = SessionFormSet(queryset=Session.objects.none(), 
@@ -128,7 +128,6 @@ class CreateWorkshop(View):
                 workshop.editors.add(*editor_instances)
                 workshop.sessions.add(*session_instances)
 
-
                 # if we have a linked open review page we extract the openreview papers and display them on a page where they can be reviewed
                 if workshop.openreview_url:
                     paper_author_combinations = self.add_papers_openreview(workshop)
@@ -138,15 +137,22 @@ class CreateWorkshop(View):
                     return render(request, 'workshops/open_review_editpage.html', context)
                     
                 return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
-                # context = {
-                #     'form': workshop_form,
-                #     'editor_form': editor_formset,
-                #     'session_form': session_formset
-                # }
-                # return render(request, self.edit_path, context)
+            else:
+                # if the forms are not valid we return the form with the errors
+                # https://stackoverflow.com/questions/3097982/how-to-make-a-django-form-retain-a-file-after-failing-validation
+                if workshop_form.instance.editor_agreement.url:
+                    workshop_form.instance.editor_agreement = None
+
+                if workshop_form.instance.preface.url:
+                    workshop_form.instance.preface = None
+                context = {
+                    'form': workshop_form,
+                    'editor_form': editor_formset,
+                    'session_form': session_formset
+                }
+                return render(request, self.edit_path, context)
 
         else:
-
             workshop_form = WorkshopForm(data = request.POST, 
                                          files = request.FILES)
             editor_formset = EditorFormSet(queryset=Editor.objects.none(),

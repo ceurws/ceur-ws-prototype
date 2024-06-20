@@ -78,7 +78,6 @@
     .handle:active, .handle:active:before, .handle:active:after {
         cursor: grabbing;
     }
-        
 
     .paper-item {
         display: flex;
@@ -145,12 +144,20 @@
         <fieldset class="editor-details">
             <legend>Editor Details</legend>
             {% for editor_form in editor_forms %}
-                <div class="editor-form">
-                    {{ editor_form.as_p }}
-                    {% if not forloop.last %}
-                    <hr>
-                    {% endif %}
+            <li class = "paper-item">
+                <div class = "paper-container">
+                    <div class="paper-summary">
+                        <span class="paper-title">{{ editor_form.instance.editor_name }}</span>
+                        <i class="arrow down toggle-details"></i>
+                    </div>
+                    <div class="paper-details" style="display: none;">
+                        {{ editor_form.as_p }}
+                        {% if not forloop.last %}
+                        <hr>
+                        {% endif %}
+                    </div>
                 </div>
+            </li>
             {% endfor %}
         </fieldset>
     </form>
@@ -248,42 +255,6 @@
             
 
         {% endif %}
-    
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@latest/dist/htmx.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            function toggleDetails() {
-                const $detailsDiv = $(this).parent().next('.paper-details');
-                $detailsDiv.toggle();
-                $(this).toggleClass('down up');
-            }
-            $('.toggle-details').on('click', toggleDetails);
-        });
-    
-        document.addEventListener('DOMContentLoaded', function() {
-        var sortables = document.querySelectorAll(".sortable");
-        sortables.forEach(function(sortable) {
-            new Sortable(sortable, {
-                animation: 150,
-                ghostClass: 'blue-background-class',
-                handle: '.handle',
-                onEnd: function (evt) {
-                    var items = sortable.querySelectorAll('.paper-item');
-                    items.forEach(function(item, index) {
-                        var orderInput = item.querySelector('input[name^="order_"]');
-                        if (orderInput) {
-                            orderInput.value = index + 1;
-                        }
-                    });
-                }
-            });
-        });
-    });
-    </script>
-   
-   
 
     {% else %}
 
@@ -372,6 +343,10 @@
         <p><strong>Editor agreement:</strong> <a href ="{{workshop.editor_agreement.url}}">
             {{ workshop.editor_agreement }}</a></p>
         {% endif %}
+        {% if workshop.preface %}
+        <p><strong>Preface:</strong> <a href ="{{workshop.preface.url}}">
+            {{ workshop.preface }}</a></p>
+        {% endif %}
 
     </fieldset>
 
@@ -413,10 +388,17 @@
     <fieldset class="papers-list">
         <legend>Papers</Legend>
 
-
         <ul>
             {% for paper in papers %}
-            <li>
+            <li class = "paper-item">
+                <div class = "paper-container ">
+                    <div class="paper-summary">
+                        <span class="paper-title">{{ paper.paper_title }}</span>
+                        <span class = "last_updated"> Last updated: {{ paper.last_updated|date:"F j, Y, g:i a" }}</span>
+                        <i class="arrow down toggle-details"></i>
+                    </div>
+                <div class="paper-details" style="display: none;">
+                    <div>
                 <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
                 <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
                 <p><strong>Authors:</strong>
@@ -432,6 +414,9 @@
                 <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">
                     {{paper.agreement_file.name }}</a></p>
                 {% endif %}
+                    </div>
+                </div>
+            </div>
             </li>
             {% endfor %}
         </ul>
@@ -452,4 +437,50 @@
 </body>
 
 </html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@latest/dist/htmx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            function toggleDetails() {
+                const $detailsDiv = $(this).parent().next('.paper-details');
+                $detailsDiv.toggle();
+                $(this).toggleClass('down up');
+            }
+            $('.toggle-details').on('click', toggleDetails);
+
+            function updateLocalTime() {
+                $('.last_updated').each(function() {
+                    const utcDate = $(this).data('utc');
+                    if (utcDate) {
+                        const localDate = new Date(utcDate);
+                        const formattedDate = localDate.toLocaleString(); // Adjust formatting as needed
+                        $(this).text('Last updated: ' + formattedDate);
+                    }
+                });
+            }
+
+            updateLocalTime();
+        });
+    
+        document.addEventListener('DOMContentLoaded', function() {
+        var sortables = document.querySelectorAll(".sortable");
+        sortables.forEach(function(sortable) {
+            new Sortable(sortable, {
+                animation: 150,
+                ghostClass: 'blue-background-class',
+                handle: '.handle',
+                onEnd: function (evt) {
+                    var items = sortable.querySelectorAll('.paper-item');
+                    items.forEach(function(item, index) {
+                        var orderInput = item.querySelector('input[name^="order_"]');
+                        if (orderInput) {
+                            orderInput.value = index + 1;
+                        }
+                    });
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}
