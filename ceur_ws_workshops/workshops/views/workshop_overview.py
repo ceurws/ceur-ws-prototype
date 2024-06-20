@@ -186,7 +186,6 @@ class WorkshopOverview(View):
                     workshop.accepted_papers.add(saved_paper_instance)
 
                 order_key = f'order_{paper_id}'
-                print(order_key)
                 if order_key in request.POST:
                     saved_paper_instance.order = int(request.POST[order_key])
                     print(saved_paper_instance.order)

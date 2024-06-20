@@ -310,20 +310,6 @@
   {% endif %}
 
 </body>
-<script> 
-  function CopyText(elementId, tooltipId) {
-      var url = document.getElementById(elementId).href;  
-      navigator.clipboard.writeText(url).then(() => {
-          console.log('Text copied to clipboard');
-          var tooltip = document.getElementById(tooltipId);
-          tooltip.innerHTML = "Copied to clipboard!";
-      });
-  }
-
-  function outFunc(tooltipId) {
-      var tooltip = document.getElementById(tooltipId);
-      tooltip.innerHTML = "Copy to clipboard";
-  }
-</script>
+<script src="{% static 'workshops/script.js' %}"></script>
 </html>
 {% endblock %}
