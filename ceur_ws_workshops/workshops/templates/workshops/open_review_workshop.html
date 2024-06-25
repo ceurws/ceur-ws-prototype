@@ -15,6 +15,14 @@
     {% if query %}
         <p>
             No results found in OpenReview database for "{{ query }}". Please try again.    
+        </p>
     {% endif %}
+
+    {% if error %}
+    {{error}}
+    {% endif %}
+
+    <p>
+
 </body>
 </html>

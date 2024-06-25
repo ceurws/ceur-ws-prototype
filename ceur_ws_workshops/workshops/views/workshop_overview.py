@@ -17,12 +17,13 @@ class WorkshopOverview(View):
     
     def render_workshop(self, request, edit_mode = False):
         workshop = self.get_workshop()
-
+        # print([PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all() if paper_instance.session == None])
         return render(request, 'workshops/workshop_overview.html', context = {
             'papers' : [paper for paper in workshop.accepted_papers.all()],
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop),
             'paper_forms' : [PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all()],
+            'paper_forms_no_session' : [paper for paper in workshop.accepted_papers.all() if paper.session == None],
             'session_title_list' : [session_object.session_title for session_object in workshop.sessions.all()],
             'editor_forms': [EditorForm(instance=editor) for editor in workshop.editors.all()],
             'edit_mode': edit_mode,
@@ -152,14 +153,15 @@ class WorkshopOverview(View):
 
         return render(request, submit_path)
     
-    def post(self, request, secret_token):
+    def post(self, request, secret_token, open_review = False):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
-
+        
+        # not sure if following if statement is necessary
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
+        
         elif request.POST["submit_button"] == "Confirm":
             workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST, files = request.FILES)
-            print("HERE")
             if workshop_form.is_valid():
                 workshop_form.save()
             else:
@@ -195,3 +197,5 @@ class WorkshopOverview(View):
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
             return self.submit_workshop(request, secret_token)
+        
+        

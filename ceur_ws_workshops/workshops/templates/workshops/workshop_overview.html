@@ -192,6 +192,7 @@
                             </div>
                         </div>
                     </li>
+
                     {% endif %}
                     {% endfor %}
             <div class="submit-container">
@@ -202,7 +203,7 @@
             
             {% endfor %}
         </fieldset>
-    
+
         {% else %}
         <fieldset class="papers-list">
             <legend>Papers</legend>
@@ -407,7 +408,30 @@
             </ul>
         </fieldset>
         {% endfor %}
+    
+    <fieldset class="inner_fieldset">
+        <legend> Papers yet to be reviewed by authors </legend>
+    <ul>
+    {% for paper in paper_forms_no_session %}
+    <li>
+        <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
+        <p><strong>Authors:</strong>
+            {% for author in paper.authors.all %}
+            {{ author.author_name }}
+            {% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+        <p><strong>Session:</strong> {{ paper.session.session_title }}</p>
+        <p><strong>Pages:</strong> {{ paper.pages }}</p>
+        <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
+            {{ paper.uploaded_file.name }}</a></p>
+    </li>             
+    {% endfor %}
+    </ul>
     </fieldset>
+    </fieldset>
+    
+    
     {% else %}
 
     <fieldset class="papers-list">
