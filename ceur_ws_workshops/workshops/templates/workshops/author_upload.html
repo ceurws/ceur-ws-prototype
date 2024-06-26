@@ -25,7 +25,6 @@
     {{author_formset.management_form}}
     <div id="author-form" class="author-form">
       {% for author in author_formset %}
-      
       {{ author|crispy}}
       {% endfor %}
     </div>
@@ -53,5 +52,4 @@
     $('#id_author-TOTAL_FORMS').val(parseInt(form_idx) + 1);
   });
 </script>
-
 {% endblock %}

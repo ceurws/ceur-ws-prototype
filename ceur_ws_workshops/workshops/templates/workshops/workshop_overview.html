@@ -4,7 +4,6 @@
 {%load crispy_forms_tags %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -12,7 +11,6 @@
     <title>Workshop Overview</title>
     <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
 </head>
-
 <body>
     <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
     <style>
@@ -140,6 +138,17 @@
         <fieldset class="workshop-details">
             <legend>Workshop Details</legend>
             {{workshop_form.as_p}}
+            {% if workshop_form.editor_agreement %}
+            <p><strong>Editor agreement:</strong> <a href ="{{workshop_form.editor_agreement.url}}">
+                {{ workshop.editor_agreement }}</a></p>
+            {%endif%}
+            {% if workshop_form.preface %}
+            <p><strong>Preface:</strong> <a href ="{{workshop_form.preface.url}}">
+                {{ workshop.preface }}</a></p>
+            {%endif%}
+            <div class="submit-container">
+                <input type="submit" name="submit_button" class="button-13" value="Confirm">
+            </div>
         </fieldset>
         <fieldset class="editor-details">
             <legend>Editor Details</legend>
@@ -159,6 +168,9 @@
                 </div>
             </li>
             {% endfor %}
+            <div class="submit-container">
+                <input type="submit" name="submit_button" class="button-13" value="Confirm">
+            </div>
         </fieldset>
     </form>
         {% if session_title_list %}
@@ -184,12 +196,14 @@
                                     <input type='hidden' name='paper_order' value="{{paperform.instance.order}}">
                                     {{ paperform.as_p }}
                                     <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
+                                    {%comment%}
                                     {% if paperform.instance.uploaded_file %}
                                     <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
                                     {% endif %}
                                     {% if paperform.instance.agreement_file %}
                                     <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
                                     {% endif %}
+                                    {%endcomment%}
                                     <div class="delete_object">
                                         <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
                                         <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.</label>
@@ -209,31 +223,32 @@
             
             {% endfor %}
         </fieldset>
-    
         {% else %}
         <fieldset class="papers-list">
             <legend>Papers</legend>
             <form method="post"  enctype="multipart/form-data" class="sortable" id="sortable-list">
                 {% csrf_token %}
+                <input type="hidden" id="paper_id" name="paper_id" value="">
                 {% for paperform in paper_forms %}
                 <li class="paper-item">
                     <div class="paper-container">
                         <div class="handle">&#9776;</div> 
                         <div class="paper-summary">
-                            <span class="paper-title">{{ paperform.instance.paper_title }}</span>
-                            <i class="arrow down toggle-details"></i>
+                            <span class="paper-title" >{{ paperform.instance.paper_title }}</span>
+                            <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
                         </div>
                         <div class="paper-details" style="display: none;">
                             <div>
                                 <input type='hidden' name='paper_order' value="{{paperform.instance.order}}">
                                 {{ paperform.as_p }}
-                                <input type="hidden" name="paper_id" value="{{ paperform.instance.id }}">
+                                {%comment%}
                                 {% if paperform.instance.uploaded_file %}
                                 <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
                                 {% endif %}
                                 {% if paperform.instance.agreement_file %}
                                 <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
                                 {% endif %}
+                                {%endcomment%}
                                 <div class="delete_object">
                                     <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
                                     <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.</label>
@@ -244,15 +259,11 @@
                     </div>
                 </li>
                 {% endfor %}
+                <div class="submit-container">
+                    <input type="submit" name="submit_button" class="button-13" value="Confirm">
+                </div>
                 </form>
         </fieldset>
-
-        <form method="post" id="form-container" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="submit-container">
-                <input type="submit" name="submit_button" class="button-13" value="Confirm">
-        </div>
-            
 
         {% endif %}
 
@@ -291,6 +302,7 @@
     </fieldset>
     <!-- <input type = button value = "Back" onclick="javascript:history.go(-1)" class="button-13"> -->
     </fieldset>
+
     <script> 
         function CopyText(elementId, tooltipId) {
             var url = document.getElementById(elementId).href;  
@@ -347,12 +359,11 @@
         <p><strong>Preface:</strong> <a href ="{{workshop.preface.url}}">
             {{ workshop.preface }}</a></p>
         {% endif %}
-
+        
     </fieldset>
 
     {% if session_title_list %}
     {% regroup papers by session as papers_by_session %}
-
     <fieldset>
         <legend>Papers</Legend>
         {% for session_title in session_title_list %}
@@ -433,7 +444,6 @@
         </div>
     </form>
     {% endif %}
-
 </body>
 
 </html>
@@ -442,26 +452,15 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 <script>
     $(document).ready(function () {
-        function toggleDetails() {
-            const $detailsDiv = $(this).parent().next('.paper-details');
-            $detailsDiv.toggle();
-            $(this).toggleClass('down up');
-        }
-        $('.toggle-details').on('click', toggleDetails);
-
-        function updateLocalTime() {
-            $('.last_updated').each(function() {
-                const utcDate = $(this).data('utc');
-                if (utcDate) {
-                    const localDate = new Date(utcDate);
-                    const formattedDate = localDate.toLocaleString(); 
-                    $(this).text('Last updated: ' + formattedDate);
+                function toggleDetails() {
+                    const $detailsDiv = $(this).parent().next('.paper-details');
+                    $detailsDiv.toggle();
+                    $(this).toggleClass('down up');
+                    paper_id = $(this).attr('title');
+                    $('#paper_id').val(paper_id);
                 }
+                $('.toggle-details').on('click', toggleDetails);
             });
-        }
-        updateLocalTime();
-    });
-
     document.addEventListener('DOMContentLoaded', function() {
     var sortables = document.querySelectorAll(".sortable");
     sortables.forEach(function(sortable) {
@@ -482,4 +481,5 @@
     });
 });
 </script>
+
 {% endblock %}

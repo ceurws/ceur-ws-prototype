@@ -1,6 +1,7 @@
 {% extends "workshops/create_workshop.html" %}
+{% load static %}
 {% block content %}
-{%load crispy_forms_tags %} 
+{% load crispy_forms_tags %} 
   <p class="header-title">Are all the details correct?</p>
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
@@ -28,7 +29,7 @@
     {%endif%}
     <br>
     <br>
-    {%if form.instance.preface %}
+    {% if form.instance.preface %}
     <i>Currently uploaded preface: <a href ="{{form.instance.preface.url}}">{{ form.instance.preface.name }}</a></i>
     {%endif%}
     
@@ -39,7 +40,6 @@
       <div class="session-form" id="session-form">
         {% for form in session_form%}
           {{ form.as_p }}
-          
           {% endfor %}
         </div>
    <input type="button" value="Add Session" class="button-13" id="add_session">
@@ -48,7 +48,7 @@
       {{ editor_form.management_form}}
       <div class="editor-form" id="editor-form">
         {% for form in editor_form%}
-          {{ form.as_p }}
+          {{ form|crispy }}
           <hr>
       {% endfor %}
 
@@ -72,11 +72,12 @@
 </div>
 <div id="empty_editor_form" style="display:none">
   <table class='no_error'>
-      {{ editor_form.empty_form.as_p }}
+      {{ editor_form.empty_form|crispy }}
       <br>
   </table>
   <hr>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{% static 'workshops/script.js' %}"></script>
+
 {% endblock %}

@@ -242,6 +242,7 @@ class PaperForm(forms.ModelForm):
         hide_agreement = kwargs.pop('hide_agreement', False)
         hide_has_third_party_material = kwargs.pop('hide_has_third_party_material', True)
         agreement_file = kwargs.pop('agreement_file', False)
+        hide_papers_overview = kwargs.pop('hide_papers_overview', False)
         super(PaperForm, self).__init__(*args, **kwargs)
 
         if file_uploaded:
@@ -262,9 +263,14 @@ class PaperForm(forms.ModelForm):
 
         if hide_agreement:
             self.fields['agreement_file'].widget = forms.HiddenInput()
+            self.fields['agreement_file'].required = False
 
+        if hide_papers_overview: 
+            self.fields['agreement_file'].widget = forms.HiddenInput()
+            self.fields['uploaded_file'].widget = forms.HiddenInput()
         if hide_has_third_party_material:
             self.fields['has_third_party_material'].widget = forms.HiddenInput()
+            
 
         if not agreement_file:
             self.fields['agreement_file'].label = 'Please Upload the hand signed agreement file'
@@ -284,6 +290,8 @@ class PaperForm(forms.ModelForm):
                                             'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
+            # ,
+            #                                          'required': 'True'}),
         }
 
         ordering = ['sort_order']
@@ -291,6 +299,7 @@ class PaperForm(forms.ModelForm):
         paper_title = forms.CharField(strip=True)
     def clean(self):
         cleaned_data = super().clean()
+        
 
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')

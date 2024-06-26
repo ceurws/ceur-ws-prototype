@@ -17,7 +17,6 @@
       <li>Optional fields can be left blank if they are not applicable.</li>
     </ul>
 
-
     {% crispy form %}
     <input type="hidden" name="openreview_url" value="{{ openreview_url }}">
 
@@ -59,7 +58,7 @@
 
 <div id="empty_editor_form" style="display:none">
   <table class='no_error'>
-    {{ editor_form.empty_form }}
+    {{ editor_form.empty_form|crispy }}
     <br>
   </table>
   <hr>
