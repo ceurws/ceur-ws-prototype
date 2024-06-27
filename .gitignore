@@ -13,7 +13,7 @@ ceur_ws_workshops/djangoenv
 ceur_ws_workshops/build
 ceur_ws_workshops/ceur_ws_workshops.egg-info
 ceur_ws_workshops/workshops/views/__pycache__
-
+.vscode
 ceur_ws_workshops/workshops/migrations/__pycache__
 # Byte-compiled / optimized / DLL files
 __pycache__/
