@@ -259,9 +259,9 @@
     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
     <p><strong>Pages:</strong> {{ paper.pages }}</p>
     <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
-    {% comment %}
+
     <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
-    {% endcomment %}
+   
     
     {%if not paper.session%}
     <i>The paper has not yet been assigned to a session.</i>
@@ -310,20 +310,6 @@
   {% endif %}
 
 </body>
-<script> 
-  function CopyText(elementId, tooltipId) {
-      var url = document.getElementById(elementId).href;  
-      navigator.clipboard.writeText(url).then(() => {
-          console.log('Text copied to clipboard');
-          var tooltip = document.getElementById(tooltipId);
-          tooltip.innerHTML = "Copied to clipboard!";
-      });
-  }
-
-  function outFunc(tooltipId) {
-      var tooltip = document.getElementById(tooltipId);
-      tooltip.innerHTML = "Copy to clipboard";
-  }
-</script>
+<script src="{% static 'workshops/script.js' %}"></script>
 </html>
 {% endblock %}
