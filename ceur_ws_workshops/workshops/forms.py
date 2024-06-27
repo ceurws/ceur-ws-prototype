@@ -310,9 +310,9 @@ class PaperForm(forms.ModelForm):
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
 
-        # pdfReader = PyPDF2.PdfReader(uploaded_file)
-        # num_pages = len(pdfReader.pages)
-        # cleaned_data['pages'] = num_pages
+        pdfReader = PyPDF2.PdfReader(uploaded_file)
+        num_pages = len(pdfReader.pages)
+        cleaned_data['pages'] = num_pages
 
         # if uploaded_file and agreement_file and self.workshop:
         # if agreement_file: 

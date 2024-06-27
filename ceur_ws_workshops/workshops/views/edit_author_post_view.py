@@ -61,6 +61,5 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
         paper_form = PaperForm(instance=paper)
         author_formset = AuthorFormSet(queryset=paper.authors.all())
 
-
     
     return render(request, 'workshops/author_upload_success.html', context)

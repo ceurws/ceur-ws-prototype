@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from ..models import Workshop, Paper, Editor, Author, Session
 from django.urls import reverse
 from django.views import View
-<<<<<<< HEAD
+
 
 from ..forms import WorkshopForm, EditorFormSet, PaperForm, SessionFormSet, get_author_formset
 from urllib.parse import urlparse, parse_qs
@@ -12,10 +12,7 @@ from PyPDF2 import PdfReader
 from django.forms import formset_factory
 
 
-=======
-from ..forms import WorkshopForm, EditorFormSet, AuthorFormSet, PaperForm, SessionFormSet
-from django.core.exceptions import ObjectDoesNotExist
->>>>>>> main
+
 
 class CreateWorkshop(View):
     success_path = "workshops/workshop_edit_success.html"
@@ -25,7 +22,7 @@ class CreateWorkshop(View):
     def get_workshop(self, workshop_id):
         return get_object_or_404(Workshop, id = workshop_id)
     
-<<<<<<< HEAD
+
     def find_ws_id(self, url):
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.query)
@@ -112,8 +109,7 @@ class CreateWorkshop(View):
 
         return paper_author_combinations
     
-=======
->>>>>>> main
+
     def get(self, request):
         form = WorkshopForm(is_preface_present = True)
         editor_form = EditorFormSet(queryset=Editor.objects.none(), 
@@ -140,16 +136,12 @@ class CreateWorkshop(View):
             if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
                 
                 workshop = workshop_form.save()  
-<<<<<<< HEAD
 
-=======
->>>>>>> main
                 editor_instances = editor_formset.save()
                 session_instances = session_formset.save()
                 workshop.editors.add(*editor_instances)
                 workshop.sessions.add(*session_instances)
 
-<<<<<<< HEAD
                 # if we have a linked open review page we extract the openreview papers and display them on a page where they can be reviewed
                 if workshop.openreview_url:
                     paper_author_combinations = self.add_papers_openreview(workshop)
@@ -161,19 +153,12 @@ class CreateWorkshop(View):
                     
                 return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
 
-=======
-                context = {
-                    'organizer_url': reverse('workshops:workshop_overview', args=[workshop.secret_token]),
-                    'author_url': reverse('workshops:author_upload', args=[workshop.secret_token])
-                }
-                return render(request, self.success_path, context)
->>>>>>> main
+
             else:
                 # if the forms are not valid we return the form with the errors
                 # https://stackoverflow.com/questions/3097982/how-to-make-a-django-form-retain-a-file-after-failing-validation
                 if workshop_form.instance.editor_agreement.url:
                     workshop_form.instance.editor_agreement = None
-
 
                 if workshop_form.instance.preface.url:
                     workshop_form.instance.preface = None
