@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
+    <title>OpenReview</title>
+</head>
+
+<style>
+    .delete_object {
+        color: red;
+        border-color: #f5c6cb;
+        position: relative;
+        padding: .75rem 1.25rem;
+        border: 1px solid transparent;
+        font-weight: bold;
+        text-align: left;
+        display: flex;
+        align-items: center;
+    }
+
+    .delete_object input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
+
+    .delete_object label {
+        margin: 0;
+    }
+
+    .paper-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .toggle-details {
+        cursor: pointer;
+        border: solid black;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 3px;
+    }
+
+    .down {
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+    }
+
+    .up {
+        transform: rotate(-135deg);
+        -webkit-transform: rotate(-135deg);
+    }
+   
+   
+    .paper-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        list-style: none; 
+    }
+
+    .paper-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        background: #f9f9f9;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .paper-summary {
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .paper-title {
+        font-size: 1em;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .toggle-details {
+        cursor: pointer;
+    }
+
+    .paper-details {
+        display: none;
+        padding: 10px 0 0 30px;
+    }
+
+    .delete_object {
+        margin-top: 10px;
+    }
+
+    .blue-background-class {
+        background-color: #e0f7fa;
+    }
+</style>
+
+{% block content %}
+
+
+<fieldset>
+    <legend>Paper and Author Details</legend>
+    <i>These were the papers that were found in OpenReview associated with this workshop. Please edit any details still missing and
+add sessions for each paper if applicable.</i>
+<br>
+<br>
+<form id="validation-form" action="{% url 'workshops:open_review_workshop' %}" enctype="multipart/form-data" method="post">
+{% csrf_token %}
+<input type="hidden" name="workshop_id" value={{ workshop_id}}>
+    {% for paper_form, author_formset in paper_author_combinations %}
+        <!-- Display the paper form -->
+        <li class="paper-item">
+            <div class="paper-container">
+                <div class="paper-summary">
+                    <span class="paper-title">{{ paper_form.instance.paper_title }}</span>
+                    <i class="arrow down toggle-details"></i>
+                </div>
+                <div class="paper-details" style="display: none;">
+                    Paper Title:
+                    <p>{{paper_form.paper_title}}</p>
+                    Pages:
+                    <p>{{paper_form.pages}}</p>
+                    Session: 
+                    <p>{{paper_form.session}}</p>
+
+                    <input type="hidden" name="paper_id" value={{ paper_form.instance.id}}>
+                    
+                    {% if paper_form.instance.uploaded_file %}
+                        <i>Currently uploaded paper file: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a></i>
+                    {% endif %}
+                    <!-- Display the author formset -->
+                    {% if author_formset|stringformat:"" %}
+                        {{ author_formset }}
+                    {% else %}
+                        {{ author_formset.management_form }}
+                        {% for form in author_formset %}
+                            <fieldset class="inner_fieldset">
+                                <b>Author {{ forloop.counter }}</b>
+                                {{ form.as_p }}
+                            </fieldset>
+                        {% endfor %}
+                    {% endif %}
+                
+                </div>
+            </div>
+        </li>
+{% endfor %}
+<input type="submit" name = "open_review_submit "class="button-13" value="Confirm">
+</fieldset>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        function toggleDetails() {
+            const $detailsDiv = $(this).parent().next('.paper-details');
+            $detailsDiv.toggle();
+            $(this).toggleClass('down up');
+        }
+        $('.toggle-details').on('click', toggleDetails);
+    });
+
+</script>
+{% endblock %}
