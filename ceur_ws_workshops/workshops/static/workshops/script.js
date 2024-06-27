@@ -1,8 +1,6 @@
 $(document).ready(function () {
-    // Hide initial validation errors
     $('.invalid-feedback').hide();
 
-    // Show errors only on submit
     $('#form-container').on('submit', function () {
       $('.invalid-feedback').show();
     });

@@ -3,6 +3,7 @@ from ..models import Workshop, Paper, Editor, Author, Session
 from django.urls import reverse
 from django.views import View
 
+
 from ..forms import WorkshopForm, EditorFormSet, PaperForm, SessionFormSet, get_author_formset
 from urllib.parse import urlparse, parse_qs
 import io
@@ -10,16 +11,18 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from PyPDF2 import PdfReader
 from django.forms import formset_factory
 
+
+
+
 class CreateWorkshop(View):
     success_path = "workshops/workshop_edit_success.html"
     overview_path = "workshops/workshop_overview.html"
     edit_path = "workshops/edit_workshop.html"
-
-    openreview_url = None
     
     def get_workshop(self, workshop_id):
         return get_object_or_404(Workshop, id = workshop_id)
     
+
     def find_ws_id(self, url):
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.query)
@@ -106,6 +109,7 @@ class CreateWorkshop(View):
 
         return paper_author_combinations
     
+
     def get(self, request):
         form = WorkshopForm(is_preface_present = True)
         editor_form = EditorFormSet(queryset=Editor.objects.none(), 
@@ -130,7 +134,7 @@ class CreateWorkshop(View):
 
             # Once forms have been bound (either using old or new editor agreement), we validate and save to the database.
             if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
-
+                
                 workshop = workshop_form.save()  
 
                 editor_instances = editor_formset.save()
@@ -148,6 +152,7 @@ class CreateWorkshop(View):
                     return render(request, 'workshops/open_review_editpage.html', context)
                     
                 return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
+
 
             else:
                 # if the forms are not valid we return the form with the errors
@@ -173,12 +178,8 @@ class CreateWorkshop(View):
             session_formset = SessionFormSet(queryset=Session.objects.none(),data = request.POST, prefix="session")
             # before rendering we check if the bound forms are valid and we save a workshop instance so that the editor agreement can be extracted in a later stage
             if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
-
+                
                 workshop_instance = workshop_form.save()  
-                workshop_instance.openreview_url = request.POST['openreview_url']
-                workshop_instance.save()
-
-
                 bound_workshop_form = WorkshopForm(instance = workshop_instance)
 
                 context = {
