@@ -69,7 +69,6 @@ class Workshop(models.Model):
     total_accepted_papers = models.IntegerField()
     total_reg_acc_papers = models.IntegerField(null=True, blank=True)
     total_short_acc_papers = models.IntegerField(null=True, blank=True)
-    openreview_url = models.URLField(max_length=200,null=True, blank=True)
 
     # Filled in by CEUR
     volume_number = models.IntegerField(null=True, blank=True)
