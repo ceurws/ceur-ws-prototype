@@ -18,7 +18,10 @@ setup(
         'sqlparse==0.5.0',
         'typing_extensions==4.12.1',
         'wheel==0.43.0',
+
         'openreview-py==1.39.7'
+
+        'PyPDF2==3.0.1',
     ],
     python_requires='>=3.10',
     entry_points = {

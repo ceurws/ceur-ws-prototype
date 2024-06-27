@@ -44,6 +44,10 @@ class Workshop(models.Model):
         filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
         workshop_id = instance.id
         return f"agreement/Vol-{workshop_id}/{filename}"
+<<<<<<< HEAD
+=======
+    
+>>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
     def workshop_preface_file_path(instance, filename):
         acronym = instance.workshop_acronym
         filename = f"WORKSHOP-PREFACE-{acronym}.pdf"
@@ -129,5 +133,9 @@ class Paper(models.Model):
     
     class Meta:
         ordering = [Lower('paper_title')]
+<<<<<<< HEAD
+=======
+
+>>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
 
 

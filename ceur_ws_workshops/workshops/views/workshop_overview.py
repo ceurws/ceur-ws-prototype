@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from ..models import Workshop, Paper
+from ..models import Workshop, Paper, Session, Editor
 from django.conf import settings
 from django.urls import reverse
 from django.views import View
@@ -8,7 +8,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json, os, zipfile
 from datetime import date
 from django.conf import settings
-from ..forms import WorkshopForm, PaperForm
+from ..forms import WorkshopForm, PaperForm, EditorForm, EditorFormSet
 
 class WorkshopOverview(View):
     def get_workshop(self):
@@ -17,16 +17,21 @@ class WorkshopOverview(View):
     
     def render_workshop(self, request, edit_mode = False):
         workshop = self.get_workshop()
-
+        # print([PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all() if paper_instance.session == None])
         return render(request, 'workshops/workshop_overview.html', context = {
             'papers' : [paper for paper in workshop.accepted_papers.all()],
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop),
-            'paper_forms' : [PaperForm(instance=paper_instance) for paper_instance in workshop.accepted_papers.all()],
+
+            'paper_forms' : [PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all()],
+            'paper_forms_no_session' : [paper for paper in workshop.accepted_papers.all() if paper.session == None],
+
             'session_title_list' : [session_object.session_title for session_object in workshop.sessions.all()],
+            'editor_forms': EditorFormSet(queryset=workshop.editors.all(), prefix="editor"),
             'edit_mode': edit_mode,
-            
-            'secret_token': self.kwargs['secret_token']
+            'secret_token': self.kwargs['secret_token'],
+            'organizer_url': reverse('workshops:workshop_overview', args=[workshop.secret_token]),
+            'author_url': reverse('workshops:author_upload', args=[workshop.author_upload_secret_token])
         })
 
     def get(self, request, secret_token):
@@ -145,43 +150,67 @@ class WorkshopOverview(View):
         self.add_papers_data(workshop, workshop_data)   
         self._save_workshop_data(workshop_data, workshop)
         request.session['json_saved'] = True
-
         self._zip_agreement_files(workshop)
         messages.success(request, 'Workshop submitted successfully.')
-
         return render(request, submit_path)
     
-    def post(self, request, secret_token):
+    def post(self, request, secret_token, open_review = False):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
         
+        # not sure if following if statement is necessary
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
+        
         elif request.POST["submit_button"] == "Confirm":
             workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST, files = request.FILES)
 
-            if workshop_form.is_valid():
+            print(workshop.editors.all())
+            print("FF")
+            editor_formset = EditorFormSet(queryset=workshop.editors.all(), data = request.POST, prefix="editor")
+
+            if all([workshop_form.is_valid(), editor_formset.is_valid()]):
+
                 workshop_form.save()
-
-            else:
-                print(workshop_form.errors)
-
+                editor_formset.save()
+            else: 
+                print("Workshop_errors", workshop_form.errors)
+                print("editor formset", editor_formset.errors)
+                # return self.render_workshop(request, edit_mode=True) 
+            
             existing_paper_ids = request.POST.getlist('paper_id')  
+            # print(existing_paper_ids)
             papers_to_delete = request.POST.getlist('papers_to_delete') 
-
             for paper_id in papers_to_delete:
                 Paper.objects.filter(id=paper_id).delete()
 
             for paper_id in existing_paper_ids:
                 if paper_id in papers_to_delete:
                     continue  
-                paper_instance = Paper.objects.filter(id=paper_id, workshop = workshop).first()
-                
-                paper_form = PaperForm(data = request.POST, files = request.FILES, instance=paper_instance, workshop = workshop)
-                if paper_form.is_valid():
-                    paper_form.save()
 
-                workshop.accepted_papers.add(paper_instance)
+                paper_instance = Paper.objects.filter(id=paper_id, workshop = workshop).first()
+                paper_form = PaperForm(data = request.POST, files = request.FILES, instance=paper_instance, workshop = workshop)
+
+                if paper_form.is_valid():
+                    saved_paper_instance = paper_form.save()
+                    if request.POST['session'] != '':
+                        saved_session_instance = Session.objects.get(pk=request.POST['session'])
+                        saved_paper_instance.session = saved_session_instance
+                    else:
+                        saved_paper_instance.session = None
+
+                    workshop.accepted_papers.add(saved_paper_instance)
+
+                    order_key = f'order_{paper_id}'
+                    if order_key in request.POST:
+                        saved_paper_instance.order = int(request.POST[order_key])
+                        print(saved_paper_instance.order)
+                        saved_paper_instance.save()
+                else:
+                    print("paper formset", paper_form.errors)
+                    return self.render_workshop(request, edit_mode = True)
 
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
             return self.submit_workshop(request, secret_token)
+        
+        

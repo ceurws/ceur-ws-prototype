@@ -150,10 +150,17 @@ class WorkshopForm(forms.ModelForm):
         self.fields['workshop_colocated'].help_text = "<i>Please provide the acronym (acronym-YYYY) of the conference with which this workshop was colocated; if the workshop was not colocated with any conference, leave this field empty.</i>"
         self.fields['workshop_acronym'].help_text ='<i>Please provide the acronym of the workshop plus YYYY (year of the workshop in exactly 4 digits, e.g. 2012). Between the acronym and the year a \'-\' should be placed.</i>'
 
+<<<<<<< HEAD
         # if not is_preface_present:
         #     self.fields['has_preface'].widget = forms.HiddenInput()
         # else:
         #     self.fields['has_preface'].label = 'Check this box if the workshop has a preface'
+=======
+        if not is_preface_present:
+            self.fields['has_preface'].widget = forms.HiddenInput()
+        else:
+            self.fields['has_preface'].label = 'Check this box if the workshop has a preface'
+>>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
 
 
     def is_valid(self):
@@ -213,8 +220,11 @@ class WorkshopForm(forms.ModelForm):
         return cleaned_data
 
     
+<<<<<<< HEAD
 
     
+=======
+>>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
     # def _detect_signature_in_image(self, file_path):
     #     loader = Loader()
     #     extractor = Extractor()
@@ -306,9 +316,15 @@ class PaperForm(forms.ModelForm):
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
 
+<<<<<<< HEAD
         pdfReader = PyPDF2.PdfReader(uploaded_file)
         num_pages = len(pdfReader.pages)
         cleaned_data['pages'] = num_pages
+=======
+        # pdfReader = PyPDF2.PdfReader(uploaded_file)
+        # num_pages = len(pdfReader.pages)
+        # cleaned_data['pages'] = num_pages
+>>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
 
         # if uploaded_file and agreement_file and self.workshop:
         # if agreement_file: 
@@ -353,13 +369,17 @@ def get_author_formset(extra=0):
         Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=extra,
         widgets={
             'author_name': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the name of the author'}),
+                                            'placeholder': 'Enter the name of the author',
+                                            'strip':True,}),
             'author_university': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the university of the author'}),
+                                            'placeholder': 'Enter the university of the author',
+                                            'strip':True,}),
             'author_uni_url': TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the URL of the university which the author is affiliated to'}),
+                                            'placeholder': 'Enter the URL of the university which the author is affiliated to',
+                                            'strip':True,}),
             'author_email': TextInput(attrs={'size': 50,
-                                            'placeholder': 'Enter the email of the author'})
+                                            'placeholder': 'Enter the email of the author',
+                                            'strip':True,}),
         },
         labels={
             'author_uni_url': "University URL",
@@ -377,12 +397,31 @@ class EditorForm(forms.ModelForm):
         model = Editor
         fields = ['editor_name', 'editor_url', 'institution', 'institution_country', 'institution_url', 'research_group']
         widgets = {
+<<<<<<< HEAD
             'editor_name': forms.TextInput(attrs={'size': 100, 'placeholder': 'Provide the name of the editor'}),
             'editor_url': forms.TextInput(attrs={'size': 100, 'placeholder': '(optional) Provide the URL of the editor e.g. https://www.example.com'}),
             'institution': forms.TextInput(attrs={'size': 100, 'placeholder': 'Provide the institution (company or university)'}),
             'institution_country': CountrySelectWidget(),
             'institution_url': forms.TextInput(attrs={'size': 100, 'placeholder': 'Provide the URL of the institution e.g. https://www.example.com'}),
             'research_group': forms.TextInput(attrs={'size': 70, 'placeholder': '(optional) Provide the research group of the editor'})
+=======
+            'editor_name': forms.TextInput(attrs={'size': 100, 
+                                                  'placeholder': 'Provide the name of the editor',
+                                                  'strip':True,}),
+            'editor_url': forms.TextInput(attrs={'size': 100, 
+                                                 'placeholder': '(optional) Provide the URL of the editor e.g. https://www.example.com',
+                                                 'strip':True,}),
+            'institution': forms.TextInput(attrs={'size': 100, 
+                                                  'placeholder': 'Provide the institution (company or university)',
+                                                  'strip':True,}),
+            'institution_country': CountrySelectWidget(),
+            'institution_url': forms.TextInput(attrs={'size': 100, 
+                                                      'placeholder': 'Provide the URL of the institution e.g. https://www.example.com',
+                                                      'strip':True,}),
+            'research_group': forms.TextInput(attrs={'size': 70, 
+                                                     'placeholder': '(optional) Provide the research group of the editor',
+                                                     'strip':True,}),
+>>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
         }
 
 EditorFormSet = modelformset_factory(

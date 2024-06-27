@@ -24,65 +24,161 @@
       {{ paper_form|crispy }}
       <p>Uploaded File: <a href="{{ paper_form.instance.uploaded_file.url }}">{{ paper_form.instance.uploaded_file.name }}</a></p>
       <p>Agreement File: <a href="{{ paper_form.instance.agreement_file.url }}">{{ paper_form.instance.agreement_file.name }}</a></p>
+
     </fieldset>
     <style>
-      .delete_object {
+     .delete_object {
         color: red;
-        /* background-color: #f8d7da; */
         border-color: #f5c6cb;
         position: relative;
         padding: .75rem 1.25rem;
-        /* margin-bottom: 1rem; */
         border: 1px solid transparent;
-        /* border-radius: .25rem; */
-        text-align: center;
         font-weight: bold;
-      }
+        text-align: left;
+        display: flex;
+        align-items: center;
+    }
+
+    .delete_object input[type="checkbox"] {
+        margin-right: 0.5rem;
+    }
+
+    .delete_object label {
+        margin: 0;
+    }
+
+    .author-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
     .toggle-details {
-    cursor: pointer;
-    border: solid black;
-    border-width: 0 3px 3px 0;
-    display: inline-block;
-    padding: 3px;
-    margin-left: 98%;
-  }
-      .arrow {
-      border: solid black;
-      border-width: 0 3px 3px 0;
-      display: inline-block;
-      padding: 3px;
+        cursor: pointer;
+        border: solid black;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 3px;
     }
+
     .down {
-      transform: rotate(45deg);
-      -webkit-transform: rotate(45deg);
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
     }
+
     .up {
-      transform: rotate(-135deg);
-      -webkit-transform: rotate(-135deg);
+        transform: rotate(-135deg);
+        -webkit-transform: rotate(-135deg);
+    }
+
+    .handle {
+        display: inline-block;
+        border-top: 3px solid var(--dark);
+        width: 30px;
+        padding-top: 5px;
+        cursor: grab;
+    }
+
+    .handle:after, .handle:before {
+        display: block;
+        content: "";
+        padding-top: 5px;
+        border-top: 3px solid var(--dark);
+    }
+
+    .handle:hover, .handle:hover:before, .handle:hover:after {
+        border-color: var(--primary);
+    }
+
+    .handle:active, .handle:active:before, .handle:active:after {
+        cursor: grabbing;
+    }
+
+    .author-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        list-style: none;
+    }
+
+    .author-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        background: #f9f9f9;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .author-name {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .author-details {
+        display: none;
+        padding: 10px 0 0 30px;
+    }
+
+    .author-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        list-style: none; 
+    }
+    .delete_object {
+        margin-top: 10px;
+    }
+
+    .blue-background-class {
+        background-color: #e0f7fa;
+    }
+
+    .arrow {
+        border: solid black;
+        border-width: 0 3px 3px 0;
+        display: inline-block;
+        padding: 3px;
+    }
+
+    .down {
+        transform: rotate(45deg);
+        -webkit-transform: rotate(45deg);
+    }
+
+    .up {
+        transform: rotate(-135deg);
+        -webkit-transform: rotate(-135deg);
     }
       </style>
-    <fieldset id="author-fieldset">
-      <legend>Author Details</legend>
-      <div id="author-form" class="author-form">
-          {{ author_formset.management_form }}
-          {% for form in author_formset %}
-          <div class="author-container">
-              <div class="author-summary">
-                  <span class="author-name">{{ form.author_name.value }}</span>
-                  <i class="arrow down toggle-details"></i>
-              </div>
-              <div class="author-details" style="display: none;">
-                  {{ form|crispy }}
-                  <input type="checkbox" name="authors_to_delete" value="{{ form.instance.id }}">
-                  <a class="delete_object">Select to delete an author from the paper.</a>
-              </div>
-              <hr>
-          </div>
-          {% endfor %}
-      </div>
-      <input type="button" value="Add Author" class="button-13" id="add_author">
-  </fieldset>
+   <fieldset id="author-fieldset">
+    <legend>Author Details</legend>
+    <div id="author-form" class="author-form">
+        {{ author_formset.management_form }}
+        {% for form in author_formset %}
+        <li class = "author-item">
+        <div class="author-container">
+            <div class="author-summary">
+                <span class="author-name">{{ form.author_name.value }}</span>
+                <i class="arrow down toggle-details"></i>
+            </div>
+            <div class="author-details" style="display: none;">
+                {{ form|crispy }}
+                <div class="delete_object">
+                    <input type="checkbox" name="authors_to_delete" value="{{ form.instance.id }}">
+                    <label for="authors_to_delete">Select to delete an author from the paper.</label>
+                </div>
+            </div>
+            <hr>
+        </div>
+      </li>
+        {% endfor %}
+    </div>
+    <input type="button" value="Add Author" class="button-13" id="add_author">
+</fieldset>
+  
   
   <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -163,7 +259,9 @@
     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
     <p><strong>Pages:</strong> {{ paper.pages }}</p>
     <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+
     <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
+   
     
     {%if not paper.session%}
     <i>The paper has not yet been assigned to a session.</i>
@@ -212,20 +310,6 @@
   {% endif %}
 
 </body>
-<script> 
-  function CopyText(elementId, tooltipId) {
-      var url = document.getElementById(elementId).href;  
-      navigator.clipboard.writeText(url).then(() => {
-          console.log('Text copied to clipboard');
-          var tooltip = document.getElementById(tooltipId);
-          tooltip.innerHTML = "Copied to clipboard!";
-      });
-  }
-
-  function outFunc(tooltipId) {
-      var tooltip = document.getElementById(tooltipId);
-      tooltip.innerHTML = "Copy to clipboard";
-  }
-</script>
+<script src="{% static 'workshops/script.js' %}"></script>
 </html>
 {% endblock %}

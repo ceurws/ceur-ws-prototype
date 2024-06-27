@@ -27,12 +27,19 @@
     }
   </style>
     <legend>Paper Data</legend>
-    <!-- {{ paper_form.as_p }} -->
+    Don't forget to download the agreement form in order to sign it. If any details are wrong, or missing, just go back. 
+
+    <br>
+    <br> 
+    <a id = "organizer_url" href="{{download_url.url}}" download> Download the agreement form</a>
+    <br>
+    <br>
     {{ paper_form|crispy }}
+
     <input type="hidden" name="secret_token" value="{{ paper_instance.secret_token }}">
 
-    <p>Currently uploaded Paper: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a> </p>
-    <p>Currently uploaded Agreement:  <a href="{{paper_form.instance.agreement_file.url}}">{{paper_form.instance.agreement_file.name }}</a></p>
+    
+  <p>Currently uploaded Paper: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a> </p>
   </fieldset>
   <fieldset id="author-fieldset">
     {{ author_formset.management_form}}

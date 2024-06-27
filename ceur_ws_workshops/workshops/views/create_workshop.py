@@ -8,7 +8,7 @@ from urllib.parse import urlparse, parse_qs
 import io
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from PyPDF2 import PdfReader
-
+from django.forms import formset_factory
 
 class CreateWorkshop(View):
     success_path = "workshops/workshop_edit_success.html"
@@ -107,7 +107,7 @@ class CreateWorkshop(View):
         return paper_author_combinations
     
     def get(self, request):
-        form = WorkshopForm(is_preface_present = False)
+        form = WorkshopForm(is_preface_present = True)
         editor_form = EditorFormSet(queryset=Editor.objects.none(), 
                                     prefix='editor')
         session_form = SessionFormSet(queryset=Session.objects.none(), 
@@ -147,6 +147,8 @@ class CreateWorkshop(View):
                     }
                     return render(request, 'workshops/open_review_editpage.html', context)
                     
+                return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
+
             else:
                 # if the forms are not valid we return the form with the errors
                 # https://stackoverflow.com/questions/3097982/how-to-make-a-django-form-retain-a-file-after-failing-validation
