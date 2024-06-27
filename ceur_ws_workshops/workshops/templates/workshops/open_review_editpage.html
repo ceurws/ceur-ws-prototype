@@ -112,8 +112,9 @@
 add sessions for each paper if applicable.</i>
 <br>
 <br>
-<form id="validation-form" action="{% url 'your_view_name' %}" enctype="multipart/form-data" method="post">
+<form id="validation-form" action="{% url 'workshops:open_review_workshop' %}" enctype="multipart/form-data" method="post">
 {% csrf_token %}
+<input type="hidden" name="workshop_id" value={{ workshop_id}}>
     {% for paper_form, author_formset in paper_author_combinations %}
         <!-- Display the paper form -->
         <li class="paper-item">
@@ -123,22 +124,36 @@ add sessions for each paper if applicable.</i>
                     <i class="arrow down toggle-details"></i>
                 </div>
                 <div class="paper-details" style="display: none;">
-                    {{ paper_form.as_p }}
+                    Paper Title:
+                    <p>{{paper_form.paper_title}}</p>
+                    Pages:
+                    <p>{{paper_form.pages}}</p>
+                    Session: 
+                    <p>{{paper_form.session}}</p>
+
+                    <input type="hidden" name="paper_id" value={{ paper_form.instance.id}}>
+                    
                     {% if paper_form.instance.uploaded_file %}
                         <i>Currently uploaded paper file: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a></i>
                     {% endif %}
                     <!-- Display the author formset -->
-                    {{ author_formset.management_form }}
-                    {% for form in author_formset %}
-                        <fieldset class="inner_fieldset">
-                            {{ form.as_p }}
-                        </fieldset>
-                    {% endfor %}
+                    {% if author_formset|stringformat:"" %}
+                        {{ author_formset }}
+                    {% else %}
+                        {{ author_formset.management_form }}
+                        {% for form in author_formset %}
+                            <fieldset class="inner_fieldset">
+                                <b>Author {{ forloop.counter }}</b>
+                                {{ form.as_p }}
+                            </fieldset>
+                        {% endfor %}
+                    {% endif %}
+                
                 </div>
             </div>
         </li>
 {% endfor %}
-<input type="submit" name = "submit_openreview_papers "class="button-13" value="Confirm">
+<input type="submit" name = "open_review_submit "class="button-13" value="Confirm">
 </fieldset>
 </form>
 

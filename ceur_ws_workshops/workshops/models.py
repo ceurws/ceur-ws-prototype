@@ -23,9 +23,9 @@ class Editor(models.Model):
 
 class Author(models.Model):
     author_name = models.CharField(max_length=100)
-    author_university = models.CharField(max_length=100)
-    author_uni_url = models.CharField(max_length=200)
-    author_email = models.EmailField(max_length=200)
+    author_university = models.CharField(max_length=100, null=True, blank=True)
+    author_uni_url = models.CharField(max_length=200, null=True, blank=True)
+    author_email = models.EmailField(max_length=200, null=True, blank=True)
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
     def __str__(self):
@@ -115,8 +115,8 @@ class Paper(models.Model):
     
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10, blank = True)
-    uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True)
-    agreement_file = models.FileField(upload_to=agreement_file_path, blank = True)
+    uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True, max_length=500)
+    agreement_file = models.FileField(upload_to=agreement_file_path, blank = True, max_length=500)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     order = models.IntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
