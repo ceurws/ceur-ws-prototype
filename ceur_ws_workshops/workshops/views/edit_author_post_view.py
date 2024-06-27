@@ -1,10 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from ..models import Workshop, Paper, Author
 from ..forms import get_author_formset, PaperForm
-<<<<<<< HEAD
-=======
 import PyPDF2, os
->>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
 
 
 def _get_agreement_filename(paper_instance, original_filename):
@@ -61,10 +58,6 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
     else:
         paper_form = PaperForm(instance=paper)
         author_formset = get_author_formset()(queryset=paper.authors.all())
-<<<<<<< HEAD
-=======
-
->>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
 
     
     return render(request, 'workshops/author_upload_success.html', context)
