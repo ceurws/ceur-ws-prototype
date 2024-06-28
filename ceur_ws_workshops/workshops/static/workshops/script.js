@@ -8,6 +8,8 @@ $(document).ready(function () {
     });
   });
 
+
+
   $('#add_session').click(function () {
     var form_idx = $('#id_session-TOTAL_FORMS').val();
     $('#session-form').append($('#empty_session_form').html().replace(/__prefix__/g, form_idx));
@@ -57,3 +59,4 @@ function outFunc(tooltipId) {
     var tooltip = document.getElementById(tooltipId);
     tooltip.innerHTML = "Copy to clipboard";
 }
+

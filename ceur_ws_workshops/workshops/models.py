@@ -120,6 +120,8 @@ class Paper(models.Model):
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     order = models.IntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
+    
+
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')

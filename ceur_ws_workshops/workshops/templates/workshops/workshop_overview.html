@@ -24,6 +24,7 @@
         text-align: left;
         display: flex;
         align-items: center;
+        margin-top:10px;
     }
 
     .delete_object input[type="checkbox"] {
@@ -123,10 +124,6 @@
         padding: 10px 0 0 30px;
     }
 
-    .delete_object {
-        margin-top: 10px;
-    }
-
     .blue-background-class {
         background-color: #e0f7fa;
     }
@@ -152,6 +149,7 @@
         </fieldset>
         <fieldset class="editor-details">
             <legend>Editor Details</legend>
+            {{ editor_forms.management_form }}
             {% for editor_form in editor_forms %}
             <li class = "paper-item">
                 <div class = "paper-container">
@@ -160,7 +158,7 @@
                         <i class="arrow down toggle-details"></i>
                     </div>
                     <div class="paper-details" style="display: none;">
-                        {{ editor_form.as_p }}
+                        {{ editor_form|crispy }}
                         {% if not forloop.last %}
                         <hr>
                         {% endif %}
@@ -231,6 +229,7 @@
             <form method="post"  enctype="multipart/form-data" class="sortable" id="sortable-list">
                 {% csrf_token %}
                 <input type="hidden" id="paper_id" name="paper_id" value="">
+                {{ paper_forms.management_form }}
                 {% for paperform in paper_forms %}
                 <li class="paper-item">
                     <div class="paper-container">
@@ -243,14 +242,12 @@
                             <div>
                                 <input type='hidden' name='paper_order' value="{{paperform.instance.order}}">
                                 {{ paperform.as_p }}
-                                {%comment%}
                                 {% if paperform.instance.uploaded_file %}
                                 <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
                                 {% endif %}
                                 {% if paperform.instance.agreement_file %}
                                 <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
                                 {% endif %}
-                                {%endcomment%}
                                 <div class="delete_object">
                                     <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
                                     <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.</label>
@@ -343,14 +340,10 @@
         <p><strong>Editors:</strong></p>
         <ul class="editors-list">
             {% for editor in workshop.editors.all %}
-
-            {% if editor.editor_url %}
-            <li> <a href ="{{editor.editor_url}}"> {{ editor.editor_name}}</a> 
-            {% else %}
-            <li> {{ editor.editor_name}}
+            <li> <a href = "{{editor.editor_url}}">{{ editor.editor_name}}</a>
                 (<i> <a href ="{{editor.institution_url }}"> {{ editor.institution}}</a>, 
-                    {{editor.institution_country}}</i>)</li>
-            {% endif %}
+                    {{editor.institution_country}}</i>)
+            </li>
             {% endfor %}
         </ul>
         {% if workshop.editor_agreement %}

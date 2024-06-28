@@ -104,7 +104,7 @@
 </style>
 
 {% block content %}
-
+{%load crispy_forms_tags %} 
 
 <fieldset>
     <legend>Paper and Author Details</legend>
@@ -138,17 +138,16 @@ add sessions for each paper if applicable.</i>
                     {% endif %}
                     <!-- Display the author formset -->
                     {% if author_formset|stringformat:"" %}
-                        {{ author_formset }}
+                        {{ author_formset|crispy }}
                     {% else %}
                         {{ author_formset.management_form }}
                         {% for form in author_formset %}
                             <fieldset class="inner_fieldset">
                                 <b>Author {{ forloop.counter }}</b>
-                                {{ form.as_p }}
+                                {{ form|crispy }}
                             </fieldset>
                         {% endfor %}
                     {% endif %}
-                
                 </div>
             </div>
         </li>
@@ -159,14 +158,15 @@ add sessions for each paper if applicable.</i>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function () {
-        function toggleDetails() {
-            const $detailsDiv = $(this).parent().next('.paper-details');
-            $detailsDiv.toggle();
-            $(this).toggleClass('down up');
-        }
-        $('.toggle-details').on('click', toggleDetails);
-    });
 
+$(document).ready(function () {
+    function toggleDetails() {
+        const $detailsDiv = $(this).parent().next('.paper-details');
+        $detailsDiv.toggle();
+        $(this).toggleClass('down up');
+    }
+    $('.toggle-details').on('click', toggleDetails);
+});
 </script>
+
 {% endblock %}
