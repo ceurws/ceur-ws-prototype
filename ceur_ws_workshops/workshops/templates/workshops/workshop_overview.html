@@ -226,42 +226,44 @@
         {% else %}
         <fieldset class="papers-list">
             <legend>Papers</legend>
-            <form method="post"  enctype="multipart/form-data" class="sortable" id="sortable-list">
+            <form method="post" enctype="multipart/form-data" class="sortable" id="sortable-list">
                 {% csrf_token %}
                 <input type="hidden" id="paper_id" name="paper_id" value="">
                 {{ paper_forms.management_form }}
-                {% for paperform in paper_forms %}
-                <li class="paper-item">
-                    <div class="paper-container">
-                        <div class="handle">&#9776;</div> 
-                        <div class="paper-summary">
-                            <span class="paper-title" >{{ paperform.instance.paper_title }}</span>
-                            <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
-                        </div>
-                        <div class="paper-details" style="display: none;">
-                            <div>
-                                <input type='hidden' name='paper_order' value="{{paperform.instance.order}}">
-                                {{ paperform.as_p }}
-                                {% if paperform.instance.uploaded_file %}
-                                <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
-                                {% endif %}
-                                {% if paperform.instance.agreement_file %}
-                                <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
-                                {% endif %}
-                                <div class="delete_object">
-                                    <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
-                                    <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.</label>
-                                </div>
+                <ul id="nested-sortable">
+                    {% for paperform in paper_forms %}
+                    <li class="paper-item" data-paper-id="{{ paperform.instance.id }}">
+                        <div class="paper-container">
+                            <div class="handle">&#9776;</div> 
+                            <div class="paper-summary">
+                                <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                                <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
                             </div>
-                            <hr>
+                            <div class="paper-details" style="display: none;">
+                                <div>
+                                    <input type='hidden' name='paper_order' value="{{ paperform.instance.order }}">
+                                    {{ paperform.as_p }}
+                                    {% if paperform.instance.uploaded_file %}
+                                    <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
+                                    {% endif %}
+                                    {% if paperform.instance.agreement_file %}
+                                    <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{ paperform.instance.agreement_file.name }}</a></p>
+                                    {% endif %}
+                                    <div class="delete_object">
+                                        <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
+                                        <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper also deletes the uploaded file and agreement.</label>
+                                    </div>
+                                </div>
+                                <hr>
+                            </div>
                         </div>
-                    </div>
-                </li>
-                {% endfor %}
+                    </li>
+                    {% endfor %}
+                </ul>
                 <div class="submit-container">
                     <input type="submit" name="submit_button" class="button-13" value="Confirm">
                 </div>
-                </form>
+            </form>
         </fieldset>
 
         {% endif %}
@@ -411,7 +413,6 @@
     </fieldset>
     </fieldset>
     
-    
     {% else %}
    
     <fieldset class="papers-list">
@@ -478,25 +479,51 @@
                 }
                 $('.toggle-details').on('click', toggleDetails);
             });
-    document.addEventListener('DOMContentLoaded', function() {
-    var sortables = document.querySelectorAll(".sortable");
-    sortables.forEach(function(sortable) {
-        new Sortable(sortable, {
+
+    // Loop through each nested sortable element
+    document.addEventListener('DOMContentLoaded', function () {
+        var nestedSortables = document.getElementById('nested-sortable');
+
+        new Sortable(nestedSortables, {
+            group: 'nested',
             animation: 150,
-            ghostClass: 'blue-background-class',
+            fallbackOnBody: true,
+            swapThreshold: 0.65,
             handle: '.handle',
             onEnd: function (evt) {
-                var items = sortable.querySelectorAll('.paper-item');
-                items.forEach(function(item, index) {
-                    var orderInput = item.querySelector('input[name^="order_"]');
-                    if (orderInput) {
-                        orderInput.value = index + 1;
-                    }
+                var order = [];
+                nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
+                    order.push(item.dataset.paperId);
                 });
+
+                var orderInput = document.createElement('input');
+                orderInput.type = 'hidden';
+                orderInput.name = 'paper_order[]';
+                orderInput.value = JSON.stringify(order);
+                document.getElementById('sortable-list').appendChild(orderInput);
             }
         });
     });
-});
+    
+//     document.addEventListener('DOMContentLoaded', function() {
+//     var sortables = document.querySelectorAll(".sortable");
+//     sortables.forEach(function(sortable) {
+//         new Sortable(sortable, {
+//             animation: 150,
+//             ghostClass: 'blue-background-class',
+//             handle: '.handle',
+//             onEnd: function (evt) {
+//                 var items = sortable.querySelectorAll('.paper-item');
+//                 items.forEach(function(item, index) {
+//                     var orderInput = item.querySelector('input[name^="order_"]');
+//                     if (orderInput) {
+//                         orderInput.value = index + 1;
+//                     }
+//                 });
+//             }
+//         });
+//     });
+// });
 </script>
 
 {% endblock %}
