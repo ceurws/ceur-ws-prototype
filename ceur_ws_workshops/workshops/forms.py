@@ -283,7 +283,7 @@ class PaperForm(forms.ModelForm):
             self.fields['agreement_file'].label = 'Upload agreement file'
     class Meta:
         model = Paper
-        fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file', 'has_third_party_material']
+        fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file', 'has_third_party_material', 'order']
 
         help_texts = {'pages': '<br><i>Provide the length(number of pages) of the paper</i>.<br>',
                     #   'agreement_file': '<br><i>The agreement file of the paper needs to be <b>hand signed</b>',
@@ -298,8 +298,6 @@ class PaperForm(forms.ModelForm):
             ,
                                                      'required': 'True'}),
         }
-
-        ordering = ['sort_order']
 
         paper_title = forms.CharField(strip=True)
     def clean(self):
@@ -353,6 +351,16 @@ class CustomBaseModelFormSet(BaseModelFormSet):
         self.agreement_not_required = kwargs.pop('agreement_not_required', False)
         super().__init__(*args, **kwargs)
 
+    def __iter__(self):
+        """Yields the forms in the order they should be rendered"""
+        # Sort forms by the 'order' field of the form instance
+        sorted_forms = sorted(self.forms, key=lambda form: form.instance.order if form.instance.pk else 0)
+        return iter(sorted_forms)
+
+    def __getitem__(self, index):
+        """Returns the form at the given index, based on the rendering order"""
+        sorted_forms = sorted(self.forms, key=lambda form: form.instance.order if form.instance.pk else 0)
+        return sorted_forms[index]
     def _construct_form(self, i, **kwargs):
         kwargs['agreement_not_required'] = self.agreement_not_required
         return super()._construct_form(i, **kwargs)

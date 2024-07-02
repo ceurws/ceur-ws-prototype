@@ -118,7 +118,7 @@ class Paper(models.Model):
     uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True, max_length=500)
     agreement_file = models.FileField(upload_to=agreement_file_path, blank = True, max_length=500)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    order = models.IntegerField(default=0)
+    order = models.PositiveIntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
     
 
@@ -131,6 +131,6 @@ class Paper(models.Model):
         return self.paper_title
     
     class Meta:
-        ordering = [Lower('paper_title')]
+        ordering = ['order']
 
 

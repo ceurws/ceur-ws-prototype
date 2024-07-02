@@ -485,45 +485,25 @@
         var nestedSortables = document.getElementById('nested-sortable');
 
         new Sortable(nestedSortables, {
-            group: 'nested',
-            animation: 150,
-            fallbackOnBody: true,
-            swapThreshold: 0.65,
-            handle: '.handle',
-            onEnd: function (evt) {
-                var order = [];
-                nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
-                    order.push(item.dataset.paperId);
-                });
+        group: 'nested',
+        animation: 150,
+        fallbackOnBody: true,
+        swapThreshold: 0.65,
+        handle: '.handle',
+        onEnd: function (evt) {
+            var order = [];
+            nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
+                order.push(item.dataset.paperId);
+            });
 
-                var orderInput = document.createElement('input');
-                orderInput.type = 'hidden';
-                orderInput.name = 'paper_order[]';
-                orderInput.value = JSON.stringify(order);
-                document.getElementById('sortable-list').appendChild(orderInput);
-            }
-        });
+            var orderInput = document.createElement('input');
+            orderInput.type = 'hidden';
+            orderInput.name = 'paper_order';
+            orderInput.value = JSON.stringify(order);
+            document.getElementById('sortable-list').appendChild(orderInput);
+        }
     });
-    
-//     document.addEventListener('DOMContentLoaded', function() {
-//     var sortables = document.querySelectorAll(".sortable");
-//     sortables.forEach(function(sortable) {
-//         new Sortable(sortable, {
-//             animation: 150,
-//             ghostClass: 'blue-background-class',
-//             handle: '.handle',
-//             onEnd: function (evt) {
-//                 var items = sortable.querySelectorAll('.paper-item');
-//                 items.forEach(function(item, index) {
-//                     var orderInput = item.querySelector('input[name^="order_"]');
-//                     if (orderInput) {
-//                         orderInput.value = index + 1;
-//                     }
-//                 });
-//             }
-//         });
-//     });
-// });
+});
 </script>
 
 {% endblock %}

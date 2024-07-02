@@ -37,8 +37,8 @@ $(document).ready(function () {
     }
   }
 
-  startDateInput.addEventListener('change', updateEndDateMin);
-  endDateInput.addEventListener('change', updateStartDateMax);
+startDateInput.addEventListener('change', updateEndDateMin);
+endDateInput.addEventListener('change', updateStartDateMax);
 
   if (startDateInput.value) {
     updateEndDateMin();

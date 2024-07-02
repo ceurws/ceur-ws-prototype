@@ -13,7 +13,7 @@ class WorkshopOverview(View):
     def render_workshop(self, request, edit_mode = False):
         workshop = self.get_workshop()
         return render(request, 'workshops/workshop_overview.html', context = {
-            'papers' : [paper for paper in workshop.accepted_papers.all()],
+            'papers' : workshop.accepted_papers.all().order_by('order'),#[paper for paper in workshop.accepted_papers.all()],
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop),
             # 'paper_forms' : [PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all()],
@@ -61,16 +61,25 @@ class WorkshopOverview(View):
                 workshop_form.save()
                 editor_formset.save()
             elif paper_form.is_valid():
-                saved_paper_instance = paper_form.save(commit=False)
+                # saved_paper_instance = paper_form.save(commit=False)
+                paper_form.save()
+
                 papers_to_delete = request.POST.getlist('papers_to_delete') 
                 for paper_id in papers_to_delete:
                     Paper.objects.filter(id=paper_id).delete()
 
-                paper_order = request.POST.getlist('paper_order[]')
-                print(paper_order)
-                saved_paper_instance.order = paper_order
-                saved_paper_instance = paper_form.save()
+                if 'paper_order' in request.POST:
+                    paper_order = json.loads(request.POST['paper_order'])
+                    for idx, paper_id in enumerate(paper_order):
+                        Paper.objects.filter(id=paper_id).update(order=idx + 1)
 
+                
+                # order_key = request.POST['paper_order']
+                # print(order_key)
+                # if order_key in request.POST:
+                #     saved_paper_instance.order = int(request.POST[order_key])
+                #     saved_paper_instance.save()
+                
                 # if request.POST['session'] != '': 
                 #     saved_session_instance = Session.objects.get(pk=request.POST['session'])
                 #     saved_paper_instance.session = saved_session_instance
@@ -88,11 +97,7 @@ class WorkshopOverview(View):
                
                     
             #         print("SUCESSSS")
-            # order_key = f'order_{paper_id}'
-            # if order_key in request.POST:
-            #     saved_paper_instance.order = int(request.POST[order_key])
-            #     print(saved_paper_instance.order)
-            #     saved_paper_instance.save()
+            
 
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
