@@ -121,7 +121,6 @@ class Paper(models.Model):
     order = models.PositiveIntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
     
-
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')

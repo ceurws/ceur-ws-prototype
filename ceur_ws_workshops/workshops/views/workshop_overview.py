@@ -55,14 +55,11 @@ class WorkshopOverview(View):
             workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST, files = request.FILES)
             editor_formset = EditorFormSet(request.POST, request.FILES, queryset=workshop.editors.all(), prefix="editor")
             paper_form = PaperFormset(request.POST, request.FILES, queryset = workshop.accepted_papers.all(), prefix="paper", agreement_not_required = True)
-            print('here')
             if all([workshop_form.is_valid(), editor_formset.is_valid()]):
-                print("then here")
                 workshop_form.save()
                 editor_formset.save()
             elif paper_form.is_valid():
-                # saved_paper_instance = paper_form.save(commit=False)
-                paper_form.save()
+                saved_paper_instance = paper_form.save()
 
                 papers_to_delete = request.POST.getlist('papers_to_delete') 
                 for paper_id in papers_to_delete:
@@ -72,33 +69,15 @@ class WorkshopOverview(View):
                     paper_order = json.loads(request.POST['paper_order'])
                     for idx, paper_id in enumerate(paper_order):
                         Paper.objects.filter(id=paper_id).update(order=idx + 1)
-
                 
-                # order_key = request.POST['paper_order']
-                # print(order_key)
-                # if order_key in request.POST:
-                #     saved_paper_instance.order = int(request.POST[order_key])
-                #     saved_paper_instance.save()
-                
-                # if request.POST['session'] != '': 
+                # if 'session' in request.POST: 
                 #     saved_session_instance = Session.objects.get(pk=request.POST['session'])
                 #     saved_paper_instance.session = saved_session_instance
                 # else:
                 #     saved_paper_instance.session = None
+                print(request.FILES)
             else: 
-                return self.render_workshop(request, edit_mode=True) 
-            
-            # existing_paper_ids = request.POST.getlist('paper_id')  
-            
-
-
-            # for paper_id in existing_paper_ids:
-            #     print(paper_form)
-               
-                    
-            #         print("SUCESSSS")
-            
-
+                print(paper_form.errors)
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
             return self.submit_workshop(request, secret_token)
