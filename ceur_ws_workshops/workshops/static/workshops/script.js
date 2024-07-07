@@ -60,3 +60,5 @@ function outFunc(tooltipId) {
     tooltip.innerHTML = "Copy to clipboard";
 }
 
+
+

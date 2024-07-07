@@ -262,12 +262,8 @@ class PaperForm(forms.ModelForm):
         if pages is not None:
             self.fields['pages'].initial = pages
 
-        if hide_agreement:
-            self.fields['agreement_file'].widget = forms.HiddenInput()
-            self.fields['agreement_file'].required = False
-
-        if self.agreement_not_required:
-            self.fields['agreement_file'].widget = forms.HiddenInput()
+        if hide_agreement or self.agreement_not_required:
+            # self.fields['agreement_file'].widget = forms.HiddenInput()
             self.fields['agreement_file'].required = False
             
         if hide_papers_overview: 
@@ -295,8 +291,7 @@ class PaperForm(forms.ModelForm):
                                             'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'
-            ,
-                                                     'required': 'True'}),
+            ,'required': 'True'}),
         }
 
         paper_title = forms.CharField(strip=True)
@@ -325,7 +320,6 @@ class PaperForm(forms.ModelForm):
         #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
         
         return cleaned_data
-
 
     # def _detect_signature_in_image(self, file_path):
     #     loader = Loader()
@@ -364,7 +358,6 @@ class CustomBaseModelFormSet(BaseModelFormSet):
     def _construct_form(self, i, **kwargs):
         kwargs['agreement_not_required'] = self.agreement_not_required
         return super()._construct_form(i, **kwargs)
-
 
 PaperFormset = modelformset_factory(
     Paper, 
