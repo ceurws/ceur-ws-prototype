@@ -38,13 +38,20 @@ pip install .
 ### Initial setup
 After updating the server, you need to create a new, empty database. To do this, run the following commands:
 
+```sh
 python3 manage.py makemigrations
 python3 manage.py migrate
+```
 
 ### Starting the server 
 After this the server can be run through the following command:
 
+```sh
 python3 manage.py runserver
-
+```
+Or
+```sh
+python3 manage.py runserver 0.0.0.0:80
+```
 
 
