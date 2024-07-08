@@ -15,7 +15,7 @@ class WorkshopOverview(View):
         return render(request, 'workshops/workshop_overview.html', context = {
             'papers' : workshop.accepted_papers.all().order_by('order'),#[paper for paper in workshop.accepted_papers.all()],
             'workshop' : workshop,
-            'workshop_form': WorkshopForm(instance=workshop),
+            'workshop_form': WorkshopForm(instance=workshop, fields_not_required =True),
             # 'paper_forms' : [PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all()],
             'paper_forms': PaperFormset(queryset = workshop.accepted_papers.all(), prefix = "paper",  agreement_not_required = True),
             'paper_forms_no_session' : [paper for paper in workshop.accepted_papers.all() if paper.session == None],
@@ -52,15 +52,35 @@ class WorkshopOverview(View):
             return self.render_workshop(request, edit_mode = True)
         
         elif request.POST["submit_button"] == "Confirm":
-            workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST, files = request.FILES)
+            workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST, files = request.FILES, fields_not_required = True)
             editor_formset = EditorFormSet(request.POST, request.FILES, queryset=workshop.editors.all(), prefix="editor")
             paper_form = PaperFormset(data = request.POST, files = request.FILES, queryset = workshop.accepted_papers.all(), prefix="paper", agreement_not_required = True)
-            print(request.POST)
             if all([workshop_form.is_valid(), editor_formset.is_valid()]):
                 workshop_form.save()
                 editor_formset.save()
             elif paper_form.is_valid():
-                saved_paper_instance = paper_form.save()
+                print("HERERE")
+                paper_form.save()
+
+                if request.POST.get(paper_form, None):
+                    for i, paper_form in enumerate(paper_form):
+                        saved_paper_instance = paper_form.save(commit = False)
+                        if request.POST.getlist('session')[i] != "":
+                            session = get_object_or_404(Session, pk=request.POST.getlist('session')[i])
+                            saved_paper_instance.session = session
+                        else:
+                            saved_paper_instance.session = None
+                        saved_paper_instance.save()
+                    
+                    # session_id = request.POST.get(f'id_paper-{i}-session')
+                    # print(session_id)
+                    # if 'session' in request.POST:
+                    #     session_id = request.POST.get('session')
+                    #     session = get_object_or_404(Session, pk=session_id)
+                    #     saved_paper_instance.session = session
+                    # else:
+                    #     saved_paper_instance.session = None
+                    # saved_paper_instance.save()
 
                 papers_to_delete = request.POST.getlist('papers_to_delete') 
                 for paper_id in papers_to_delete:
@@ -71,21 +91,17 @@ class WorkshopOverview(View):
                     if not isinstance(paper_order, int):
                         for idx, paper_id in enumerate(paper_order):
                             Paper.objects.filter(id=paper_id).update(order=idx + 1)
-                for i, form in enumerate(paper_form):
-                # Handle the session field
-                    if request.POST.getlist('session')[i] != "":
-                        session = get_object_or_404(Session, pk=request.POST.getlist('session')[i])
-                        form.instance.session = session
-                    paper_form.save()
-                    # if 'session' in request.POST:
-                    #     session_id = request.POST.get('session')
-                    #     if session_id:
-                    #         saved_session_instance = Session.objects.get(pk=session_id)
-                    #         saved_paper_instance.session = saved_session_instance
-                    #         saved_paper_instance.save()
-                    #     else:
-                    #         saved_paper_instance.session = None
-                    #         saved_paper_instance.save()
+
+                
+                # if 'session' in request.POST:
+                #     session_id = request.POST.get('session')
+                #     if session_id:
+                #         saved_session_instance = Session.objects.get(pk=session_id)
+                #         saved_paper_instance.session = saved_session_instance
+                #         saved_paper_instance.save()
+                #     else:
+                #         saved_paper_instance.session = None
+                #         saved_paper_instance.save()
                 
             if not workshop_form.is_valid():
                 print("Workshop form errors:", workshop_form.errors)

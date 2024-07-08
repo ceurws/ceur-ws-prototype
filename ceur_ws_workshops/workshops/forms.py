@@ -126,6 +126,7 @@ class WorkshopForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         # loads language options and returns proper ISO
         is_preface_present = kwargs.pop('is_preface_present', False)
+        fields_not_required = kwargs.pop('fields_not_required', False)
         super(WorkshopForm, self).__init__(*args, **kwargs)
         json_file_path = os.path.join(os.path.dirname(__file__), 'static', 'workshops', 'languages.json')
         
@@ -155,6 +156,20 @@ class WorkshopForm(forms.ModelForm):
         else:
             self.fields['has_preface'].label = 'Check this box if the workshop has a preface'
 
+        if fields_not_required: 
+            self.fields['workshop_short_title'].required = False
+            self.fields['workshop_full_title'].required = False
+            self.fields['workshop_acronym'].required = False
+            self.fields['workshop_description'].required = False
+            self.fields['workshop_country'].required = False
+            self.fields['workshop_city'].required = False
+            self.fields['year_final_papers'].required = False
+            self.fields['workshop_begin_date'].required = False
+            self.fields['workshop_end_date'].required = False
+            self.fields['volume_owner'].required = False
+            self.fields['volume_owner_email'].required = False
+            self.fields['total_submitted_papers'].required = False
+            self.fields['total_accepted_papers'].required = False
 
     def is_valid(self):
         valid = super().is_valid()
@@ -166,9 +181,10 @@ class WorkshopForm(forms.ModelForm):
         total_reg_acc_papers = self.cleaned_data.get('total_reg_acc_papers', 0)  
         total_short_acc_papers = self.cleaned_data.get('total_short_acc_papers', 0)  
     
-        if total_accepted_papers > total_submitted_papers:
-            self.add_error('total_accepted_papers', "The number of accepted papers cannot exceed the number of submitted papers.")
-            return False
+        if total_accepted_papers is not None and total_submitted_papers is not None: 
+            if total_accepted_papers > total_submitted_papers:
+                self.add_error('total_accepted_papers', "The number of accepted papers cannot exceed the number of submitted papers.")
+                return False
 
         if total_reg_acc_papers is not None and total_short_acc_papers is not None:
             if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
@@ -290,8 +306,8 @@ class PaperForm(forms.ModelForm):
             'pages': forms.TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'
-            ,'required': 'True'}),
+            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
+            # 'required': 'True'}),
         }
 
         paper_title = forms.CharField(strip=True)
