@@ -146,7 +146,7 @@ class AuthorUpload(View):
         if bool(request.FILES.get('uploaded_file', False)) == True:
         # if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:
             author_formset = get_author_formset()(queryset=Author.objects.none(), data = request.POST, prefix="author")
-            paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop(), agreement_file = True)
+            paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop(), agreement_file = True, clean_enabled = True)
 
 =======
         if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:
@@ -160,7 +160,7 @@ class AuthorUpload(View):
 
             paper_instance = Paper.objects.filter(secret_token=request.POST.get('secret_token'), workshop = self.get_workshop()).first()
 
-            paper_form = PaperForm(request.POST, file_uploaded=True, workshop=self.get_workshop(), instance = paper_instance, agreement_file = True)
+            paper_form = PaperForm(request.POST, file_uploaded=True, workshop=self.get_workshop(), instance = paper_instance, agreement_file = True, clean_enabled = True)
 
         if 'confirm_button' in request.POST:
             return self.submit_paper(request, author_formset, paper_form)

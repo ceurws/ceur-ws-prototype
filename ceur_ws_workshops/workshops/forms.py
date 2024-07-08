@@ -1,7 +1,7 @@
 
 from .models import Workshop, Editor, Paper, Author, Session
 from django import forms
-from django.forms import modelformset_factory, TextInput, FileInput, Textarea, CheckboxInput, URLInput
+from django.forms import modelformset_factory, TextInput, FileInput, Textarea, CheckboxInput, URLInput, BaseModelFormSet
 from django_countries.widgets import CountrySelectWidget
 import os, json
 from django.core.exceptions import ValidationError
@@ -126,6 +126,7 @@ class WorkshopForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         # loads language options and returns proper ISO
         is_preface_present = kwargs.pop('is_preface_present', False)
+        fields_not_required = kwargs.pop('fields_not_required', False)
         super(WorkshopForm, self).__init__(*args, **kwargs)
         json_file_path = os.path.join(os.path.dirname(__file__), 'static', 'workshops', 'languages.json')
         
@@ -155,6 +156,20 @@ class WorkshopForm(forms.ModelForm):
         else:
             self.fields['has_preface'].label = 'Check this box if the workshop has a preface'
 
+        if fields_not_required: 
+            self.fields['workshop_short_title'].required = False
+            self.fields['workshop_full_title'].required = False
+            self.fields['workshop_acronym'].required = False
+            self.fields['workshop_description'].required = False
+            self.fields['workshop_country'].required = False
+            self.fields['workshop_city'].required = False
+            self.fields['year_final_papers'].required = False
+            self.fields['workshop_begin_date'].required = False
+            self.fields['workshop_end_date'].required = False
+            self.fields['volume_owner'].required = False
+            self.fields['volume_owner_email'].required = False
+            self.fields['total_submitted_papers'].required = False
+            self.fields['total_accepted_papers'].required = False
 
     def is_valid(self):
         valid = super().is_valid()
@@ -166,9 +181,10 @@ class WorkshopForm(forms.ModelForm):
         total_reg_acc_papers = self.cleaned_data.get('total_reg_acc_papers', 0)  
         total_short_acc_papers = self.cleaned_data.get('total_short_acc_papers', 0)  
     
-        if total_accepted_papers > total_submitted_papers:
-            self.add_error('total_accepted_papers', "The number of accepted papers cannot exceed the number of submitted papers.")
-            return False
+        if total_accepted_papers is not None and total_submitted_papers is not None: 
+            if total_accepted_papers > total_submitted_papers:
+                self.add_error('total_accepted_papers', "The number of accepted papers cannot exceed the number of submitted papers.")
+                return False
 
         if total_reg_acc_papers is not None and total_short_acc_papers is not None:
             if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
@@ -238,7 +254,6 @@ class WorkshopForm(forms.ModelForm):
                 break
         return is_signed
 
-
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         file_uploaded = kwargs.pop('file_uploaded', False)
@@ -249,6 +264,8 @@ class PaperForm(forms.ModelForm):
         hide_has_third_party_material = kwargs.pop('hide_has_third_party_material', True)
         agreement_file = kwargs.pop('agreement_file', False)
         hide_papers_overview = kwargs.pop('hide_papers_overview', False)
+        self.clean_enabled = kwargs.pop('clean_enabled', False)
+        self.agreement_not_required = kwargs.pop('agreement_not_required', False)
         super(PaperForm, self).__init__(*args, **kwargs)
 
         if file_uploaded:
@@ -267,16 +284,16 @@ class PaperForm(forms.ModelForm):
         if pages is not None:
             self.fields['pages'].initial = pages
 
-        if hide_agreement:
-            self.fields['agreement_file'].widget = forms.HiddenInput()
+        if hide_agreement or self.agreement_not_required:
+            # self.fields['agreement_file'].widget = forms.HiddenInput()
             self.fields['agreement_file'].required = False
-
+            
         if hide_papers_overview: 
             self.fields['agreement_file'].widget = forms.HiddenInput()
             self.fields['uploaded_file'].widget = forms.HiddenInput()
+
         if hide_has_third_party_material:
             self.fields['has_third_party_material'].widget = forms.HiddenInput()
-            
 
         if not agreement_file:
             self.fields['agreement_file'].label = 'Please Upload the hand signed agreement file'
@@ -296,23 +313,20 @@ class PaperForm(forms.ModelForm):
                                             'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
-            # ,
-            #                                          'required': 'True'}),
+            # 'required': 'True'}),
         }
-
-        ordering = ['sort_order']
 
         paper_title = forms.CharField(strip=True)
     def clean(self):
         cleaned_data = super().clean()
         
-
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
 
-        pdfReader = PyPDF2.PdfReader(uploaded_file)
-        num_pages = len(pdfReader.pages)
-        cleaned_data['pages'] = num_pages
+        if self.clean_enabled:
+            pdfReader = PyPDF2.PdfReader(uploaded_file)
+            num_pages = len(pdfReader.pages)
+            cleaned_data['pages'] = num_pages
 
         # if uploaded_file and agreement_file and self.workshop:
         # if agreement_file: 
@@ -328,7 +342,6 @@ class PaperForm(forms.ModelForm):
         #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
         
         return cleaned_data
-
 
     # def _detect_signature_in_image(self, file_path):
     #     loader = Loader()
@@ -349,8 +362,31 @@ class PaperForm(forms.ModelForm):
     #             break
     #     return is_signed
 
+class CustomBaseModelFormSet(BaseModelFormSet):
+    def __init__(self, *args, **kwargs):
+        self.agreement_not_required = kwargs.pop('agreement_not_required', False)
+        super().__init__(*args, **kwargs)
 
+    def __iter__(self):
+        """Yields the forms in the order they should be rendered"""
+        sorted_forms = sorted(self.forms, key=lambda form: form.instance.order if form.instance.pk else 0)
+        return iter(sorted_forms)
+
+    def __getitem__(self, index):
+        """Returns the form at the given index, based on the rendering order"""
+        sorted_forms = sorted(self.forms, key=lambda form: form.instance.order if form.instance.pk else 0)
+        return sorted_forms[index]
     
+    def _construct_form(self, i, **kwargs):
+        kwargs['agreement_not_required'] = self.agreement_not_required
+        return super()._construct_form(i, **kwargs)
+
+PaperFormset = modelformset_factory(
+    Paper, 
+    form=PaperForm, 
+    formset=CustomBaseModelFormSet,
+    extra=0,
+)
 # function to generate formsets, so the extra parameter can be set dynamically in case of initial data.
 def get_author_formset(extra=0):
     return modelformset_factory(
@@ -373,11 +409,6 @@ def get_author_formset(extra=0):
             'author_uni_url': "University URL",
         },
     )
-
-# def get_paper_formset(extra = 0):
-#     return modelformset_factory(
-
-#     )
 
 class EditorForm(forms.ModelForm):
     

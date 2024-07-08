@@ -1,11 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from ..models import Workshop, Paper, Author
-<<<<<<< HEAD
 from ..forms import get_author_formset, PaperForm
 import PyPDF2, os
-=======
-from ..forms import AuthorFormSet, PaperForm
->>>>>>> main
+from .util import *
 
 
 def _get_agreement_filename(paper_instance, original_filename):
@@ -13,6 +10,7 @@ def _get_agreement_filename(paper_instance, original_filename):
         extension = os.path.splitext(original_filename)[1]
         new_filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
         return new_filename
+
 
 def edit_author_post_view(request, paper_id, author_upload_secret_token):
     workshop = get_object_or_404(Workshop, author_upload_secret_token=author_upload_secret_token)
@@ -44,7 +42,7 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
                 paper_instance.pages = len(pdfReader.pages)
             if request.FILES.get('agreement_file', False):
                 paper_instance.agreement_file = request.FILES['agreement_file']
-                paper_instance.agreement_file.name = _get_agreement_filename(paper_instance, paper_instance.agreement_file.name)
+                paper_instance.agreement_file.name = get_agreement_filename(paper_instance, paper_instance.agreement_file.name)
 
             paper_instance.save()
 

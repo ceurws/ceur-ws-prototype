@@ -44,10 +44,7 @@ class Workshop(models.Model):
         filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
         workshop_id = instance.id
         return f"agreement/Vol-{workshop_id}/{filename}"
-<<<<<<< HEAD
-=======
     
->>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
     def workshop_preface_file_path(instance, filename):
         acronym = instance.workshop_acronym
         filename = f"WORKSHOP-PREFACE-{acronym}.pdf"
@@ -120,8 +117,9 @@ class Paper(models.Model):
     uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True, max_length=500)
     agreement_file = models.FileField(upload_to=agreement_file_path, blank = True, max_length=500)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    order = models.IntegerField(default=0)
+    order = models.PositiveIntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
+    
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')
@@ -131,10 +129,6 @@ class Paper(models.Model):
         return self.paper_title
     
     class Meta:
-        ordering = [Lower('paper_title')]
-<<<<<<< HEAD
-=======
-
->>>>>>> e23aa6a1ff570e070d058ae793ce48d960267910
+        ordering = ['order']
 
 
