@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from ..models import Workshop, Paper, Session, Editor
+from ..models import *
 from django.urls import reverse
 from django.views import View
 from django.contrib import messages
@@ -18,6 +18,7 @@ class WorkshopOverview(View):
             'workshop_form': WorkshopForm(instance=workshop, fields_not_required =True),
             # 'paper_forms' : [PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all()],
             'paper_forms': PaperFormset(queryset = workshop.accepted_papers.all(), prefix = "paper",  agreement_not_required = True),
+            'prefaces': workshop.prefaces.all(),
             'paper_forms_no_session' : [paper for paper in workshop.accepted_papers.all() if paper.session == None],
             'session_title_list' : [session_object.session_title for session_object in workshop.sessions.all()],
             'editor_forms': EditorFormSet(queryset=workshop.editors.all(), prefix="editor"),

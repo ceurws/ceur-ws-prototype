@@ -15,6 +15,7 @@
 
 <body>
     <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
+    <p style="text-align: center;">Workshop id: <i>{{workshop.id}}</i></p>
     <style>
         .delete_object {
             color: red;
@@ -346,7 +347,6 @@
             </div>
             <br><br>
         </fieldset>
-
         <fieldset class="inner_fieldset">
             <legend>Author Upload URL</legend>
             <i>Share the author upload link with each author that wants to upload a paper. Submissions will
@@ -398,10 +398,10 @@
         <p><strong>Editor agreement:</strong> <a href="{{workshop.editor_agreement.url}}">
                 {{ workshop.editor_agreement }}</a></p>
         {% endif %}
-        {% if workshop.preface %}
-        <p><strong>Preface:</strong> <a href="{{workshop.preface.url}}">
-                {{ workshop.preface }}</a></p>
-        {% endif %}
+        {% for preface in prefaces %}
+        <p><strong>Preface:</strong> <a href="{{preface.preface.url}}">
+                {{ preface.preface.name}}</a></p>
+        {%endfor%}
 
     </fieldset>
 

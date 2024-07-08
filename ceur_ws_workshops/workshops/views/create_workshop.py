@@ -1,9 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from ..models import Workshop, Paper, Editor, Author, Session
+from ..models import Workshop, Paper, Editor, Author, Session, Preface
 from django.urls import reverse
 from django.views import View
 
-from ..forms import WorkshopForm, EditorFormSet, PaperForm, SessionFormSet, get_author_formset
+from ..forms import WorkshopForm, EditorFormSet, PaperForm, SessionFormSet, get_author_formset, PrefaceFormset
 from urllib.parse import urlparse, parse_qs
 import io
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -100,21 +100,31 @@ class CreateWorkshop(View):
                 except:
                     author_form_list = ['' for _ in range(len(paper_form_list))]
                     pass
-
                         
         paper_author_combinations = zip(paper_form_list, author_form_list)             
 
         return paper_author_combinations
     
     def get(self, request):
-        form = WorkshopForm(is_preface_present = True)
+        # form = WorkshopForm()
         editor_form = EditorFormSet(queryset=Editor.objects.none(), 
                                     prefix='editor')
         session_form = SessionFormSet(queryset=Session.objects.none(), 
                                       prefix='session')
+        preface_formset = PrefaceFormset(queryset=Preface.objects.none(),
+                                        prefix = 'preface')
+        workshop_id = request.GET.get('workshop_id')
+        workshop_instance = self.get_workshop(workshop_id) if workshop_id else None
+
+        form = WorkshopForm(instance=workshop_instance)
+        # editor_form = EditorFormSet(queryset=workshop_instance.editors.all(), prefix='editor')
+        # session_form = SessionFormSet(queryset=workshop_instance.sessions.all(), prefix='session')
+        # preface_formset = PrefaceFormset(queryset=workshop_instance.prefaces.all(), prefix='preface')
+
         context = {'form':form, 
                    'editor_form':editor_form, 
-                   'session_form':session_form}
+                   'session_form':session_form, 
+                   'preface_formset': preface_formset}
         return render(request, "workshops/create_workshop.html", context)
     
 
@@ -127,17 +137,23 @@ class CreateWorkshop(View):
             session_formset = SessionFormSet(queryset=Session.objects.none(), data=request.POST, prefix="session")
 
             workshop_form = WorkshopForm(data=request.POST, files=request.FILES, instance=workshop_instance)
-
+            preface_formset = PrefaceFormset(data = request.POST, files = request.FILES, instance = workshop_instance, prefix = "preface")
             # Once forms have been bound (either using old or new editor agreement), we validate and save to the database.
-            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
+            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid(), preface_formset.is_valid]):
 
                 workshop = workshop_form.save()  
 
                 editor_instances = editor_formset.save()
                 session_instances = session_formset.save()
+
+                prefaces = preface_formset.save(commit=False)
+                for preface in prefaces:
+                    preface.workshop = workshop
+                    preface.save()
+                    
                 workshop.editors.add(*editor_instances)
                 workshop.sessions.add(*session_instances)
-
+                
                 # if we have a linked open review page we extract the openreview papers and display them on a page where they can be reviewed
                 if workshop.openreview_url:
                     paper_author_combinations = self.add_papers_openreview(workshop)
@@ -155,12 +171,13 @@ class CreateWorkshop(View):
                 if workshop_form.instance.editor_agreement.url:
                     workshop_form.instance.editor_agreement = None
 
-                if workshop_form.instance.preface.url:
-                    workshop_form.instance.preface = None
+                if preface_formset.instance.preface.url:
+                    preface_formset.instance.preface = None
                 context = {
                     'form': workshop_form,
                     'editor_form': editor_formset,
-                    'session_form': session_formset
+                    'session_form': session_formset,
+                    'preface_formset': preface_formset
                 }
                 return render(request, self.edit_path, context)
 
@@ -171,27 +188,34 @@ class CreateWorkshop(View):
                                            data = request.POST, 
                                            prefix="editor")
             session_formset = SessionFormSet(queryset=Session.objects.none(),data = request.POST, prefix="session")
+            preface_formset = PrefaceFormset(data = request.POST, files = request.FILES, prefix = "preface")
             # before rendering we check if the bound forms are valid and we save a workshop instance so that the editor agreement can be extracted in a later stage
-            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
+            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid(), preface_formset.is_valid()]):
 
                 workshop_instance = workshop_form.save()  
                 workshop_instance.openreview_url = request.POST['openreview_url']
                 workshop_instance.save()
-
-
+                
                 bound_workshop_form = WorkshopForm(instance = workshop_instance)
+                
+                prefaces = preface_formset.save(commit=False)
+                for preface in prefaces:
+                    preface.workshop = workshop_instance
+                    preface.save()
 
                 context = {
                     'form': bound_workshop_form,
                     'editor_form': editor_formset,
                     'session_form': session_formset,
-                    'workshop_instance': workshop_instance
+                    'workshop_instance': workshop_instance,
+                    'preface_formset': preface_formset
                 }
                 return render(request, self.edit_path, context)
             else:
                 context = {
                     'form': workshop_form,
                     'editor_form': editor_formset,
-                    'session_form': session_formset
+                    'session_form': session_formset,
+                    'preface_formset': preface_formset
                 }
                 return render(request, self.edit_path, context)

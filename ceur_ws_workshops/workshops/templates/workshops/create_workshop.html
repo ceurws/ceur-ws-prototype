@@ -3,6 +3,22 @@
 {% block content %}
 {% load crispy_forms_tags %}
 
+<style>
+  .close-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1.5rem; /* Adjust the size as needed */
+  cursor: pointer;
+  color: #000; /* Adjust the color as needed */
+}
+
+.close-button:hover {
+  color: #f00; /* Optional: Change color on hover */
+}
+</style>
+
 <form method="post" id="form-container" enctype="multipart/form-data">
   <h1 class="header-title">Create Workshop Volume</h1>
   {% csrf_token %}
@@ -19,9 +35,22 @@
 
     {% crispy form %}
     <input type="hidden" name="openreview_url" value="{{ openreview_url }}">
-
     <input type="hidden" name="workshop_id" value="{{ form.instance.id }}">
   </fieldset>
+  <fieldset id="preface-fieldset">
+    <legend>Prefaces</legend>
+    {{ preface_formset.management_form }}
+    <div id="preface-form">
+        {% for form in preface_formset %}
+            <div class="preface-form" style="position: relative;">
+                {{ form.as_p }}
+                <input type="button" value = "&times;" class="delete-preface close-button" style="position: absolute; top: 0; right: 0;">
+                {{ form.DELETE }} 
+            </div>
+        {% endfor %}
+    </div>
+    <input type="button" value = "Add Preface" class="button-13"  id="add_preface">
+</fieldset>
 
   <fieldset id="session_fieldset">
     <legend>Session</legend>
@@ -31,6 +60,8 @@
     <div class="session-form" id="session-form">
       {% for form in session_form %}
         {{ form.as_p }}
+        <input type="button" value = "&times;" class="delete-session close-button" style="position: absolute; top: 0; right: 0;">
+        {{ form.DELETE }} 
         <br>
       {% endfor %}
     </div>
@@ -45,6 +76,8 @@
     <div class="editor-form" id="editor-form">
       {% for editor in editor_form %}
         {{ editor|crispy }}
+        <input type="button" value = "&times;" class="delete-session close-button" style="position: absolute; top: 0; right: 0;">
+        {{ form.DELETE }} 
         <br>
       {% endfor %}
     </div>
@@ -56,18 +89,32 @@
   </div>
 </form>
 
+<div id="empty_preface_form" style="display:none">
+  <div class="preface-form" style="position: relative;">
+      {{ preface_formset.empty_form.as_p }}
+      <input type="button" value = "&times;" class="delete-preface close-button" style="position: absolute; top: 0; right: 0;">
+      {{ preface_formset.empty_form.DELETE }} 
+      <hr>
+  </div>
+
+</div>
 <div id="empty_editor_form" style="display:none">
-  <table class='no_error'>
+  <div class="editor-form" style="position: relative;">
     {{ editor_form.empty_form|crispy }}
+    <input type="button" value = "&times;" class="delete-editor close-button" style="position: absolute; top: 0; right: 0;">
+    {{ editor_form.empty_form.DELETE }} 
     <br>
-  </table>
-  <hr>
+    <hr>
+  </div>
 </div>
 <div id="empty_session_form" style="display:none">
-  <table class='no_error'>
+  <div class="session-form" style="position: relative;">
     {{ session_form.empty_form }}
+    <input type="button" value = "&times;" class="delete-session close-button" style="position: absolute; top: 0; right: 0;">
+    {{ session_form.empty_form.DELETE }} 
     <br>
-  </table>
+    <hr>
+  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

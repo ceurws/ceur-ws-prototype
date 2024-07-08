@@ -1,7 +1,7 @@
 
-from .models import Workshop, Editor, Paper, Author, Session
+from .models import *
 from django import forms
-from django.forms import modelformset_factory, TextInput, FileInput, Textarea, CheckboxInput, URLInput, BaseModelFormSet
+from django.forms import modelformset_factory, inlineformset_factory, TextInput, FileInput, Textarea, CheckboxInput, URLInput, BaseModelFormSet
 from django_countries.widgets import CountrySelectWidget
 import os, json
 from django.core.exceptions import ValidationError
@@ -51,7 +51,7 @@ class WorkshopForm(forms.ModelForm):
                 'workshop_language_iso', 'workshop_description', 'workshop_country',  'workshop_city', 'year_final_papers', 'workshop_colocated',
                 'workshop_begin_date', 'workshop_end_date', 'year_final_papers', 'volume_owner',
                 'volume_owner_email', 'total_submitted_papers', 'total_accepted_papers', 'total_reg_acc_papers', 'total_short_acc_papers', 'editor_agreement',
-                'editor_agreement_signed', 'has_preface', 'preface']
+                'editor_agreement_signed']
         
         widgets = {
             'workshop_short_title': TextInput(attrs={'size': 100, 
@@ -112,9 +112,8 @@ class WorkshopForm(forms.ModelForm):
             'editor_agreement': FileInput(attrs={'accept': '.pdf', 
                                                  'placeholder': 'Upload the agreement file'}),                
             'editor_agreement_signed': CheckboxInput(attrs={'required': True}),
-            'has_preface': CheckboxInput(attrs={'label': 'Check this box if the workshop has a preface'}),
-            'preface': FileInput(attrs={'accept': '.pdf',
-                                        'placeholder': 'Upload the preface of the workshop'}),
+            # 'preface': FileInput(attrs={'accept': '.pdf',
+            #                             'placeholder': 'Upload the preface of the workshop'}),
        }
         
         labels = {
@@ -125,7 +124,6 @@ class WorkshopForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         # loads language options and returns proper ISO
-        is_preface_present = kwargs.pop('is_preface_present', False)
         fields_not_required = kwargs.pop('fields_not_required', False)
         super(WorkshopForm, self).__init__(*args, **kwargs)
         json_file_path = os.path.join(os.path.dirname(__file__), 'static', 'workshops', 'languages.json')
@@ -147,14 +145,8 @@ class WorkshopForm(forms.ModelForm):
         self.fields['volume_owner_email'] = forms.EmailField(initial=email, required=True, max_length=200, label='Volume owner email', help_text='<br><i>Provide the email of the volume owner</i>')
         self.fields['volume_owner_email'].widget.attrs['placeholder'] = 'Enter the email of the volume owner'
         self.fields['volume_owner_email'].widget.attrs['size'] = 100
-
         self.fields['workshop_colocated'].help_text = "<i>Please provide the acronym (acronym-YYYY) of the conference with which this workshop was colocated; if the workshop was not colocated with any conference, leave this field empty.</i>"
         self.fields['workshop_acronym'].help_text ='<i>Please provide the acronym of the workshop plus YYYY (year of the workshop in exactly 4 digits, e.g. 2012). Between the acronym and the year a \'-\' should be placed.</i>'
-
-        if not is_preface_present:
-            self.fields['has_preface'].widget = forms.HiddenInput()
-        else:
-            self.fields['has_preface'].label = 'Check this box if the workshop has a preface'
 
         if fields_not_required: 
             self.fields['workshop_short_title'].required = False
@@ -195,24 +187,6 @@ class WorkshopForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
 
-
-
-        # total_submitted_papers = cleaned_data.get('total_submitted_papers')
-        # total_accepted_papers = cleaned_data.get('total_accepted_papers')
-        # total_reg_acc_papers = cleaned_data.get('total_reg_acc_papers', 0)  
-        # total_short_acc_papers = cleaned_data.get('total_short_acc_papers', 0)  
-        # editor_agreement = cleaned_data.get('editor_agreement')
-
-
-        # if total_accepted_papers > total_submitted_papers:
-        #     raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
-
-
-        # if total_reg_acc_papers is not None and total_short_acc_papers is not None:
-        #     if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
-        #         raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
-            
-
         # if not editor_agreement:
         #     raise ValidationError("Please upload the agreement file.")
         # if editor_agreement:
@@ -227,26 +201,6 @@ class WorkshopForm(forms.ModelForm):
     #             raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
 
         return cleaned_data
-
-    
-    # def _detect_signature_in_image(self, file_path):
-    #     loader = Loader()
-    #     extractor = Extractor()
-    #     cropper = Cropper(border_ratio=0)
-    #     judger = Judger()
-
-    #     masks = loader.get_masks(file_path)
-    #     is_signed = False
-    #     for mask in masks:
-    #         labeled_mask = extractor.extract(mask)
-    #         results = cropper.run(labeled_mask)
-    #         for result in results.values():
-    #             is_signed = judger.judge(result["cropped_mask"])
-    #             if is_signed:
-    #                 break
-    #         if is_signed:
-    #             break
-    #     return is_signed
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -336,26 +290,6 @@ class PaperForm(forms.ModelForm):
         #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
         
         return cleaned_data
-
-    # def _detect_signature_in_image(self, file_path):
-    #     loader = Loader()
-    #     extractor = Extractor()
-    #     cropper = Cropper(border_ratio=0)
-    #     judger = Judger()
-
-    #     masks = loader.get_masks(file_path)
-    #     is_signed = False
-    #     for mask in masks:
-    #         labeled_mask = extractor.extract(mask)
-    #         results = cropper.run(labeled_mask)
-    #         for result in results.values():
-    #             is_signed = judger.judge(result["cropped_mask"])
-    #             if is_signed:
-    #                 break
-    #         if is_signed:
-    #             break
-    #     return is_signed
-
 class CustomBaseModelFormSet(BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         self.agreement_not_required = kwargs.pop('agreement_not_required', False)
@@ -441,3 +375,10 @@ SessionFormSet = modelformset_factory(
 
     }
 )
+
+class WorkshopPrefaceForm(forms.ModelForm):
+    class Meta:
+        model = Preface
+        fields = ['preface']
+
+PrefaceFormset = inlineformset_factory(Workshop, Preface, form=WorkshopPrefaceForm, extra=0, can_delete=False)
