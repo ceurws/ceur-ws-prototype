@@ -1,7 +1,7 @@
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
-{% load crispy_forms_tags %}
+{%load crispy_forms_tags %} 
 
 <style>
   .close-button {
@@ -36,6 +36,7 @@
     {% crispy form %}
     <input type="hidden" name="openreview_url" value="{{ openreview_url }}">
     <input type="hidden" name="workshop_id" value="{{ form.instance.id }}">
+
   </fieldset>
   <fieldset id="preface-fieldset">
     <legend>Prefaces</legend>
@@ -52,10 +53,13 @@
     <input type="button" value = "Add Preface" class="button-13"  id="add_preface">
 </fieldset>
 
+
   <fieldset id="session_fieldset">
     <legend>Session</legend>
-    <i>If the workshop has different sessions, please provide the titles of these sessions in this section. If no splits exist, please leave blank.</i>
-    <br><br>
+    <i> If the workshop has different sessions, please provide the titles of these sessions in this section. If no
+      splits exist, please leave blank.</i>
+    <br>
+    <br>
     {{ session_form.management_form }}
     <div class="session-form" id="session-form">
       {% for form in session_form %}
@@ -70,8 +74,10 @@
 
   <fieldset id="editor-fieldset">
     <legend>Editors</legend>
-    <i>Please provide details on the editors in this section. Also provide your own details if you are also an editor.</i>
-    <br><br>
+    <i> Please provide details on the editors in this section. Also provide your own details if you are also an editor.
+    </i>
+    <br>
+    <br>
     {{ editor_form.management_form }}
     <div class="editor-form" id="editor-form">
       {% for editor in editor_form %}
@@ -116,6 +122,7 @@
     <hr>
   </div>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{% static 'workshops/script.js' %}"></script>

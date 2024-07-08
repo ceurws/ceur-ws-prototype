@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 $(document).ready(function() {
   $('.invalid-feedback').hide();
 
   // Show errors only on submit
   $('#form-container').on('submit', function () {
     $('.invalid-feedback').show();
+=======
+$(document).ready(function () {
+    $('.invalid-feedback').hide();
+
+    $('#form-container').on('submit', function () {
+      $('.invalid-feedback').show();
+    });
+>>>>>>> 9c8e59285e07e38e91415292a1eb908be201d3bb
   });
   function addForm(buttonId, totalFormsId, formContainerId, emptyFormHtmlId) {
       $(buttonId).click(function () {

@@ -10,16 +10,18 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from PyPDF2 import PdfReader
 from django.forms import formset_factory
 
+
+
+
 class CreateWorkshop(View):
     success_path = "workshops/workshop_edit_success.html"
     overview_path = "workshops/workshop_overview.html"
     edit_path = "workshops/edit_workshop.html"
-
-    openreview_url = None
     
     def get_workshop(self, workshop_id):
         return get_object_or_404(Workshop, id = workshop_id)
     
+
     def find_ws_id(self, url):
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.query)
@@ -105,6 +107,7 @@ class CreateWorkshop(View):
 
         return paper_author_combinations
     
+
     def get(self, request):
         # form = WorkshopForm()
         editor_form = EditorFormSet(queryset=Editor.objects.none(), 
@@ -164,6 +167,7 @@ class CreateWorkshop(View):
                     return render(request, 'workshops/open_review_editpage.html', context)
                     
                 return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
+
 
             else:
                 # if the forms are not valid we return the form with the errors
