@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-type" content="text/html;charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="../ceur-ws.css">
+    <title>CEUR-WS.org/Vol-{{ data.XXX }} - Workshop on {{ data.CEURVOLTITLE }} {{ data.YYYY }}</title>
+</head>
+<body>
+
+<table style="border: 0; border-spacing: 0; border-collapse: collapse; width: 95%">
+    <tbody>
+        <tr>
+            <td style="text-align: left; vertical-align: middle">
+                <a href="https://ceur-ws.org/"><div id="CEURWSLOGO"></div></a>
+            </td>
+            <td style="text-align: right; vertical-align: middle">
+                <div style="float:left" id="CEURCCBY"></div>
+                <span class="CEURVOLNR">Vol-{{ data.XXX }}</span> <br>
+                <span class="CEURURN">urn:nbn:de:0074-{{ data.XXX }}-C</span>
+                <p class="unobtrusive copyright" style="text-align: justify">
+                    Copyright &copy; {{ data.JJJJ }} for the individual papers by the papers' authors. 
+                    Copyright &copy; <span class="CEURPUBYEAR">{{ data.JJJJ }}</span> for the volume
+                    as a collection by its editors. This volume and its papers are published under the
+                    Creative Commons License Attribution 4.0 International
+                    <a href="https://creativecommons.org/licenses/by/4.0/"><span class="CEURLIC">CC BY 4.0</span></a>.
+                </p>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<hr>
+
+<h1>
+    <a href="https://www.workshop-website.org/loc">
+        <span class="CEURVOLACRONYM">{{ data.NNNN }} {{ data.YYYY }}</span>
+    </a><br>
+    <span class="CEURVOLTITLE">{{ data.CEURVOLTITLE }} {{ data.YYYY }}</span>
+</h1>
+<br>
+
+<h3>
+    <span class="CEURFULLTITLE">{{ data.CEURFULLTITLE }}</span><br>
+    co-located with <span class="CEURCOLOCATED">{{ data.CEURCOLOCATED }}</span><br>
+</h3>
+<h3><span class="CEURLOCTIME">{{ data.CEURLANG }}</span>, {{ data.CEURLANG }}, {{ data.CEURLANG }} {{ data.YYYY }}</h3>
+
+<br>
+<b> Edited by </b>
+<p></p>
+<h3>
+    {% for editor in data.CEUREDITORS %}
+        <a href="{{ editor.CEURINSTITUTIONURL }}"><span class="CEURVOLEDITOR">{{ editor.CEURVOLEDITOR }}</span></a><br>
+    {% endfor %}
+</h3>
+
+{% for editor in data.CEUREDITORS %}
+    <a href="{{ editor.CEURINSTITUTIONURL }}">{{ editor.CEURINSTITUTION }}</a>,
+    {{ editor.CEURINSTITUTION }}<br>
+{% endfor %}
+
+<hr>
+
+<br><br><br>
+
+<div class="CEURTOC">
+    <h2> Table of Contents </h2>
+
+    <ul>
+        <li id="preface">
+            <a href="preface.pdf">Preface</a><br>
+            Summary: There were <span class="CEURSUBMITTEDPAPERS">{{ data.CEURSUBMITTEDPAPERS }}</span> papers submitted for peer-review to this workshop. Out of these, 
+            <span class="CEURACCEPTEDPAPERS">{{ data.CEURACCEPTEDPAPERS }}</span> papers were accepted for this volume, 
+            <span class="CEURACCEPTEDREGULARPAPERS">{{ data.CEURACCEPTEDREGULARPAPERS }}</span> as regular papers and
+            <span class="CEURACCEPTEDSHORTPAPERS">{{ data.CEURACCEPTEDSHORTPAPERS }}</span> as short papers.
+        </li>
+    </ul>
+    <br>
+
+    {% for session in data.CEURSESSIONS %}
+        <h3><span class="CEURSESSION">{{ session.session_title }}</span></h3>
+        <ul>
+            {% for paper in session.papers %}
+                <li id="{{ paper.id }}">
+                    <a href="{{ paper.uploaded_file_url }}">
+                        <span class="CEURTITLE">{{ paper.CEURTITLE }}</span>
+                    </a>
+                    <span class="CEURPAGES">{{ paper.CEURPAGES }}</span><br>
+                    {% for author in paper.CEURAUTHOR %}
+                        <span class="CEURAUTHOR">{{ author }}</span>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+</div>
+
+<hr>
+<span class="unobtrusive">
+    {{ data.CEURPUBDATE }}: submitted by Peter Coeditor, 
+    metadata incl. bibliographic data published under <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons CC0</a><br>
+    <span class="CEURPUBDATE">{{ data.CEURPUBDATE }}</span>: published on CEUR Workshop Proceedings (CEUR-WS.org, ISSN 1613-0073)
+    <!-- dynamically make the volume number here -->
+    |<a href="https://validator.w3.org/nu/?doc=https%3A%2F%2Fceur-ws.org%2FVol-XXX%2F">valid HTML5</a>|
+</span>
+</body>
+</html>

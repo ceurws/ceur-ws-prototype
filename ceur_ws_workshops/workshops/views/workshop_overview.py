@@ -15,10 +15,9 @@ class WorkshopOverview(View):
         workshop = self.get_workshop()
 
         default_context = {
-            'papers' : workshop.accepted_papers.all().order_by('order'),#[paper for paper in workshop.accepted_papers.all()],
+            'papers' : workshop.accepted_papers.all().order_by('order'),
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop, fields_not_required =True),
-            # 'paper_forms' : [PaperForm(instance=paper_instance, workshop=workshop) for paper_instance in workshop.accepted_papers.all()],
             'paper_forms': PaperFormset(queryset = workshop.accepted_papers.all(), prefix = "paper",  agreement_not_required = True),
             'prefaces': workshop.prefaces.all(),
             'paper_forms_no_session' : [paper for paper in workshop.accepted_papers.all() if paper.session == None],
@@ -42,7 +41,6 @@ class WorkshopOverview(View):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
         if workshop.submitted:
-            messages.warning(request, 'This workshop has already been submitted.')
             context = {
                 'workshop': workshop,
                 'already_submitted': True
@@ -56,10 +54,26 @@ class WorkshopOverview(View):
         request.session['json_saved'] = True
         zip_agreement_files(workshop)
         messages.success(request, 'Workshop submitted successfully.')
-
         workshop.submitted = True
         workshop.save()
+        
+        vol_number = workshop.id
+        html_dir = os.path.join(settings.BASE_DIR, f'Vol-{vol_number}')
+        if not os.path.exists(html_dir):
+            os.makedirs(html_dir)
+
+        # Generate the HTML content
+        html_content = self.generate_html(request, workshop_data)
+
+        # Save the generated HTML to a file
+        html_file_path = os.path.join(html_dir, 'index.html')
+        with open(html_file_path, 'w') as html_file:
+            html_file.write(html_content)
         return render(request, submit_path)
+    
+    def generate_html(self, request, workshop_data):
+    # Generate HTML content from the workshop_data
+        return render(request, 'workshops/generated_html_template.html', {'data': workshop_data})
     
     def post(self, request, secret_token, open_review = False):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
@@ -108,17 +122,6 @@ class WorkshopOverview(View):
                     if not isinstance(paper_order, int):
                         for idx, paper_id in enumerate(paper_order):
                             Paper.objects.filter(id=paper_id).update(order=idx + 1)
-
-                
-                # if 'session' in request.POST:
-                #     session_id = request.POST.get('session')
-                #     if session_id:
-                #         saved_session_instance = Session.objects.get(pk=session_id)
-                #         saved_paper_instance.session = saved_session_instance
-                #         saved_paper_instance.save()
-                #     else:
-                #         saved_paper_instance.session = None
-                #         saved_paper_instance.save()
                 
             if not workshop_form.is_valid():
                 print("Workshop form errors:", workshop_form.errors)

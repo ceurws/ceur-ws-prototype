@@ -49,6 +49,7 @@
     {%endif%}
     
     </fieldset>
+    {%comment%}
     <fieldset id="preface-fieldset">
       <legend>Prefaces</legend>
       {{ preface_formset.management_form }}
@@ -68,6 +69,7 @@
       <br>
       <input type="button" value="Add Preface" class="button-13" id="add_preface">
   </fieldset>
+  {%endcomment%}
     <fieldset>
       {{ session_form.management_form}}
       <div class="session-form" id="session-form">
