@@ -211,13 +211,6 @@ class WorkshopForm(forms.ModelForm):
         total_short_acc_papers = cleaned_data.get('total_short_acc_papers', 0)  
         editor_agreement = cleaned_data.get('editor_agreement')
         email = cleaned_data.get('volume_owner_email')
-
-        if total_accepted_papers > total_submitted_papers:
-            raise ValidationError("The number of accepted papers cannot exceed the number of submitted papers.")
-
-        if total_reg_acc_papers is not None and total_short_acc_papers is not None:
-            if (total_reg_acc_papers + total_short_acc_papers) != total_accepted_papers:
-                raise ValidationError("The sum of regular and short accepted papers must equal the total number of accepted")
    
         # if not editor_agreement:
         #     raise ValidationError("Please upload the agreement file.")

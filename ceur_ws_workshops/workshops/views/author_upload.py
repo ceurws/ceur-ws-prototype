@@ -1,17 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from ..models import Workshop, Paper, Author, Session
 from django.views import View
-<<<<<<< HEAD
 from ..forms import PaperForm, get_author_formset
 import  PyPDF2
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.core.files.base import ContentFile
 
-=======
-from ..forms import AuthorFormSet, PaperForm
-import os
->>>>>>> main
 
 class AuthorUpload(View):
     upload_path = "workshops/author_upload.html"
@@ -117,7 +112,6 @@ class AuthorUpload(View):
         else:
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
 
-<<<<<<< HEAD
 
     def get(self, request, author_upload_secret_token):
         # if 'author_formset_data' in request.session:
@@ -130,33 +124,21 @@ class AuthorUpload(View):
                                hide_agreement = True,
                                hide_has_third_party_material = False)
 
-=======
-    def get(self, request, secret_token):
-        author_formset = AuthorFormSet(queryset=Author.objects.none(), prefix="author")
-        paper_form = PaperForm(file_uploaded=False, workshop=self.get_workshop())
->>>>>>> main
         context = self.get_context(author_formset, paper_form)
         return render(request, self.upload_path, context)
 
     def post(self, request, author_upload_secret_token):
         
         # if statement to check if request.FILES has any new files attached. 
-<<<<<<< HEAD
 
         if bool(request.FILES.get('uploaded_file', False)) == True:
         # if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:
             author_formset = get_author_formset()(queryset=Author.objects.none(), data = request.POST, prefix="author")
             paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop(), agreement_file = True, clean_enabled = True)
 
-=======
-        if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:
-            author_formset = AuthorFormSet(queryset=Author.objects.none(), data = request.POST, prefix="author")
-            paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop())
-       
->>>>>>> main
         # if no files are attached we extract the files uploaded 
         else:
-            author_formset = AuthorFormSet(request.POST, prefix="author")
+            author_formset = get_author_formset()(request.POST, prefix="author")
 
             paper_instance = Paper.objects.filter(secret_token=request.POST.get('secret_token'), workshop = self.get_workshop()).first()
 

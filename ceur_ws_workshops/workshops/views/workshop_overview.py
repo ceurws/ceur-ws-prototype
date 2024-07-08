@@ -59,7 +59,7 @@ class WorkshopOverview(View):
                 workshop_form.save()
                 editor_formset.save()
             elif paper_form.is_valid():
-                print("HERERE")
+                
                 paper_form.save()
 
                 if request.POST.get(paper_form, None):
@@ -103,14 +103,6 @@ class WorkshopOverview(View):
                 #         saved_paper_instance.session = None
                 #         saved_paper_instance.save()
                 
-            if not workshop_form.is_valid():
-                print("Workshop form errors:", workshop_form.errors)
-
-            if not editor_formset.is_valid():
-                print("Editor formset errors:", editor_formset.errors)
-
-            if not paper_form.is_valid():
-                print("Paper formset errors:", paper_form.errors)
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
             return self.submit_workshop(request, secret_token)
