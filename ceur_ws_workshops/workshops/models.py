@@ -87,7 +87,7 @@ class Workshop(models.Model):
     editor_agreement = models.FileField(upload_to=workshop_agreement_file_path)
     editor_agreement_signed = models.BooleanField()
     # preface = models.FileField(upload_to =workshop_preface_file_path, blank = True, null = True )
-
+    submitted = models.BooleanField(default=False)
     # KEYS
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
     accepted_papers = models.ManyToManyField('Paper', related_name='accepted_papers')

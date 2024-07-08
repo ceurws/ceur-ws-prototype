@@ -10,9 +10,11 @@ class WorkshopOverview(View):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
         return workshop
     
-    def render_workshop(self, request, edit_mode = False):
+    def render_workshop(self, request, edit_mode = False, context=None):
+
         workshop = self.get_workshop()
-        return render(request, 'workshops/workshop_overview.html', context = {
+
+        default_context = {
             'papers' : workshop.accepted_papers.all().order_by('order'),#[paper for paper in workshop.accepted_papers.all()],
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop, fields_not_required =True),
@@ -26,7 +28,10 @@ class WorkshopOverview(View):
             'secret_token': self.kwargs['secret_token'],
             'organizer_url': reverse('workshops:workshop_overview', args=[workshop.secret_token]),
             'author_url': reverse('workshops:author_upload', args=[workshop.author_upload_secret_token])
-        })
+        }
+        if context:
+            default_context.update(context)
+        return render(request, 'workshops/workshop_overview.html', default_context)
 
     def get(self, request, secret_token):
         return self.render_workshop(request)        
@@ -35,14 +40,25 @@ class WorkshopOverview(View):
         submit_path = 'workshops/submit_workshop.html'
 
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
-        workshop_data = get_workshop_data(workshop)
 
+        if workshop.submitted:
+            messages.warning(request, 'This workshop has already been submitted.')
+            context = {
+                'workshop': workshop,
+                'already_submitted': True
+            }
+            return self.render_workshop(request, edit_mode=False, context=context)
+        
+        workshop_data = get_workshop_data(workshop)
         add_editors_data(workshop, workshop_data)
         add_papers_data(workshop, workshop_data)   
         save_workshop_data(workshop_data, workshop)
         request.session['json_saved'] = True
         zip_agreement_files(workshop)
         messages.success(request, 'Workshop submitted successfully.')
+
+        workshop.submitted = True
+        workshop.save()
         return render(request, submit_path)
     
     def post(self, request, secret_token, open_review = False):

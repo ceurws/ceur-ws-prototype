@@ -530,6 +530,12 @@
                     onclick="return confirm('Are you sure you want to submit the workshop? You are unable to edit your workshop after submitting. ')">
             </div>
         </form>
+
+        {% if already_submitted %}
+        <script>
+            alert('This workshop has already been submitted.');
+        </script>
+        {% endif %}
         {% endif %}
 </body>
 
