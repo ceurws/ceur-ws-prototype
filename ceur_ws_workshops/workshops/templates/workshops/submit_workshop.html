@@ -12,12 +12,12 @@
   <div class="container mt-3 text-center">
     <!-- Success message -->
     <h1>Operation Successful</h1>
-    <p>The workshop is available at <a href="/Vol-{vol_number}/">/Vol-{vol_number}/</a>.</p>
+    <p>The workshop is available at <a href="media/Vol-{{workshop.id}}/">/Vol-{{volume_number}}/</a>.</p>
 
     <!-- Django messages -->
     <div id="django-messages" style="display: none;">
       {% for message in messages %}
-      <div data-message="{{ message|escapejs }}">{{ message }}</div>
+      <div data-message="{{ message|escapejs}}">{{ message }}</div>
       {% endfor %}
     </div>
   </div>

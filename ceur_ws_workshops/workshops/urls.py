@@ -17,7 +17,8 @@ urlpatterns = [
      path('open_review_workshop/', OpenReviewClass.as_view(), name='open_review_workshop'),
     path('open_review_edit', OpenReviewClass.as_view(), name='open_review_edit'),
     path('author_upload/<uuid:paper_id>/<uuid:author_upload_secret_token>/', edit_author_post_view, name='edit_author_post'),
-    re_path(r'^Vol-(?P<vol_number>\d+)/$', serve, {'document_root': settings.BASE_DIR, 'path': 'Vol-'}, name='serve_html'),
+
+    # re_path(r'^Vol-(?P<vol_number>\d+)/$', serve, {'document_root': settings.BASE_DIR, 'path': 'Vol-'}, name='serve_html'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

@@ -114,6 +114,7 @@ class OpenReviewClass(View):
                     'form': workshop_form,
                     'editor_form': editor_form,
                     'session_form': session_form,
+                    'preface_formset': preface_formset,
                     'openreview_url': query
                 }
                 return render(request, "workshops/create_workshop.html", context)

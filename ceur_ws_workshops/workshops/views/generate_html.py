@@ -20,6 +20,4 @@ class GenerateHtml(View):
         return HttpResponse(html_content, content_type='text/html')
 
     def generate_html(self, request, workshop_data):
-        # Generate HTML content from the workshop_data
-        # This is where you would use the workshop_data to populate your HTML template
         return render(request, 'workshops/generated_html_template.html', {'data': workshop_data})

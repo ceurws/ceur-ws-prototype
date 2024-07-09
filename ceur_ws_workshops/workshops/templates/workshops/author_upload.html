@@ -9,7 +9,21 @@
   <title>Paper Submitted Correctly</title>
   <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
 </head>
+<style>
+  .close-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1.5rem; /* Adjust the size as needed */
+  cursor: pointer;
+  color: #000; /* Adjust the color as needed */
+}
 
+.close-button:hover {
+  color: #f00; /* Optional: Change color on hover */
+}
+</style>
 <h2 class="header-title">Submit Paper</h2>
 
 <!-- Paper Form -->
@@ -22,10 +36,15 @@
   </fieldset>
   
   <fieldset id="author-fieldset">
-    {{author_formset.management_form}}
-    <div id="author-form" class="author-form">
+    <legend>Authors</legend>
+    {{ author_formset.management_form }}
+    <div id="author-form">
       {% for author in author_formset %}
-      {{ author|crispy}}
+      <div class="author-form" style="position: relative;">
+        {{ author.as_p }}
+        <input type="button" value="&times;" class="delete-author close-button" style="position: absolute; top: 0; right: 0;">
+        {{ author.DELETE }} 
+      </div>
       {% endfor %}
     </div>
     <input type="button" value="Add Author" class="button-13" id="add_author">
@@ -37,19 +56,40 @@
 </form>
 
 <div id="empty_author_form" style="display:none">
-  <table class='no_error'>
+  <div class="author-form" style="position: relative;">
     {{ author_formset.empty_form|crispy }}
-    <br>
-  </table>
-  <hr>
+    <input type="button" value="&times;" class="delete-author close-button" style="position: absolute; top: 0; right: 0;">
+    {{ author_formset.empty_form.DELETE }} 
+    <hr>
+  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'workshops/script.js' %}"></script>
+
 <script>
-  $('#add_author').click(function () {
-    var form_idx = $('#id_author-TOTAL_FORMS').val();
-    $('#author-form').append($('#empty_author_form').html().replace(/__prefix__/g, form_idx));
-    $('#id_author-TOTAL_FORMS').val(parseInt(form_idx) + 1);
-  });
+  $(document).ready(function() {
+  function addForm(buttonId, totalFormsId, formContainerId, emptyFormHtmlId) {
+      $(buttonId).click(function () {
+          var form_idx = $(totalFormsId).val();
+          var form_html = $(emptyFormHtmlId).html().replace(/__prefix__/g, form_idx);
+          $(formContainerId).append(form_html);
+          $(totalFormsId).val(parseInt(form_idx) + 1);
+      });
+  }
+
+  function deleteForm(deleteButtonClass, formClass) {
+      $(document).on('click', deleteButtonClass, function() {
+          var parentDiv = $(this).closest(formClass);
+          parentDiv.find('input[type=checkbox][name$="-DELETE"]').prop('checked', true); 
+          parentDiv.hide(); 
+      });
+  }
+
+  addForm('#add_author', '#id_author-TOTAL_FORMS', '#author-form', '#empty_author_form');
+  deleteForm('.delete-author', '.author-form');
+});
+
 </script>
+
 {% endblock %}

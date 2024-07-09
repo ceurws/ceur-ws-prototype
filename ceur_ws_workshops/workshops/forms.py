@@ -233,7 +233,7 @@ class PaperForm(forms.ModelForm):
             self.fields['pages'].initial = pages
 
         if hide_agreement or self.agreement_not_required:
-            # self.fields['agreement_file'].widget = forms.HiddenInput()
+            self.fields['agreement_file'].widget = forms.HiddenInput()
             self.fields['agreement_file'].required = False
             
         if hide_papers_overview: 
@@ -260,8 +260,10 @@ class PaperForm(forms.ModelForm):
             'pages': forms.TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
-            # 'required': 'True'}),
+            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html' ,
+            'required': 'True'}),
+
+            #}),
         }
 
         paper_title = forms.CharField(strip=True)

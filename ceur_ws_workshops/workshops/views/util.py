@@ -2,6 +2,10 @@ from datetime import date
 from django.conf import settings
 import os, json, zipfile
 from django.core.serializers.json import DjangoJSONEncoder
+from django.shortcuts import render, get_object_or_404, redirect
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+from ..models import *
 
 def get_workshop_data(workshop):
         '''
@@ -87,7 +91,7 @@ def add_papers_data(workshop, workshop_data):
                 "uploaded_file_url": paper.uploaded_file.url if paper.uploaded_file else None,
                 "agreement_file_url": paper.agreement_file.url if paper.agreement_file else None,
             }
-            for paper in workshop.accepted_papers.all()
+            for paper in workshop.accepted_papers.all().order_by('order')
         ]
         del(workshop_data['CEURSESSIONS'])
         workshop_data['CEURPAPERS'] = papers_data
@@ -115,5 +119,8 @@ def get_agreement_filename(paper_instance, original_filename):
     extension = os.path.splitext(original_filename)[1]
     new_filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
     return new_filename
+
+
+
 
 

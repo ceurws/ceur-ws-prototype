@@ -24,7 +24,7 @@ $(document).ready(function() {
   addForm('#add_preface', '#id_preface-TOTAL_FORMS', '#preface-form', '#empty_preface_form');
   addForm('#add_session', '#id_session-TOTAL_FORMS', '#session-form', '#empty_session_form');
   addForm('#add_editor', '#id_editor-TOTAL_FORMS', '#editor-form', '#empty_editor_form');
-  addForm('#add_author', '#id_author-TOTAL_FORMS', '#author-form', '#empty_author_form');
+  add_form('#add_author', '#id_author-TOTAL_FORMS', '#author-form', '#empty_author_form');
   deleteForm('.delete-preface', '.preface-form');
   deleteForm('.delete-session', '.session-form');
   deleteForm('.delete-editor', '.editor-form');

@@ -39,8 +39,8 @@ class Session(models.Model):
     
 class Preface(models.Model):
     def workshop_preface_file_path(instance, filename):
-        acronym = instance.workshop.workshop_acronym
-        filename = f"WORKSHOP-PREFACE-{acronym}.pdf"
+        preface_count = Preface.objects.filter(workshop=instance.workshop).count() + 1
+        filename = f"preface{preface_count}.pdf"
         workshop_id = instance.workshop.id
         return f"preface/Vol-{workshop_id}/{filename}"
      
@@ -54,8 +54,10 @@ class Preface(models.Model):
 class Workshop(models.Model):
     
     def workshop_agreement_file_path(instance, filename):
-        acronym = instance.workshop_acronym
-        filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
+        # acronym = instance.workshop_acronym
+        # filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
+        editor_agreement_count = Workshop.objects.filter(id=instance.id).count() + 1
+        filename = f"editor_agreement{editor_agreement_count}.pdf"
         workshop_id = instance.id
         return f"agreement/Vol-{workshop_id}/{filename}"
      
@@ -109,15 +111,22 @@ class Language(models.Model):
 
 class Paper(models.Model):
     def paper_upload_path(instance, filename):
+        paper_count = Paper.objects.filter(workshop=instance.workshop).count() + 1
+        filename = f"paper{paper_count}.pdf"
         workshop_volume = instance.workshop.id
         return f"papers/Vol-{workshop_volume}/{filename}"
 
     def agreement_file_path(instance, filename):
         agreement_file = instance.workshop.id
-        original_filename = instance.agreement_file.name
-        paper_title = instance.paper_title.replace(' ', '')
-        extension = os.path.splitext(original_filename)[1]
-        filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}.html'
+        # original_filename = instance.agreement_file.name
+        # paper_title = instance.paper_title.replace(' ', '')
+        # extension = os.path.splitext(original_filename)[1]
+        # filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}.html'
+        agreement_count = Paper.objects.filter(workshop=instance.workshop).count() + 1
+        filename = f'agreement{agreement_count}.html'
+    
+        if not filename.lower().endswith('.html'):
+            filename += '.html'
         return f"agreement/Vol-{agreement_file}/{filename}"
     
     paper_title = models.CharField(max_length=200)

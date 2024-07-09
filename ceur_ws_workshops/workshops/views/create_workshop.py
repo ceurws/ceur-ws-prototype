@@ -21,7 +21,6 @@ class CreateWorkshop(View):
     def get_workshop(self, workshop_id):
         return get_object_or_404(Workshop, id = workshop_id)
 
-
     def find_ws_id(self, url):
         parsed_url = urlparse(url)
         query_params = parse_qs(parsed_url.query)
@@ -142,8 +141,8 @@ class CreateWorkshop(View):
             workshop_form = WorkshopForm(data=request.POST, files=request.FILES, instance=workshop_instance)
             preface_formset = PrefaceFormset(data = request.POST, files = request.FILES, instance = workshop_instance, prefix = "preface")
             # Once forms have been bound (either using old or new editor agreement), we validate and save to the database.
-            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
-                    # , preface_formset.is_valid]):
+            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()
+                    , preface_formset.is_valid]):
 
                 workshop = workshop_form.save()  
 
@@ -196,8 +195,8 @@ class CreateWorkshop(View):
             session_formset = SessionFormSet(queryset=Session.objects.none(),data = request.POST, prefix="session")
             preface_formset = PrefaceFormset(data = request.POST, files = request.FILES, prefix = "preface")
             # before rendering we check if the bound forms are valid and we save a workshop instance so that the editor agreement can be extracted in a later stage
-            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()]):
-                    # , preface_formset.is_valid()]):
+            if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()
+                    , preface_formset.is_valid()]):
 
                 workshop_instance = workshop_form.save()  
                 workshop_instance.openreview_url = request.POST['openreview_url']
@@ -205,17 +204,17 @@ class CreateWorkshop(View):
                 
                 bound_workshop_form = WorkshopForm(instance = workshop_instance)
                 
-                # prefaces = preface_formset.save(commit=False)
-                # for preface in prefaces:
-                #     preface.workshop = workshop_instance
-                #     preface.save()
+                prefaces = preface_formset.save(commit=False)
+                for preface in prefaces:
+                    preface.workshop = workshop_instance
+                    preface.save()
 
                 context = {
                     'form': bound_workshop_form,
                     'editor_form': editor_formset,
                     'session_form': session_formset,
                     'workshop_instance': workshop_instance,
-                    # 'preface_formset': preface_formset
+                    'preface_formset': preface_formset
                 }
                 return render(request, self.edit_path, context)
             else:
@@ -225,8 +224,4 @@ class CreateWorkshop(View):
                     'session_form': session_formset,
                     'preface_formset': preface_formset
                 }
-                print(workshop_form.errors)
-                print(editor_formset.errors)
-                print(session_formset.errors)
-                print(preface_formset.errors)
                 return render(request, self.edit_path, context)

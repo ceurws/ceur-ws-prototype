@@ -3,10 +3,8 @@ from ..models import Workshop, Paper, Author, Session
 from django.views import View
 from ..forms import PaperForm, get_author_formset
 import  PyPDF2
-from django.template.loader import render_to_string
-from django.http import HttpResponse
 from django.core.files.base import ContentFile
-
+from .util import *
 
 class AuthorUpload(View):
     upload_path = "workshops/author_upload.html"
@@ -32,7 +30,7 @@ class AuthorUpload(View):
                    'workshop': self.get_workshop()}
         html_content = render_to_string(template_name, context)
         return html_content, paper.has_third_party_material
-
+    
     def generate_agreement(self, request, paper_id, author_upload_secret_token, author_formset):
         paper = get_object_or_404(Paper, id=paper_id)
         html_content, has_third_party_material = self.generate_agreement_html(paper, author_upload_secret_token, author_formset)
@@ -130,10 +128,12 @@ class AuthorUpload(View):
     def post(self, request, author_upload_secret_token):
         
         # if statement to check if request.FILES has any new files attached. 
-        if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:
+
+        if bool(request.FILES.get('uploaded_file', False)) == True:
+        # if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:
             author_formset = get_author_formset()(queryset=Author.objects.none(), data = request.POST, prefix="author")
-            paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop())
-       
+            paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop(), agreement_file = True, clean_enabled = True)
+
         # if no files are attached we extract the files uploaded 
         else:
             author_formset = get_author_formset()(request.POST, prefix="author")

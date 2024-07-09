@@ -382,8 +382,9 @@
         <p><strong>Total regular accepted papers:</strong> {{ workshop.total_reg_acc_papers }}</p>
 
         {%if workshop.openreview_url%}
-        <p><strong>Open Review URL:</strong> <a href="{{ workshop.openreview_url }}" target="_blank">{{
-                workshop.openreview_url }}</a></p>
+        <p><strong>Open Review URL:</strong> <a href="
+            {{ workshop.openreview_url }}" target="_blank">
+            {{ workshop.openreview_url }}</a></p>
         {%endif%}
 
         <p><strong>Editors:</strong></p>
