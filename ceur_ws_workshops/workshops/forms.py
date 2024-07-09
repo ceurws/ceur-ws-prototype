@@ -377,7 +377,6 @@ SessionFormSet = modelformset_factory(
 
     }
 )
-
 class WorkshopPrefaceForm(forms.ModelForm):
     class Meta:
         model = Preface

@@ -10,7 +10,6 @@ from ..models import *
 def get_workshop_data(workshop):
         '''
         Function that returns part of the metadata for the final JSON 
-        arg: Workshop model 
         '''
         return {
             "JJJJ":	workshop.year_final_papers,
@@ -22,6 +21,7 @@ def get_workshop_data(workshop):
             "CEURLANG": workshop.workshop_language_iso,
             "CEURVOLNR": workshop.pk,
             "CEURPUBYEAR":str(workshop.workshop_begin_date.year), #workshop_begin_date
+            "CEURWORKSHOP_ID": workshop.id,
             "CEURURN": workshop.urn,
             "CEURVOLACRONYM": workshop.workshop_acronym,
             "CEURVOLTITLE": workshop.workshop_short_title,
@@ -36,7 +36,6 @@ def get_workshop_data(workshop):
             },
             "CEUREDITORS": [],
             "email_address": workshop.volume_owner_email,
-            
             "CEURSESSIONS": [],
             "CEURPAPERS": [],
             "CEURPUBDATE": date.today(),

@@ -40,12 +40,12 @@ class WorkshopOverview(View):
 
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
-        # if workshop.submitted:
-        #     context = {
-        #         'workshop': workshop,
-        #         'already_submitted': True
-        #     }
-        #     return self.render_workshop(request, edit_mode=False, context=context)
+        if workshop.submitted:
+            context = {
+                'workshop': workshop,
+                'already_submitted': True
+            }
+            return self.render_workshop(request, edit_mode=False, context=context)
         
         workshop_data = get_workshop_data(workshop)
         add_editors_data(workshop, workshop_data)
@@ -59,23 +59,21 @@ class WorkshopOverview(View):
         
         vol_number = workshop.id
         html_dir = os.path.join(settings.MEDIA_ROOT, f'Vol-{vol_number}')
-
         if not os.path.exists(html_dir):
             os.makedirs(html_dir)
 
         print(html_dir, "HTML_DIR")
-        # Generate the HTML content
         html_content = self.generate_html(workshop_data)
         
-        # Save the generated HTML to a file
         html_file_path = os.path.join(html_dir, 'index.html')
         with open(html_file_path, 'w') as html_file:
             html_file.write(html_content)
        
-        return render(request, submit_path)
+        return render(request, submit_path, context = {
+            'workshop': workshop,
+        })
     
     def generate_html(self,  workshop_data):
-    # Generate HTML content from the workshop_data
         return render_to_string('workshops/generated_html_template.html', {'data': workshop_data})
     
     def post(self, request, secret_token, open_review = False):
