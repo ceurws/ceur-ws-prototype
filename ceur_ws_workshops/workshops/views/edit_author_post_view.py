@@ -4,13 +4,11 @@ from ..forms import get_author_formset, PaperForm
 import PyPDF2, os
 from .util import *
 
-
 def _get_agreement_filename(paper_instance, original_filename):
         paper_title = paper_instance.paper_title.replace(' ', '')
         extension = os.path.splitext(original_filename)[1]
         new_filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}'
         return new_filename
-
 
 def edit_author_post_view(request, paper_id, author_upload_secret_token):
     workshop = get_object_or_404(Workshop, author_upload_secret_token=author_upload_secret_token)

@@ -118,10 +118,6 @@ class Paper(models.Model):
 
     def agreement_file_path(instance, filename):
         agreement_file = instance.workshop.id
-        # original_filename = instance.agreement_file.name
-        # paper_title = instance.paper_title.replace(' ', '')
-        # extension = os.path.splitext(original_filename)[1]
-        # filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}.html'
         agreement_count = Paper.objects.filter(workshop=instance.workshop).count() + 1
         filename = f'agreement{agreement_count}.html'
     

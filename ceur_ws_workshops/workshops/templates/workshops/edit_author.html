@@ -29,23 +29,26 @@
     <legend>Paper Data</legend>
     Don't forget to download the agreement form in order to sign it. If any details are wrong, or missing, just go back. 
 
-    <br>
-    <br> 
+    <br><br> 
     <a id = "organizer_url" href="{{download_url.url}}" download> Download the agreement form</a>
-    <br>
-    <br>
+    <br><br>
     {{ paper_form|crispy }}
+    {%comment%}
+    {% if paper_form.paper_title.errors %}
+      <div class="errorlist">
+        {{ paper_form.paper_title.errors }}
+      </div>
+    {% endif %}
+    {%endcomment%}
 
     <input type="hidden" name="secret_token" value="{{ paper_instance.secret_token }}">
 
-    
   <p>Currently uploaded Paper: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a> </p>
   </fieldset>
   <fieldset id="author-fieldset">
     {{ author_formset.management_form}}
     <div id="author-form" class="author-form">
       {% for form in author_formset %}
-        <!-- {{ form.as_p }} -->
         {{form|crispy}}
           <hr>
       {% endfor %}
@@ -71,42 +74,5 @@
   document.addEventListener('DOMContentLoaded', function () {
     let messages = Array.from(document.querySelectorAll('#django-messages [data-message]')).map(el => el.getAttribute('data-message'));
   });
-
-  $('#add_author').click(function () {
-    var form_idx = $('#id_author-TOTAL_FORMS').val();
-    $('#author-form').append($('#empty_author_form').html().replace(/__prefix__/g, form_idx));
-    $('#id_author-TOTAL_FORMS').val(parseInt(form_idx) + 1);
-  });
-
-  $(document).ready(function() {
-    let existingAuthors = [];
-
-    const authorUploadSecretToken = "{{ author_upload_secret_token }}";  // Assuming you pass this context variable
-
-    // Fetch existing authors from the server
-    $.getJSON(`/get_existing_authors/${authorUploadSecretToken}/`, function(data) {
-        existingAuthors = data;
-    });
-
-    $('#author-form').on('submit', function(event) {
-        let isDuplicate = false;
-
-        $('#authors input').each(function() {
-            const name = $(this).find('input[name$="-author_name"]').val();
-            const email = $(this).find('input[name$="-author_email"]').val();
-
-            existingAuthors.forEach(function(author) {
-                if (author.author_name === name && author.author_email === email) {
-                    isDuplicate = true;
-                }
-            });
-        });
-
-        if (isDuplicate) {
-            event.preventDefault();
-            alert('An author with the same name and email already exists.');
-        }
-    });
-});
 </script>
 {% endblock %}

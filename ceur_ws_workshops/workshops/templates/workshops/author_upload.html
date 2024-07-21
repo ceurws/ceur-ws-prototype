@@ -7,9 +7,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paper Submitted Correctly</title>
-  <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'workshops/styles.css' %}">
 </head>
-<style>
+<!-- <style>
   .close-button {
   background: none;
   border: none;
@@ -23,7 +23,20 @@
 .close-button:hover {
   color: #f00; /* Optional: Change color on hover */
 }
-</style>
+
+.errorlist {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  position: relative;
+  padding: .75rem 1.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid transparent;
+  border-radius: .25rem;
+  text-align: center;
+  font-weight: bold;
+  }
+</style> -->
 <h2 class="header-title">Submit Paper</h2>
 
 <!-- Paper Form -->
@@ -31,8 +44,12 @@
   <fieldset>
     {% csrf_token %}
     <legend>Paper Details</legend>
-    <!-- {{ paper_form.as_p }} -->
-    {{ paper_form|crispy }}
+    {{ paper_form|crispy}}
+    {% if paper_form.paper_title.errors %}
+    <div class="errorlist">
+      {{ paper_form.paper_title.errors }}
+    </div>
+  {% endif %}
   </fieldset>
   
   <fieldset id="author-fieldset">
@@ -41,7 +58,7 @@
     <div id="author-form">
       {% for author in author_formset %}
       <div class="author-form" style="position: relative;">
-        {{ author.as_p }}
+        {{ author|crispy}}
         <input type="button" value="&times;" class="delete-author close-button" style="position: absolute; top: 0; right: 0;">
         {{ author.DELETE }} 
       </div>
@@ -66,30 +83,4 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{% static 'workshops/script.js' %}"></script>
-
-<script>
-  $(document).ready(function() {
-  function addForm(buttonId, totalFormsId, formContainerId, emptyFormHtmlId) {
-      $(buttonId).click(function () {
-          var form_idx = $(totalFormsId).val();
-          var form_html = $(emptyFormHtmlId).html().replace(/__prefix__/g, form_idx);
-          $(formContainerId).append(form_html);
-          $(totalFormsId).val(parseInt(form_idx) + 1);
-      });
-  }
-
-  function deleteForm(deleteButtonClass, formClass) {
-      $(document).on('click', deleteButtonClass, function() {
-          var parentDiv = $(this).closest(formClass);
-          parentDiv.find('input[type=checkbox][name$="-DELETE"]').prop('checked', true); 
-          parentDiv.hide(); 
-      });
-  }
-
-  addForm('#add_author', '#id_author-TOTAL_FORMS', '#author-form', '#empty_author_form');
-  deleteForm('.delete-author', '.author-form');
-});
-
-</script>
-
 {% endblock %}

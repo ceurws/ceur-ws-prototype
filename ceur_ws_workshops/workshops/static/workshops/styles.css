@@ -21,7 +21,32 @@ legend {
     list-style-type: none;
 }
 
-
+.close-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1.5rem; /* Adjust the size as needed */
+    cursor: pointer;
+    color: #000; /* Adjust the color as needed */
+  }
+  
+  .close-button:hover {
+    color: #f00; /* Optional: Change color on hover */
+  }
+  
+  .errorlist {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    text-align: center;
+    font-weight: bold;
+    }
 
 
 

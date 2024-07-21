@@ -45,6 +45,10 @@ class AuthorUpload(View):
 
         if paper_form.is_valid() and author_formset.is_valid():
 
+            if Paper.objects.filter(paper_title=paper_form.cleaned_data['paper_title'], workshop=self.get_workshop()).exists():
+                paper_form.add_error('paper_title', 'A paper with this title has already been submitted. Please choose a different title. If you would like to make any changes to your submission, please contact one of the workshop editors.')
+                return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
+
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = self.get_workshop()
             
@@ -73,6 +77,10 @@ class AuthorUpload(View):
     def create_paper(self, request, author_formset, paper_form, author_upload_secret_token):
 
         if paper_form.is_valid() and author_formset.is_valid():
+
+            if Paper.objects.filter(paper_title=paper_form.cleaned_data['paper_title'], workshop=self.get_workshop()).exists():
+                paper_form.add_error('paper_title', 'A paper with this title has already been submitted. Please choose a different title. If you would like to make any changes to the submission, please contact one of the workshop editors.')
+                return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
             
             paper_instance = paper_form.save(commit=False) 
             paper_instance.workshop = self.get_workshop()
@@ -87,7 +95,10 @@ class AuthorUpload(View):
             # paper_instance.authors.add(*author_instances)  
             self.get_workshop().accepted_papers.add(paper_instance)  
             
-            paper_form = PaperForm(file_uploaded=True, workshop=self.get_workshop(), instance=paper_instance, pages=paper_form.cleaned_data['pages'])
+            paper_form = PaperForm(file_uploaded=True, 
+                                   workshop=self.get_workshop(), 
+                                   instance=paper_instance, 
+                                   pages=paper_form.cleaned_data['pages'])
 
             # Build path 
             name, agreement_html_content = self.generate_agreement(request, paper_instance.id, author_upload_secret_token, author_formset)
@@ -128,22 +139,31 @@ class AuthorUpload(View):
     def post(self, request, author_upload_secret_token):
         
         # if statement to check if request.FILES has any new files attached. 
-
         if bool(request.FILES.get('uploaded_file', False)) == True:
-        # if bool(request.FILES.get('agreement_file', False)) == True and bool(request.FILES.get('uploaded_file', False)) == True:
-            author_formset = get_author_formset()(queryset=Author.objects.none(), data = request.POST, prefix="author")
-            paper_form = PaperForm(request.POST, request.FILES, file_uploaded=True, workshop=self.get_workshop(), agreement_file = True, clean_enabled = True)
-
+            author_formset = get_author_formset()(queryset=Author.objects.none(), 
+                                                  data = request.POST, 
+                                                  prefix="author")
+            paper_form = PaperForm(request.POST, 
+                                   request.FILES, 
+                                   file_uploaded=True, 
+                                   workshop=self.get_workshop(), 
+                                   agreement_file = True, 
+                                   clean_enabled = True)
         # if no files are attached we extract the files uploaded 
         else:
             author_formset = get_author_formset()(request.POST, prefix="author")
 
             paper_instance = Paper.objects.filter(secret_token=request.POST.get('secret_token'), workshop = self.get_workshop()).first()
 
-            paper_form = PaperForm(request.POST, file_uploaded=True, workshop=self.get_workshop(), instance = paper_instance, agreement_file = True, clean_enabled = True)
+            paper_form = PaperForm(request.POST, 
+                                   file_uploaded=True, 
+                                   workshop=self.get_workshop(), 
+                                   instance = paper_instance, 
+                                   agreement_file = True)
+                                #    , 
+                                #    clean_enabled = True)
 
         if 'confirm_button' in request.POST:
             return self.submit_paper(request, author_formset, paper_form)
         else:
-            
             return self.create_paper(request, author_formset, paper_form, author_upload_secret_token)
