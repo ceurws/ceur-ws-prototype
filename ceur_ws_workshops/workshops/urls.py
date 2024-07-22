@@ -14,7 +14,7 @@ urlpatterns = [
     path('create_workshop/', CreateWorkshop.as_view(), name='create_workshop'),
     path('author_upload/<uuid:author_upload_secret_token>/', AuthorUpload.as_view(), name='author_upload'),
     path('workshop_overview/<uuid:secret_token>/', WorkshopOverview.as_view(), name='workshop_overview'),
-     path('open_review_workshop/', OpenReviewClass.as_view(), name='open_review_workshop'),
+    path('open_review_workshop/', OpenReviewClass.as_view(), name='open_review_workshop'),
     path('open_review_edit', OpenReviewClass.as_view(), name='open_review_edit'),
     path('author_upload/<uuid:paper_id>/<uuid:author_upload_secret_token>/', edit_author_post_view, name='edit_author_post'),
 ]

@@ -13,7 +13,7 @@ def _get_agreement_filename(paper_instance, original_filename):
 def edit_author_post_view(request, paper_id, author_upload_secret_token):
     workshop = get_object_or_404(Workshop, author_upload_secret_token=author_upload_secret_token)
     paper = get_object_or_404(Paper, secret_token=paper_id)
-
+   
     context = {
         'workshop' : workshop,
         'paper_form' : None,

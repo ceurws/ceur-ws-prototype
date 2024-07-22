@@ -45,10 +45,6 @@ class AuthorUpload(View):
 
         if paper_form.is_valid() and author_formset.is_valid():
 
-            if Paper.objects.filter(paper_title=paper_form.cleaned_data['paper_title'], workshop=self.get_workshop()).exists():
-                paper_form.add_error('paper_title', 'A paper with this title has already been submitted. Please choose a different title. If you would like to make any changes to your submission, please contact one of the workshop editors.')
-                return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
-
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = self.get_workshop()
             
@@ -66,10 +62,9 @@ class AuthorUpload(View):
             if request.POST['session'] != '':
                 session_instance = Session.objects.get(pk=request.POST['session'])
                 paper_instance.session = session_instance
-            
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
-
+            print(paper_instance.secret_token)
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, author_upload_secret_token = self.kwargs['author_upload_secret_token'])
         else:
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
@@ -78,9 +73,12 @@ class AuthorUpload(View):
 
         if paper_form.is_valid() and author_formset.is_valid():
 
-            if Paper.objects.filter(paper_title=paper_form.cleaned_data['paper_title'], workshop=self.get_workshop()).exists():
-                paper_form.add_error('paper_title', 'A paper with this title has already been submitted. Please choose a different title. If you would like to make any changes to the submission, please contact one of the workshop editors.')
-                return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
+            # if Paper.objects.filter(paper_title=paper_form.cleaned_data['paper_title'], workshop=self.get_workshop()).exists():
+
+            #     if paper_form.instance.uploaded_file.url:
+            #         paper_form.instance.editor_agreement = None
+            #     paper_form.add_error('paper_title', 'A paper with this title has already been submitted. Please choose a different title. If you would like to make any changes to the submission, please contact one of the workshop editors.')
+            #     return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
             
             paper_instance = paper_form.save(commit=False) 
             paper_instance.workshop = self.get_workshop()
@@ -93,7 +91,7 @@ class AuthorUpload(View):
                 paper_instance.session = session_instance
 
             # paper_instance.authors.add(*author_instances)  
-            self.get_workshop().accepted_papers.add(paper_instance)  
+            self.get_workshop().accepted_papers.add(paper_instance)
             
             paper_form = PaperForm(file_uploaded=True, 
                                    workshop=self.get_workshop(), 
@@ -102,7 +100,6 @@ class AuthorUpload(View):
 
             # Build path 
             name, agreement_html_content = self.generate_agreement(request, paper_instance.id, author_upload_secret_token, author_formset)
-            print(name)
 
             paper_instance.agreement_file.save(name, ContentFile(agreement_html_content.encode('utf-8')))
             paper_instance.save()           
@@ -159,9 +156,8 @@ class AuthorUpload(View):
                                    file_uploaded=True, 
                                    workshop=self.get_workshop(), 
                                    instance = paper_instance, 
-                                   agreement_file = True)
-                                #    , 
-                                #    clean_enabled = True)
+                                   agreement_file = True, 
+                                   clean_enabled = True)
 
         if 'confirm_button' in request.POST:
             return self.submit_paper(request, author_formset, paper_form)

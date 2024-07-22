@@ -27,6 +27,54 @@
     font-size: 12px; 
     color: rgb(101, 100, 100); 
 }
+
+.CEURTITLE {
+    flex-grow: 1; /* Allow title to grow and take available space */
+    margin-right: 10px; /* Space between title and page number */
+}
+
+.CEURPAGES {
+    white-space: nowrap; /* Prevent line break */
+}
+
+.session-list {
+            list-style-type: square; /* Use square bullets */
+            padding-left: 20px; /* Add padding for the list */
+            color: grey;
+        }
+        .paper-item {
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .title-and-pages {
+            display: flex;
+            justify-content: space-between;
+        }
+        .CEURPAGES {
+            margin-left: auto; /* Move the page numbers to the right */
+        }
+        .authors {
+            margin-top: 5px;
+        }
+.author-list, .affiliation-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .author-item, .affiliation-item {
+            margin-bottom: 10px;
+        }
+        .author-name {
+            display: inline;
+        }
+        .affiliation {
+            display: inline;
+        }
+
+.CEURLOCTIME{
+    font-size: 1.2em;
+    margin-top: 20px;
+}
 </style>
 
 <table style="border: 0; border-spacing: 0; border-collapse: collapse; width: 95%">
@@ -69,21 +117,38 @@
     <span class="CEURFULLTITLE">{{ data.CEURFULLTITLE }}</span><br>
     co-located with <span class="CEURCOLOCATED">{{ data.CEURCOLOCATED }}</span><br>
 </h3>
-<h3><span class="CEURLOCTIME">{{ data.CEURLANG }}</span>, {{ data.CEURLANG }}, {{ data.CEURLANG }} {{ data.YYYY }}</h3>
+<h3><span class="CEURLOCTIME">
+    {{ data.CEURLOCTIME.CEURCITY }}, 
+    {{ data.CEURLOCTIME.CEURCOUNTRY }},
+    {% if data.CEURLOCTIME.CEURBEGINDATE == data.CEURLOCTIME.CEURENDDATE %}
+        {{ data.CEURLOCTIME.CEURBEGINDATE|date:"F j, Y" }}
+    {% else %}
+        {{ data.CEURLOCTIME.CEURBEGINDATE|date:"F j, Y" }} - {{ data.CEURLOCTIME.CEURENDDATE|date:"F j, Y" }}
+    {% endif %}
+</span> </h3>
 
 <br>
 <b> Edited by </b>
 <p></p>
 <h3>
-    {% for editor in data.CEUREDITORS %}
-        <a href="{{ editor.CEURINSTITUTIONURL }}"><span class="CEURVOLEDITOR">{{ editor.CEURVOLEDITOR }}</span></a><br>
-    {% endfor %}
+    <ul class="author-list">
+        {% for editor in data.CEUREDITORS %}
+            <li class="author-item">
+                <a href="{{ editor.CEUREDITORURL }}"><span class="CEURVOLEDITOR">{{ editor.CEURVOLEDITOR }}</span></a>
+                <sup>{{ forloop.counter }}</sup><br>
+            </li>
+        {% endfor %}
+    </ul>
 </h3>
-
-{% for editor in data.CEUREDITORS %}
-    <a href="{{ editor.CEURINSTITUTIONURL }}">{{ editor.CEURINSTITUTION }}</a>,
-    {{ editor.CEURINSTITUTION }}<br>
-{% endfor %}
+<ul class="affiliation-list">
+    {% for editor in data.CEUREDITORS %}
+        <li class="affiliation-item">
+            <sup>{{ forloop.counter }}</sup>
+            <a href="{{ editor.CEURINSTITUTIONURL }}">{{ editor.CEURINSTITUTION }}</a>,
+            {{ editor.CEURINSTITUTION }}<br>
+        </li>
+    {% endfor %}
+</ul>
 
 <hr>
 
@@ -104,21 +169,26 @@
     <br>
 
     {% for session in data.CEURSESSIONS %}
-        <h3><span class="CEURSESSION">{{ session.session_title }}</span></h3>
-        <ul>
-            {% for paper in session.papers %}
-                <li id="{{ paper.id }}">
+    <h3><span class="CEURSESSION">{{ session.session_title }}</span></h3>
+    <ul class="session-list">
+        {% for paper in session.papers %}
+            <li class="paper-item" id="{{ paper.id }}">
+                <div class="title-and-pages">
                     <a href="{{ paper.uploaded_file_url }}">
                         <span class="CEURTITLE">{{ paper.CEURTITLE }}</span>
                     </a>
-                    <span class="CEURPAGES">{{ paper.CEURPAGES }}</span><br>
+                    <span class="CEURPAGES">{{ paper.CEURPAGES }}</span>
+                </div>
+                <div class="authors">
                     {% for author in paper.CEURAUTHOR %}
                         <span class="CEURAUTHOR">{{ author }}</span>{% if not forloop.last %}, {% endif %}
                     {% endfor %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endfor %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% endfor %}
+
 </div>
 
 <hr>

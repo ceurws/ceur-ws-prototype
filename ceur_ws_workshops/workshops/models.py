@@ -132,7 +132,7 @@ class Paper(models.Model):
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     order = models.PositiveIntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
-    
+    sort_order = models.PositiveIntegerField(default=0, null=True, blank=True) 
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')

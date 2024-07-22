@@ -8,7 +8,6 @@ from django.views import View
 
 class GenerateHtml(View):
     def get(self, request, workshop_id):
-        workshop = get_object_or_404(Workshop, id=workshop_id)
 
         json_file_path = os.path.join(settings.BASE_DIR, 'workshop_metadata', f'workshop_{workshop_id}_metadata.json')
 

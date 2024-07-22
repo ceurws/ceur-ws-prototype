@@ -15,8 +15,8 @@ def get_workshop_data(workshop):
             "JJJJ":	workshop.year_final_papers,
             "YYYY": workshop.workshop_begin_date.year, 
             "NNNN": workshop.workshop_acronym,
-            # "DD": date.today().day,
-            # "MM": date.today.month,
+            "DD": workshop.workshop_begin_date.day,
+            "MM": workshop.workshop_begin_date.month,
             "XXX": workshop.volume_number,
             "CEURLANG": workshop.workshop_language_iso,
             "CEURVOLNR": workshop.pk,
@@ -53,6 +53,7 @@ def add_editors_data(workshop, workshop_data):
         "CEURVOLEDITOR": editor.editor_name,
         "CEUREDITOREMAIL": editor.editor_url,
         "CEURINSTITUTION": editor.institution,
+        "CEUREDITORURL": editor.editor_url,
         "CEURCOUNTRY": editor.institution_country,
         "CEURINSTITUTIONURL": editor.institution_url,
         "CEURRESEARCHGROUP": editor.research_group 

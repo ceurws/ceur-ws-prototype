@@ -14,7 +14,6 @@
     <h1>Operation Successful</h1>
     <p>The workshop is available at <a href="/media/Vol-{{workshop.id}}/index.html">media/Vol-{{workshop.id}}/</a>.</p>
 
-    <!-- Django messages -->
     <div id="django-messages" style="display: none;">
       {% for message in messages %}
       <div data-message="{{ message|escapejs}}">{{ message }}</div>
@@ -23,11 +22,9 @@
   </div>
 
   <script>
-    // Script to display messages if available
     document.addEventListener('DOMContentLoaded', function () {
       let messages = Array.from(document.querySelectorAll('#django-messages [data-message]')).map(el => el.getAttribute('data-message'));
       if (messages.length > 0) {
-        // Display messages as an alert
         alert(messages.join("\n"));
       }
     });

@@ -40,12 +40,12 @@ class WorkshopOverview(View):
 
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
-        if workshop.submitted:
-            context = {
-                'workshop': workshop,
-                'already_submitted': True
-            }
-            return self.render_workshop(request, edit_mode=False, context=context)
+        # if workshop.submitted:
+        #     context = {
+        #         'workshop': workshop,
+        #         'already_submitted': True
+        #     }
+        #     return self.render_workshop(request, edit_mode=False, context=context)
         
         workshop_data = get_workshop_data(workshop)
         add_editors_data(workshop, workshop_data)

@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/style.css' %}">
+  <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
 </head>
 <p class="header-title">Are all the details correct?</p>
 <form id="validation-form" enctype="multipart/form-data" method="post">
@@ -25,6 +25,19 @@
       text-align: center;
       font-weight: bold;
     }
+    .close-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1.5rem; /* Adjust the size as needed */
+  cursor: pointer;
+  color: #000; /* Adjust the color as needed */
+}
+
+.close-button:hover {
+  color: #f00; /* Optional: Change color on hover */
+}
   </style>
     <legend>Paper Data</legend>
     Don't forget to download the agreement form in order to sign it. If any details are wrong, or missing, just go back. 
@@ -46,30 +59,36 @@
   <p>Currently uploaded Paper: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a> </p>
   </fieldset>
   <fieldset id="author-fieldset">
-    {{ author_formset.management_form}}
-    <div id="author-form" class="author-form">
+    {{ author_formset.management_form }}
+    <div id="author-form">
       {% for form in author_formset %}
-        {{form|crispy}}
+        <div class="author-form" style="position: relative;">
+          {{ form|crispy }}
+          <input type="button" value="&times;" class="delete-author close-button" style="position: absolute; top: 0; right: 0;">
+          {{ form.DELETE }}
           <hr>
+        </div>
       {% endfor %}
     </div>
     <input type="button" value="Add Author" class="button-13" id="add_author">
   </fieldset>
   <br>
-  <div class = "submit-container">
-  <input type="submit" name="confirm_button" class="button-13" value="Confirm">
-</div>
+  <div class="submit-container">
+    <input type="submit" name="confirm_button" class="button-13" value="Confirm">
+  </div>
 </form>
 
 <div id="empty_author_form" style="display:none">
-  <table class='no_error'>
+  <div class="author-form" style="position: relative;">
     {{ author_formset.empty_form|crispy }}
-    <!-- <br> -->
-  </table>
-  <hr>
+    <input type="button" value="&times;" class="delete-author close-button" style="position: absolute; top: 0; right: 0;">
+    {{ author_formset.empty_form.DELETE }} 
+    <hr>
+  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'workshops/script.js' %}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     let messages = Array.from(document.querySelectorAll('#django-messages [data-message]')).map(el => el.getAttribute('data-message'));
