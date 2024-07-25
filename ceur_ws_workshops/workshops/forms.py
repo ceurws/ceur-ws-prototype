@@ -205,23 +205,28 @@ class WorkshopForm(forms.ModelForm):
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         file_uploaded = kwargs.pop('file_uploaded', False)
-        self.workshop = kwargs.pop('workshop', None) 
+        self.workshop = kwargs.pop('workshop', None)
         hide_pages = kwargs.pop('hide_pages', False)
         pages = kwargs.pop('pages', None)
-        hide_agreement = kwargs.pop('hide_agreement', False)
+        self.hide_agreement = kwargs.pop('hide_agreement', False)
         hide_has_third_party_material = kwargs.pop('hide_has_third_party_material', True)
-        agreement_file = kwargs.pop('agreement_file', False)
+        self.agreement_file = kwargs.pop('agreement_file', False)
         hide_papers_overview = kwargs.pop('hide_papers_overview', False)
         self.clean_enabled = kwargs.pop('clean_enabled', False)
         self.agreement_not_required = kwargs.pop('agreement_not_required', False)
         super(PaperForm, self).__init__(*args, **kwargs)
+
+        if self.workshop:
+            self.fields['session'].queryset = self.workshop.sessions.all()
+        else:
+            self.fields['session'].queryset = Session.objects.none()
 
         if file_uploaded:
             self.fields['uploaded_file'].label = 'Change current file'
         else:
             self.fields['uploaded_file'].label = 'Upload file'
 
-        if self.workshop: 
+        if self.workshop:
             self.fields['session'].queryset = self.workshop.sessions.all()
         else:
             self.fields['session'].queryset = Session.objects.none()
@@ -232,44 +237,41 @@ class PaperForm(forms.ModelForm):
         if pages is not None:
             self.fields['pages'].initial = pages
 
-        if hide_agreement or self.agreement_not_required:
+
+        if self.agreement_not_required:
+            self.fields['agreement_file'].required = False
+        if self.hide_agreement:
             self.fields['agreement_file'].widget = forms.HiddenInput()
             self.fields['agreement_file'].required = False
-            
-        if hide_papers_overview: 
+
+        if hide_papers_overview:
             self.fields['agreement_file'].widget = forms.HiddenInput()
             self.fields['uploaded_file'].widget = forms.HiddenInput()
 
         if hide_has_third_party_material:
             self.fields['has_third_party_material'].widget = forms.HiddenInput()
 
-        if not agreement_file:
+        if not self.agreement_file:
             self.fields['agreement_file'].label = 'Please Upload the hand signed agreement file'
         else:
             self.fields['agreement_file'].label = 'Upload agreement file'
+
     class Meta:
         model = Paper
         fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file', 'has_third_party_material']
-
         help_texts = {'pages': '<br><i>Provide the length(number of pages) of the paper</i>.<br>',
-                    #   'agreement_file': '<br><i>The agreement file of the paper needs to be <b>hand signed</b>',
-                       'has_third_party_material': '<i>Check this box if the paper contains third-party material</i>'}
+                      'has_third_party_material': '<i>Check this box if the paper contains third-party material</i>'}
         widgets = {
-            'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper',
-                                                  'strip':True}),
-            'pages': forms.TextInput(attrs={'size': 70, 
-                                            'placeholder': 'Enter the number of pages'}),
+            'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper', 'strip': True}),
+            'pages': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html' ,
-            'required': 'True'}),
-
-            #}),
+            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html', 'required': 'True'}),
         }
 
         paper_title = forms.CharField(strip=True)
+
     def clean(self):
         cleaned_data = super().clean()
-        
         agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
 
@@ -277,6 +279,11 @@ class PaperForm(forms.ModelForm):
             pdfReader = PyPDF2.PdfReader(uploaded_file)
             num_pages = len(pdfReader.pages)
             cleaned_data['pages'] = num_pages
+
+        if not self.agreement_not_required and not cleaned_data.get('agreement_file'):
+            self.add_error('agreement_file', 'This field is required.')
+
+        return cleaned_data
 
         # if uploaded_file and agreement_file and self.workshop:
         # if agreement_file: 
@@ -291,25 +298,24 @@ class PaperForm(forms.ModelForm):
         #     print("Agreement file is not signed. Please upload a hand-signed agreement file.")
         #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
         
-        return cleaned_data
 class CustomBaseModelFormSet(BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         self.agreement_not_required = kwargs.pop('agreement_not_required', False)
+        self.hide_agreement = kwargs.pop('hide_agreement', False)
         super().__init__(*args, **kwargs)
 
+    def _construct_form(self, i, **kwargs):
+        kwargs['agreement_not_required'] = self.agreement_not_required
+        kwargs['hide_agreement'] = self.hide_agreement
+        return super()._construct_form(i, **kwargs)
+
     def __iter__(self):
-        """Yields the forms in the order they should be rendered"""
         sorted_forms = sorted(self.forms, key=lambda form: form.instance.order if form.instance.pk else 0)
         return iter(sorted_forms)
 
     def __getitem__(self, index):
-        """Returns the form at the given index, based on the rendering order"""
         sorted_forms = sorted(self.forms, key=lambda form: form.instance.order if form.instance.pk else 0)
         return sorted_forms[index]
-    
-    def _construct_form(self, i, **kwargs):
-        kwargs['agreement_not_required'] = self.agreement_not_required
-        return super()._construct_form(i, **kwargs)
 
 PaperFormset = modelformset_factory(
     Paper, 

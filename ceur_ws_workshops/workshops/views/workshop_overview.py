@@ -5,6 +5,7 @@ from django.views import View
 from django.contrib import messages
 from ..forms import *
 from .util import *
+import hashlib
 class WorkshopOverview(View):
     def get_workshop(self):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
@@ -18,7 +19,7 @@ class WorkshopOverview(View):
             'papers' : workshop.accepted_papers.all().order_by('order'),
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop, fields_not_required =True),
-            'paper_forms': PaperFormset(queryset = workshop.accepted_papers.all(), prefix = "paper",  agreement_not_required = True),
+            'paper_forms': PaperFormset(queryset = workshop.accepted_papers.all(), prefix = "paper",  agreement_not_required = True, hide_agreement = True),
             'prefaces': workshop.prefaces.all(),
             'paper_forms_no_session' : [paper for paper in workshop.accepted_papers.all() if paper.session == None],
             'session_title_list' : [session_object.session_title for session_object in workshop.sessions.all()],
@@ -50,15 +51,16 @@ class WorkshopOverview(View):
         workshop_data = get_workshop_data(workshop)
         add_editors_data(workshop, workshop_data)
         add_papers_data(workshop, workshop_data)   
-        save_workshop_data(workshop_data, workshop)
+        save_workshop_data(workshop_data, workshop)        
         request.session['json_saved'] = True
         zip_agreement_files(workshop)
+        zip_paper_files(workshop)
         messages.success(request, 'Workshop submitted successfully.')
+
         workshop.submitted = True
         workshop.save()
         
-        vol_number = workshop.id
-        html_dir = os.path.join(settings.MEDIA_ROOT, f'Vol-{vol_number}')
+        html_dir = os.path.join(settings.MEDIA_ROOT, f'Vol-{workshop.id}')
         if not os.path.exists(html_dir):
             os.makedirs(html_dir)
 
@@ -91,7 +93,6 @@ class WorkshopOverview(View):
                 workshop_form.save()
                 editor_formset.save()
             elif paper_form.is_valid():
-                print("HERERE")
                 paper_form.save()
 
                 if request.POST.get(paper_form, None):
@@ -105,7 +106,6 @@ class WorkshopOverview(View):
                         saved_paper_instance.save()
                     
                     # session_id = request.POST.get(f'id_paper-{i}-session')
-                    # print(session_id)
                     # if 'session' in request.POST:
                     #     session_id = request.POST.get('session')
                     #     session = get_object_or_404(Session, pk=session_id)
@@ -118,20 +118,27 @@ class WorkshopOverview(View):
                 for paper_id in papers_to_delete:
                     Paper.objects.filter(id=paper_id).delete()
 
+                # if 'paper_order' in request.POST:
+                #     paper_order = json.loads(request.POST['paper_order'])
+                #     if not isinstance(paper_order, int):
+                #         for idx, paper_id in enumerate(paper_order):
+                #             Paper.objects.filter(id=paper_id).update(order=idx + 1)
+
                 if 'paper_order' in request.POST:
                     paper_order = json.loads(request.POST['paper_order'])
-                    if not isinstance(paper_order, int):
-                        for idx, paper_id in enumerate(paper_order):
-                            Paper.objects.filter(id=paper_id).update(order=idx + 1)
-                
-            if not workshop_form.is_valid():
-                print("Workshop form errors:", workshop_form.errors)
-
-            if not editor_formset.is_valid():
-                print("Editor formset errors:", editor_formset.errors)
-
-            if not paper_form.is_valid():
-                print("Paper formset errors:", paper_form.errors)
+                    for idx, item in enumerate(paper_order):
+                        paper_id = item['paperId']
+                        session_id = item['session']
+                        print(session_id)
+                        paper = Paper.objects.get(id=paper_id)
+                        paper.order = idx + 1
+                        if session_id != 'unassigned':
+                            session = get_object_or_404(Session, pk=session_id)
+                            paper.session = session
+                        else:
+                            paper.session = None
+                        paper.save()
+                        
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
             return self.submit_workshop(request, secret_token)

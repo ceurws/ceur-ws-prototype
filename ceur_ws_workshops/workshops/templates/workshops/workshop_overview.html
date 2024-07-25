@@ -179,21 +179,21 @@
             </div>
         </fieldset>
     </form>
-    {% if session_title_list %}
+    {{% if session_title_list %}
     <form method="post" enctype="multipart/form-data" class="sortable" id="sortable-list">
         {% csrf_token %}
         <fieldset class="papers-list">
             <legend>Papers</legend>
             <input type="hidden" id="paper_id" name="paper_id" value="">
             {{ paper_forms.management_form }}
-
-            {% for session_title in session_title_list %}
+    
+            {% for session in workshop.sessions.all %}
                 <fieldset class="papers-list">
-                    <legend>{{ session_title }}</legend>
-                    <ul id="nested-sortable-{{ forloop.counter }}">
+                    <legend>{{ session.session_title }}</legend>
+                    <ul id="nested-sortable-{{ forloop.counter }}" data-session-id="{{ session.id }}">
                         {% for paperform in paper_forms %}
-                            {% if paperform.instance.session and paperform.instance.session.session_title == session_title %}
-                                <li class="paper-item" data-paper-id="{{ paperform.instance.id }}">
+                            {% if paperform.instance.session and paperform.instance.session == session %}
+                                <li class="paper-item" data-paper-id="{{ paperform.instance.id }}" data-session-id="{{ session.id }}">
                                     <div class="paper-container">
                                         <div class="handle">&#9776;</div>
                                         <div class="paper-summary">
@@ -203,11 +203,9 @@
                                         <div class="paper-details" style="display: none;">
                                             <div>
                                                 <input type='hidden' name='paper_order' value="{{ paperform.instance.order }}">
-                                                <input type='hidden' name='session' value="{{ paperform.instance.session.id }}">
+                                                <input type='hidden' name='session-{{ forloop.counter }}' value="{{ session.id }}">
                                                 {{ paperform|crispy }}
                                                 {{paperform.id}}
-                                                {{paperform.paper_title}}
-                                                {{paperform.agreement_file}}
                                                 {% if paperform.instance.uploaded_file %}
                                                     <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
                                                 {% endif %}
@@ -228,14 +226,14 @@
                     </ul>
                 </fieldset>
             {% endfor %}
-
+    
             <!-- Unassigned Papers -->
             <fieldset class="papers-list">
                 <legend>Unassigned Papers</legend>
-                <ul id="nested-sortable-unassigned">
+                <ul id="nested-sortable-unassigned" data-session-id="unassigned">
                     {% for paperform in paper_forms %}
                         {% if not paperform.instance.session %}
-                            <li class="paper-item" data-paper-id="{{ paperform.instance.id }}">
+                            <li class="paper-item" data-paper-id="{{ paperform.instance.id }}" data-session-id="unassigned">
                                 <div class="paper-container">
                                     <div class="handle">&#9776;</div>
                                     <div class="paper-summary">
@@ -247,7 +245,6 @@
                                             <input type='hidden' name='paper_order' value="{{ paperform.instance.order }}">
                                             {{ paperform|crispy }}
                                             {{paperform.id}}
-                                            {{paperform.paper_title}}
                                             {{paperform.agreement_file}}
                                             {% if paperform.instance.uploaded_file %}
                                                 <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{ paperform.instance.uploaded_file.name }}</a></p>
@@ -269,7 +266,7 @@
                 </ul>
             </fieldset>
         </fieldset>
-
+    
         <div class="submit-container">
             <input type="submit" name="submit_button" class="button-13" value="Confirm">
         </div>
@@ -580,28 +577,34 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-        var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
+    var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
 
-        sortableLists.forEach(function (nestedSortables) {
-            new Sortable(nestedSortables, {
-                group: 'nested',
-                animation: 150,
-                fallbackOnBody: true,
-                swapThreshold: 0.65,
-                handle: '.handle',
-                onEnd: function (evt) {
-                    var order = [];
-                    nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
-                        order.push(item.dataset.paperId);
+    sortableLists.forEach(function (nestedSortables) {
+        new Sortable(nestedSortables, {
+            group: 'nested',
+            animation: 150,
+            fallbackOnBody: true,
+            swapThreshold: 0.65,
+            handle: '.handle',
+            onEnd: function (evt) {
+                var order = [];
+                sortableLists.forEach(function (nestedSortable) {
+                    var sessionId = nestedSortable.getAttribute('data-session-id');
+                    nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
+                        order.push({
+                            paperId: item.getAttribute('data-paper-id'),
+                            session: sessionId
+                        });
                     });
-                    var orderInput = document.createElement('input');
-                    orderInput.type = 'hidden';
-                    orderInput.name = 'paper_order';
-                    orderInput.value = JSON.stringify(order);
-                    document.getElementById('sortable-list').appendChild(orderInput);
-                }
-            });
+                });
+                var orderInput = document.createElement('input');
+                orderInput.type = 'hidden';
+                orderInput.name = 'paper_order';
+                orderInput.value = JSON.stringify(order);
+                document.getElementById('sortable-list').appendChild(orderInput);
+            }
         });
+    });
 });
 </script>
 
