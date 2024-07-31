@@ -12,11 +12,13 @@ class WorkshopOverview(View):
         return workshop
     
     def render_workshop(self, request, edit_mode = False, context=None):
-
+        
+        
         workshop = self.get_workshop()
-
+        # workshop.accepted_papers.all().order_by('order')
+        print("PAPERS", [paper for paper in workshop.accepted_papers.all()])
         default_context = {
-            'papers' : workshop.accepted_papers.all().order_by('order'),
+            'papers' : [paper for paper in workshop.accepted_papers.all()],
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop, fields_not_required =True),
             'paper_forms': PaperFormset(queryset = workshop.accepted_papers.all(), prefix = "paper",  agreement_not_required = True, hide_agreement = True),
@@ -109,7 +111,6 @@ class WorkshopOverview(View):
                 for paper_id in papers_to_delete:
                     Paper.objects.filter(id=paper_id).delete()
 
-
                 if 'paper_order' in request.POST:
                     paper_order = json.loads(request.POST['paper_order'])
                     
@@ -117,21 +118,17 @@ class WorkshopOverview(View):
                         for idx, paper_id in enumerate(paper_order):
                             Paper.objects.filter(id=paper_id).update(order=idx + 1)
 
-                    for idx, item in enumerate(paper_order):
-                        paper_id = item['paperId']
-                        session_id = item['session']
-                        paper = Paper.objects.get(id=paper_id)
-                        paper.order = idx + 1
-                        if session_id != 'unassigned':
-                            session = get_object_or_404(Session, pk=session_id)
-                            paper.session = session
-                        else:
-                            paper.session = None
-                        paper.save()
-            if not workshop_form.is_valid():
-                print(workshop.errors)
-            if not editor_formset.is_valid():
-                print(editor_formset.errors)
+                    # for idx, item in enumerate(paper_order):
+                    #     paper_id = item['paperId']
+                    #     session_id = item['session']
+                    #     paper = Paper.objects.get(id=paper_id)
+                    #     paper.order = idx + 1
+                    #     if session_id != 'unassigned':
+                    #         session = get_object_or_404(Session, pk=session_id)
+                    #         paper.session = session
+                    #     else:
+                    #         paper.session = None
+                    #     paper.save()
 
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":

@@ -7,7 +7,6 @@ from urllib.parse import urlparse, parse_qs
 from django.http import HttpResponse
 from openreview import OpenReviewException  # Ensure this is imported at the beginning
 
-
 class OpenReviewClient:
     def __init__(self):
         import openreview        
@@ -46,16 +45,16 @@ class OpenReviewClass(View):
                 workshop = get_object_or_404(Workshop, id = request.POST.get('workshop_id'))
                 paper = get_object_or_404(Paper, id = request.POST.getlist('paper_id')[i])
                 
-                paper_form = PaperForm(data = data, workshop = workshop, instance = paper)
-
-                if request.POST.getlist('session')[i] != "":
-                    session = get_object_or_404(Session, pk=request.POST.getlist('session')[i])
-                    paper_form.session = session
-                
+                paper_form = PaperForm(data = data, workshop = workshop, instance = paper, agreement_not_required = True)
+    
                 if paper_form.is_valid():
                     paper_instance = paper_form.save(commit=False)
                     paper_instance.workshop = workshop
-                
+
+                    if request.POST.getlist('session')[i] != "":
+                        session = get_object_or_404(Session, pk=request.POST.getlist('session')[i])
+                        paper_instance.session = session
+
                     if request.POST.get('author0-TOTAL_FORMS', None):
                         author_formset = get_author_formset(extra=request.POST[f'author{i}-TOTAL_FORMS'])(queryset=Author.objects.none(), data = request.POST, prefix=f'author{i}')
                         if author_formset.is_valid():
@@ -63,7 +62,8 @@ class OpenReviewClass(View):
                             paper_instance.authors.add(*author_instances)
                     instance = paper_form.save()
                     workshop.accepted_papers.add(instance)
-
+                else:
+                    print(paper_form.errors, "ERRORS")
             return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
 
         else:
@@ -118,7 +118,6 @@ class OpenReviewClass(View):
                     'openreview_url': query
                 }
                 return render(request, "workshops/create_workshop.html", context)
-
 
         context = {
             'query' : query

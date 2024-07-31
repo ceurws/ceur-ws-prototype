@@ -81,7 +81,7 @@ class CreateWorkshop(View):
                     pass
                 
                 # we save the paper form here to store the files.
-                paper_form = PaperForm(form_data, form_files, workshop = workshop)
+                paper_form = PaperForm(form_data, form_files, workshop = workshop, agreement_not_required = True)
                 if paper_form.is_valid():
                     paper_instance = paper_form.save(commit=False)
                     paper_instance.uploaded_file = in_memory_pdf

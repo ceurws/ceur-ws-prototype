@@ -128,7 +128,7 @@ class Paper(models.Model):
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10, blank = True)
     uploaded_file = models.FileField(upload_to=paper_upload_path, blank = True, max_length=500)
-    agreement_file = models.FileField(upload_to=agreement_file_path, blank = True, max_length=500)
+    agreement_file = models.FileField(upload_to=agreement_file_path, blank = True, null = True, max_length=500)
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     order = models.PositiveIntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
