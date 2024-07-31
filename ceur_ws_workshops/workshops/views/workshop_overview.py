@@ -92,6 +92,7 @@ class WorkshopOverview(View):
                 workshop_form.save()
                 editor_formset.save()
             elif paper_form.is_valid():
+
                 paper_form.save()
 
                 if request.POST.get(paper_form, None):
@@ -103,15 +104,6 @@ class WorkshopOverview(View):
                         else:
                             saved_paper_instance.session = None
                         saved_paper_instance.save()
-                    
-                    # session_id = request.POST.get(f'id_paper-{i}-session')
-                    # if 'session' in request.POST:
-                    #     session_id = request.POST.get('session')
-                    #     session = get_object_or_404(Session, pk=session_id)
-                    #     saved_paper_instance.session = session
-                    # else:
-                    #     saved_paper_instance.session = None
-                    # saved_paper_instance.save()
 
                 papers_to_delete = request.POST.getlist('papers_to_delete') 
                 for paper_id in papers_to_delete:
@@ -120,6 +112,11 @@ class WorkshopOverview(View):
 
                 if 'paper_order' in request.POST:
                     paper_order = json.loads(request.POST['paper_order'])
+                    
+                    if not isinstance(paper_order, int):
+                        for idx, paper_id in enumerate(paper_order):
+                            Paper.objects.filter(id=paper_id).update(order=idx + 1)
+
                     for idx, item in enumerate(paper_order):
                         paper_id = item['paperId']
                         session_id = item['session']
@@ -135,7 +132,7 @@ class WorkshopOverview(View):
                 print(workshop.errors)
             if not editor_formset.is_valid():
                 print(editor_formset.errors)
-                        
+
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
             return self.submit_workshop(request, secret_token)

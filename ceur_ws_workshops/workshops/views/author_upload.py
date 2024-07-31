@@ -135,6 +135,7 @@ class AuthorUpload(View):
     def post(self, request, author_upload_secret_token):
         
         # if statement to check if request.FILES has any new files attached. 
+
         if bool(request.FILES.get('uploaded_file', False)) == True:
             author_formset = get_author_formset()(queryset=Author.objects.none(), 
                                                   data = request.POST, 
@@ -145,6 +146,7 @@ class AuthorUpload(View):
                                    workshop=self.get_workshop(), 
                                    agreement_file = True, 
                                    clean_enabled = True)
+
         # if no files are attached we extract the files uploaded 
         else:
             author_formset = get_author_formset()(request.POST, prefix="author")
