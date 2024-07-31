@@ -39,6 +39,10 @@ class AuthorUpload(View):
         response['Content-Disposition'] = f'attachment; filename="{name}"'
         return name, html_content
     
+    def check_paper_exists(self, paper_form, workshop):
+        paper_title = paper_form.cleaned_data.get('paper_title')
+        return Paper.objects.filter(paper_title=paper_title, workshop=workshop).exists()
+    
     def submit_paper(self, request, author_formset, paper_form):
 
         author_instances = None
@@ -72,14 +76,11 @@ class AuthorUpload(View):
     def create_paper(self, request, author_formset, paper_form, author_upload_secret_token):
 
         if paper_form.is_valid() and author_formset.is_valid():
+# TODO FIX 
 
-            # if Paper.objects.filter(paper_title=paper_form.cleaned_data['paper_title'], workshop=self.get_workshop()).exists():
-
-            #     if paper_form.instance.uploaded_file.url:
-            #         paper_form.instance.editor_agreement = None
-            #     paper_form.add_error('paper_title', 'A paper with this title has already been submitted. Please choose a different title. If you would like to make any changes to the submission, please contact one of the workshop editors.')
+            # if self.check_paper_exists(paper_form, self.get_workshop()):
+            #     print("Paper with this title already exists in the workshop.")
             #     return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
-            
             paper_instance = paper_form.save(commit=False) 
             paper_instance.workshop = self.get_workshop()
 
@@ -98,7 +99,6 @@ class AuthorUpload(View):
                                    instance=paper_instance, 
                                    pages=paper_form.cleaned_data['pages'])
 
-            # Build path 
             name, agreement_html_content = self.generate_agreement(request, paper_instance.id, author_upload_secret_token, author_formset)
 
             paper_instance.agreement_file.save(name, ContentFile(agreement_html_content.encode('utf-8')))
@@ -117,7 +117,6 @@ class AuthorUpload(View):
             return render(request, self.edit_path, context)
         else:
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
-
 
     def get(self, request, author_upload_secret_token):
         # if 'author_formset_data' in request.session:

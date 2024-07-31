@@ -64,7 +64,6 @@ class WorkshopOverview(View):
         if not os.path.exists(html_dir):
             os.makedirs(html_dir)
 
-        print(html_dir, "HTML_DIR")
         html_content = self.generate_html(workshop_data)
         
         html_file_path = os.path.join(html_dir, 'index.html')
@@ -118,18 +117,12 @@ class WorkshopOverview(View):
                 for paper_id in papers_to_delete:
                     Paper.objects.filter(id=paper_id).delete()
 
-                # if 'paper_order' in request.POST:
-                #     paper_order = json.loads(request.POST['paper_order'])
-                #     if not isinstance(paper_order, int):
-                #         for idx, paper_id in enumerate(paper_order):
-                #             Paper.objects.filter(id=paper_id).update(order=idx + 1)
 
                 if 'paper_order' in request.POST:
                     paper_order = json.loads(request.POST['paper_order'])
                     for idx, item in enumerate(paper_order):
                         paper_id = item['paperId']
                         session_id = item['session']
-                        print(session_id)
                         paper = Paper.objects.get(id=paper_id)
                         paper.order = idx + 1
                         if session_id != 'unassigned':
@@ -138,6 +131,10 @@ class WorkshopOverview(View):
                         else:
                             paper.session = None
                         paper.save()
+            if not workshop_form.is_valid():
+                print(workshop.errors)
+            if not editor_formset.is_valid():
+                print(editor_formset.errors)
                         
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
