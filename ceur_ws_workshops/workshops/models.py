@@ -37,20 +37,30 @@ class Session(models.Model):
     def __str__(self):
         return self.session_title
     
+class Preface(models.Model):
+    def workshop_preface_file_path(instance, filename):
+        preface_count = Preface.objects.filter(workshop=instance.workshop).count() + 1
+        filename = f"preface{preface_count}.pdf"
+        workshop_id = instance.workshop.id
+        return f"preface/Vol-{workshop_id}/{filename}"
+     
+    workshop = models.ForeignKey('Workshop', related_name='prefaces', on_delete=models.CASCADE)
+    preface = models.FileField(upload_to=workshop_preface_file_path, blank = True, null = True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Preface for {self.workshop.workshop_full_title} created at {self.created_at}"
+    
 class Workshop(models.Model):
     
     def workshop_agreement_file_path(instance, filename):
-        acronym = instance.workshop_acronym
-        filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
+        # acronym = instance.workshop_acronym
+        # filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
+        editor_agreement_count = Workshop.objects.filter(id=instance.id).count() + 1
+        filename = f"editor_agreement{editor_agreement_count}.pdf"
         workshop_id = instance.id
         return f"agreement/Vol-{workshop_id}/{filename}"
-    
-    def workshop_preface_file_path(instance, filename):
-        acronym = instance.workshop_acronym
-        filename = f"WORKSHOP-PREFACE-{acronym}.pdf"
-        workshop_id = instance.id
-        return f"preface/Vol-{workshop_id}/{filename}"
- 
+     
     workshop_full_title = models.CharField(max_length=200)
     workshop_short_title = models.CharField(max_length=200)
     workshop_acronym = models.CharField(max_length=50)
@@ -69,7 +79,8 @@ class Workshop(models.Model):
     total_accepted_papers = models.IntegerField()
     total_reg_acc_papers = models.IntegerField(null=True, blank=True)
     total_short_acc_papers = models.IntegerField(null=True, blank=True)
-
+    openreview_url = models.URLField(max_length=200,null=True, blank=True)
+    
     # Filled in by CEUR
     volume_number = models.IntegerField(null=True, blank=True)
     submission_date = models.DateField(null=True, blank=True) # date the submit button is clicked by volume owner
@@ -78,9 +89,8 @@ class Workshop(models.Model):
 
     editor_agreement = models.FileField(upload_to=workshop_agreement_file_path)
     editor_agreement_signed = models.BooleanField()
-    preface = models.FileField(upload_to =workshop_preface_file_path, blank = True, null = True )
-    has_preface = models.BooleanField()
-
+    # preface = models.FileField(upload_to =workshop_preface_file_path, blank = True, null = True )
+    submitted = models.BooleanField(default=False)
     # KEYS
     editors = models.ManyToManyField(Editor, blank=True, related_name='workshops_editors')  
     accepted_papers = models.ManyToManyField('Paper', related_name='accepted_papers')
@@ -101,15 +111,18 @@ class Language(models.Model):
 
 class Paper(models.Model):
     def paper_upload_path(instance, filename):
+        paper_count = Paper.objects.filter(workshop=instance.workshop).count() + 1
+        filename = f"paper{paper_count}.pdf"
         workshop_volume = instance.workshop.id
         return f"papers/Vol-{workshop_volume}/{filename}"
 
     def agreement_file_path(instance, filename):
         agreement_file = instance.workshop.id
-        original_filename = instance.agreement_file.name
-        paper_title = instance.paper_title.replace(' ', '')
-        extension = os.path.splitext(original_filename)[1]
-        filename = f'AUTHOR-AGREEMENT-{paper_title}{extension}.html'
+        agreement_count = Paper.objects.filter(workshop=instance.workshop).count() + 1
+        filename = f'agreement{agreement_count}.html'
+    
+        if not filename.lower().endswith('.html'):
+            filename += '.html'
         return f"agreement/Vol-{agreement_file}/{filename}"
     
     paper_title = models.CharField(max_length=200)
@@ -119,7 +132,7 @@ class Paper(models.Model):
     secret_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     order = models.PositiveIntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
-    
+    sort_order = models.PositiveIntegerField(default=0, null=True, blank=True) 
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')

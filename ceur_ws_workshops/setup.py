@@ -27,10 +27,8 @@ setup(
             'ceur_ws_workshops_manage = ceur_ws_workshops.manage:main',
         ],
     },
-
     classifiers = [ 
         'Framework :: Django',
         'Framework :: Django :: 3.0', 
     ],
-
 )

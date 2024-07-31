@@ -8,6 +8,9 @@
     <title>Workshop</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="{% static 'workshops/script.js' %}"></script>
 </head>
 <body>
     <header class="header-title">
@@ -24,7 +27,9 @@
         <form action="{% url 'workshops:create_workshop' %}" method="get">
             <button type="submit" class="button-13">Create New Workshop</button>
           </form>
-        
+          <form action="{% url 'workshops:open_review_workshop' %}" method="get">
+            <button type="submit" class="button-13">Create New Worskhop with OpenReview</button>
+          </form>
 
         {% endblock %}
     </main>

@@ -1,8 +1,8 @@
 from django.views import View
 from . import CreateWorkshop
 from django.shortcuts import render, redirect, get_object_or_404
-from ..forms import WorkshopForm, EditorFormSet, SessionFormSet, PaperForm, get_author_formset
-from ..models import Editor, Session, Workshop, Paper, Author
+from ..forms import WorkshopForm, EditorFormSet, SessionFormSet, PaperForm, get_author_formset, PrefaceFormset
+from ..models import Editor, Session, Workshop, Paper, Author, Preface
 from urllib.parse import urlparse, parse_qs
 from django.http import HttpResponse
 from openreview import OpenReviewException  # Ensure this is imported at the beginning
@@ -109,10 +109,12 @@ class OpenReviewClass(View):
                 workshop_form = WorkshopForm(data=data)
                 editor_form = EditorFormSet(queryset=Editor.objects.none(), prefix='editor')
                 session_form = SessionFormSet(queryset=Session.objects.none(), prefix='session')
+                preface_formset = PrefaceFormset(queryset=Preface.objects.none(), prefix = "preface")
                 context = {
                     'form': workshop_form,
                     'editor_form': editor_form,
                     'session_form': session_form,
+                    'preface_formset': preface_formset,
                     'openreview_url': query
                 }
                 return render(request, "workshops/create_workshop.html", context)

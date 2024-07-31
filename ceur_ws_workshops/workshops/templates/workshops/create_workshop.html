@@ -3,6 +3,22 @@
 {% block content %}
 {%load crispy_forms_tags %} 
 
+<style>
+  .close-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 1.5rem; /* Adjust the size as needed */
+  cursor: pointer;
+  color: #000; /* Adjust the color as needed */
+}
+
+.close-button:hover {
+  color: #f00; /* Optional: Change color on hover */
+}
+</style>
+
 <form method="post" id="form-container" enctype="multipart/form-data">
   <h1 class="header-title">Create Workshop Volume</h1>
   {% csrf_token %}
@@ -18,38 +34,24 @@
     </ul>
 
     {% crispy form %}
-    <script>
-      const startDateInput = document.getElementById('workshop_begin_date');
-      const endDateInput = document.getElementById('workshop_end_date');
-      function updateEndDateMin() {
-      endDateInput.setAttribute('min', startDateInput.value);
-      if (endDateInput.value && startDateInput.value > endDateInput.value) {
-        endDateInput.value = startDateInput.value;
-      }
-    }
-    
-    function updateStartDateMax() {
-      if (startDateInput.value && startDateInput.value > endDateInput.value) {
-        startDateInput.value = endDateInput.value;
-      }
-    }
-
-    startDateInput.addEventListener('change', updateEndDateMin);
-
-    endDateInput.addEventListener('change', updateStartDateMax);
-
-    if (startDateInput.value) {
-      updateEndDateMin();
-    }
-
-    else if (endDateInput.value) {
-      updateStartDateMax();
-    }
-    </script>
+    <input type="hidden" name="openreview_url" value="{{ openreview_url }}">
     <input type="hidden" name="workshop_id" value="{{ form.instance.id }}">
 
   </fieldset>
-
+  <fieldset id="preface-fieldset">
+    <legend>Prefaces</legend>
+    {{ preface_formset.management_form }}
+    <div id="preface-form">
+        {% for form in preface_formset %}
+            <div class="preface-form" style="position: relative;">
+                {{ form.as_p }}
+                <input type="button" value = "&times;" class="delete-preface close-button" style="position: absolute; top: 0; right: 0;">
+                {{ form.DELETE }} 
+            </div>
+        {% endfor %}
+    </div>
+    <input type="button" value = "Add Preface" class="button-13"  id="add_preface">
+</fieldset>
 
   <fieldset id="session_fieldset">
     <legend>Session</legend>
@@ -60,8 +62,10 @@
     {{ session_form.management_form }}
     <div class="session-form" id="session-form">
       {% for form in session_form %}
-      {{form.as_p}}
-      <br>
+        {{ form.as_p }}
+        <input type="button" value = "&times;" class="delete-session close-button" style="position: absolute; top: 0; right: 0;">
+        {{ form.DELETE }} 
+        <br>
       {% endfor %}
     </div>
     <input type="button" value="Add Session" class="button-13" id="add_session">
@@ -76,8 +80,10 @@
     {{ editor_form.management_form }}
     <div class="editor-form" id="editor-form">
       {% for editor in editor_form %}
-      {{editor|crispy}}
-      <br>
+        {{ editor|crispy }}
+        <input type="button" value = "&times;" class="delete-session close-button" style="position: absolute; top: 0; right: 0;">
+        {{ form.DELETE }} 
+        <br>
       {% endfor %}
     </div>
     <input type="button" value="Add Editor" class="button-13" id="add_editor">
@@ -88,21 +94,34 @@
   </div>
 </form>
 
+<div id="empty_preface_form" style="display:none">
+  <div class="preface-form" style="position: relative;">
+      {{ preface_formset.empty_form.as_p }}
+      <input type="button" value = "&times;" class="delete-preface close-button" style="position: absolute; top: 0; right: 0;">
+      {{ preface_formset.empty_form.DELETE }} 
+      <hr>
+  </div>
+</div>
 
 <div id="empty_editor_form" style="display:none">
-  <table class='no_error'>
+  <div class="editor-form" style="position: relative;">
     {{ editor_form.empty_form|crispy }}
+    <input type="button" value = "&times;" class="delete-editor close-button" style="position: absolute; top: 0; right: 0;">
+    {{ editor_form.empty_form.DELETE }} 
     <br>
-  </table>
-  <hr>
-</div>
-<div id="empty_session_form" style="display:none">
-  <table class='no_error'>
-    {{ session_form.empty_form }}
-    <br>
-  </table>
+    <hr>
+  </div>
 </div>
 
+<div id="empty_session_form" style="display:none">
+  <div class="session-form" style="position: relative;">
+    {{ session_form.empty_form }}
+    <input type="button" value = "&times;" class="delete-session close-button" style="position: absolute; top: 0; right: 0;">
+    {{ session_form.empty_form.DELETE }} 
+    <br>
+    <hr>
+  </div>
+</div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{% static 'workshops/script.js' %}"></script>
