@@ -1,7 +1,7 @@
 {% extends 'workshops/edit_author.html' %}
 {% load static %}
 {% block content %}
-{%load crispy_forms_tags %} 
+{% load crispy_forms_tags %} 
 <!DOCTYPE html>
 <html lang="en">
 
@@ -11,10 +11,137 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paper Submitted Correctly</title>
   <link rel="stylesheet" href="{% static 'ceur_ws_workshops/workshops/static/workshops/styles.css' %}">
+  <style>
+.delete_object {
+  color: red;
+  border-color: #f5c6cb;
+  position: relative;
+  padding: .75rem 1.25rem;
+  border: 1px solid transparent;
+  font-weight: bold;
+  text-align: left;
+  display: flex;
+  align-items: center;
+}
+
+.delete_object input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.delete_object label {
+  margin: 0;
+}
+
+.author-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle-details {
+  cursor: pointer;
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+.up {
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+}
+
+.handle {
+  display: inline-block;
+  border-top: 3px solid var(--dark);
+  width: 30px;
+  padding-top: 5px;
+  cursor: grab;
+}
+
+.handle:after, .handle:before {
+  display: block;
+  content: "";
+  padding-top: 5px;
+  border-top: 3px solid var(--dark);
+}
+
+.handle:hover, .handle:hover:before, .handle:hover:after {
+  border-color: var(--primary);
+}
+
+.handle:active, .handle:active:before, .handle:active:after {
+  cursor: grabbing;
+}
+
+.author-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  list-style: none;
+}
+
+.author-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #f9f9f9;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.author-name {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.author-details {
+  display: none;
+  padding: 10px 0 0 30px;
+}
+
+.author-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  list-style: none; 
+}
+.delete_object {
+  margin-top: 10px;
+}
+
+.blue-background-class {
+  background-color: #e0f7fa;
+}
+
+.arrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+}
+
+.down {
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+}
+
+.up {
+  transform: rotate(-135deg);
+  -webkit-transform: rotate(-135deg);
+}
+
+  </style>
 </head>
 
 <body>
-
   {% if edit_mode %}
   <h1>Edit Paper Details</h1>
   <form method="post" enctype="multipart/form-data">
@@ -26,133 +153,7 @@
       <p>Agreement File: <a href="{{ paper_form.instance.agreement_file.url }}">{{ paper_form.instance.agreement_file.name }}</a></p>
 
     </fieldset>
-    <style>
-     .delete_object {
-        color: red;
-        border-color: #f5c6cb;
-        position: relative;
-        padding: .75rem 1.25rem;
-        border: 1px solid transparent;
-        font-weight: bold;
-        text-align: left;
-        display: flex;
-        align-items: center;
-    }
-
-    .delete_object input[type="checkbox"] {
-        margin-right: 0.5rem;
-    }
-
-    .delete_object label {
-        margin: 0;
-    }
-
-    .author-summary {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .toggle-details {
-        cursor: pointer;
-        border: solid black;
-        border-width: 0 3px 3px 0;
-        display: inline-block;
-        padding: 3px;
-    }
-
-    .down {
-        transform: rotate(45deg);
-        -webkit-transform: rotate(45deg);
-    }
-
-    .up {
-        transform: rotate(-135deg);
-        -webkit-transform: rotate(-135deg);
-    }
-
-    .handle {
-        display: inline-block;
-        border-top: 3px solid var(--dark);
-        width: 30px;
-        padding-top: 5px;
-        cursor: grab;
-    }
-
-    .handle:after, .handle:before {
-        display: block;
-        content: "";
-        padding-top: 5px;
-        border-top: 3px solid var(--dark);
-    }
-
-    .handle:hover, .handle:hover:before, .handle:hover:after {
-        border-color: var(--primary);
-    }
-
-    .handle:active, .handle:active:before, .handle:active:after {
-        cursor: grabbing;
-    }
-
-    .author-container {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        list-style: none;
-    }
-
-    .author-container {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        background: #f9f9f9;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-
-    .author-name {
-        font-size: 1.2em;
-        font-weight: bold;
-        margin-right: 10px;
-    }
-
-    .author-details {
-        display: none;
-        padding: 10px 0 0 30px;
-    }
-
-    .author-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        list-style: none; 
-    }
-    .delete_object {
-        margin-top: 10px;
-    }
-
-    .blue-background-class {
-        background-color: #e0f7fa;
-    }
-
-    .arrow {
-        border: solid black;
-        border-width: 0 3px 3px 0;
-        display: inline-block;
-        padding: 3px;
-    }
-
-    .down {
-        transform: rotate(45deg);
-        -webkit-transform: rotate(45deg);
-    }
-
-    .up {
-        transform: rotate(-135deg);
-        -webkit-transform: rotate(-135deg);
-    }
-      </style>
+    
    <fieldset id="author-fieldset">
     <legend>Author Details</legend>
     <div id="author-form" class="author-form">
@@ -238,7 +239,6 @@
     <hr>
   </div>
   
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       let messages = Array.from(document.querySelectorAll('#django-messages [data-message]')).map(el => el.getAttribute('data-message'));
@@ -254,7 +254,7 @@
   {% else %}
   <h1>Paper Submitted Correctly</h1>
   <p style = "text-align: center;">Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_full_title }}</strong>.</p>
-  <fieldset class="paper-details">
+  <fieldset>
     <legend>Paper Details</legend>
     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
     <p><strong>Pages:</strong> {{ paper.pages }}</p>
@@ -270,7 +270,7 @@
   </fieldset>
   <br>
   <fieldset>
-    <legend>Paper Author Details:</legend>
+    <legend>Author Details:</legend>
     <ul>
       {% for author in paper.authors.all %}
       <li><strong>Name:</strong> {{ author.author_name }}</li>
@@ -309,6 +309,5 @@
   {% endif %}
 
 </body>
-<script src="{% static 'workshops/script.js' %}"></script>
 </html>
 {% endblock %}

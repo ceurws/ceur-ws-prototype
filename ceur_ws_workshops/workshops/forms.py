@@ -112,8 +112,6 @@ class WorkshopForm(forms.ModelForm):
             'editor_agreement': FileInput(attrs={'accept': '.pdf', 
                                                  'placeholder': 'Upload the agreement file'}),                
             'editor_agreement_signed': CheckboxInput(attrs={'required': True}),
-            # 'preface': FileInput(attrs={'accept': '.pdf',
-            #                             'placeholder': 'Upload the preface of the workshop'}),
        }
         
         labels = {
@@ -135,13 +133,11 @@ class WorkshopForm(forms.ModelForm):
         # Populate dropdown choices from JSON data
         choices = [(data['639-2'], data['name']) for code, data in languages.items()]
         self.fields['workshop_language_iso'].choices = choices
-        self.helper = FormHelper(self)
-        self.helper.form_tag = False
         # default language 
         self.fields['workshop_language_iso'].initial = 'eng'
         self.fields['workshop_country'].initial = 'NL'
         email = kwargs.pop('volume_owner_email', None)
-
+        
         self.fields['volume_owner_email'] = forms.EmailField(initial=email, required=True, max_length=200, label='Volume owner email', help_text='<br><i>Provide the email of the volume owner</i>')
         self.fields['volume_owner_email'].widget.attrs['placeholder'] = 'Enter the email of the volume owner'
         self.fields['volume_owner_email'].widget.attrs['size'] = 100
@@ -211,7 +207,6 @@ class PaperForm(forms.ModelForm):
         self.hide_agreement = kwargs.pop('hide_agreement', False)
         hide_has_third_party_material = kwargs.pop('hide_has_third_party_material', True)
         self.agreement_file = kwargs.pop('agreement_file', False)
-        hide_papers_overview = kwargs.pop('hide_papers_overview', False)
         self.clean_enabled = kwargs.pop('clean_enabled', False)
         self.agreement_not_required = kwargs.pop('agreement_not_required', False)
         super(PaperForm, self).__init__(*args, **kwargs)
@@ -226,27 +221,18 @@ class PaperForm(forms.ModelForm):
         else:
             self.fields['uploaded_file'].label = 'Upload file'
 
-        if self.workshop:
-            self.fields['session'].queryset = self.workshop.sessions.all()
-        else:
-            self.fields['session'].queryset = Session.objects.none()
-
         if hide_pages:
             self.fields['pages'].widget = forms.HiddenInput()
 
         if pages is not None:
             self.fields['pages'].initial = pages
 
-        if self.agreement_not_required:
+        if self.agreement_not_required or self.hide_agreement:
             self.fields['agreement_file'].required = False
             
         if self.hide_agreement:
             self.fields['agreement_file'].widget = forms.HiddenInput()
             self.fields['agreement_file'].required = False
-
-        if hide_papers_overview:
-            self.fields['agreement_file'].widget = forms.HiddenInput()
-            self.fields['uploaded_file'].widget = forms.HiddenInput()
 
         if hide_has_third_party_material:
             self.fields['has_third_party_material'].widget = forms.HiddenInput()
@@ -265,8 +251,9 @@ class PaperForm(forms.ModelForm):
             'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper', 'strip': True}),
             'pages': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
-            # 'required': 'True'
+            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html',
+            'required': 'True'}),
+            #  required: True is needed here for the __init__ to work in author_upload
         }
 
         paper_title = forms.CharField(strip=True)
@@ -281,8 +268,8 @@ class PaperForm(forms.ModelForm):
             num_pages = len(pdfReader.pages)
             cleaned_data['pages'] = num_pages
 
-        if not self.agreement_not_required and not cleaned_data.get('agreement_file'):
-            self.add_error('agreement_file', 'This field is required.')
+        # if not self.agreement_not_required and not cleaned_data.get('agreement_file'):
+        #     self.add_error('agreement_file', 'This field is required.')
 
         return cleaned_data
 
@@ -324,6 +311,7 @@ PaperFormset = modelformset_factory(
     formset=CustomBaseModelFormSet,
     extra=0,
 )
+
 # function to generate formsets, so the extra parameter can be set dynamically in case of initial data.
 def get_author_formset(extra=0):
     return modelformset_factory(
@@ -377,7 +365,6 @@ EditorFormSet = modelformset_factory(
 
 SessionFormSet = modelformset_factory(
     Session, fields=('session_title',), extra=0,
-    # CSS styling but for formsets
     widgets = {
         'session_title': TextInput(attrs={'size': 70, 
                                             'placeholder': '(optional) Title of the session'}),

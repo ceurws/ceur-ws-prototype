@@ -1,4 +1,4 @@
-
+{% extends 'workshops/open_review_workshop.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -114,9 +114,8 @@ add sessions for each paper if applicable.</i>
 <br>
 <form id="validation-form" action="{% url 'workshops:open_review_workshop' %}" enctype="multipart/form-data" method="post">
 {% csrf_token %}
-<input type="hidden" name="workshop_id" value={{ workshop_id}}>
+<input type="hidden" name="workshop_id" value={{ workshop_id}} >
     {% for paper_form, author_formset in paper_author_combinations %}
-        <!-- Display the paper form -->
         <li class="paper-item">
             <div class="paper-container">
                 <div class="paper-summary">
@@ -136,7 +135,6 @@ add sessions for each paper if applicable.</i>
                     {% if paper_form.instance.uploaded_file %}
                         <i>Currently uploaded paper file: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a></i>
                     {% endif %}
-                    <!-- Display the author formset -->
                     {% if author_formset|stringformat:"" %}
                         {{ author_formset|crispy }}
                     {% else %}

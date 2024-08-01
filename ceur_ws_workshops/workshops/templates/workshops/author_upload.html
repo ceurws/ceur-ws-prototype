@@ -8,38 +8,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paper Submitted Correctly</title>
   <link rel="stylesheet" href="{% static 'workshops/styles.css' %}">
-</head>
-<style>
-  .close-button {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  font-size: 1.5rem; /* Adjust the size as needed */
-  cursor: pointer;
-  color: #000; /* Adjust the color as needed */
-}
-
-.close-button:hover {
-  color: #f00; /* Optional: Change color on hover */
-}
-
-.errorlist {
-  color: #721c24;
-  background-color: #f8d7da;
-  border-color: #f5c6cb;
-  position: relative;
-  padding: .75rem 1.25rem;
-  margin-bottom: 1rem;
-  border: 1px solid transparent;
-  border-radius: .25rem;
-  text-align: center;
-  font-weight: bold;
+  <style>
+    .close-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1.5rem; 
+    cursor: pointer;
+    color: #000; 
   }
-</style>
+  
+  .close-button:hover {
+    color: #f00; 
+  }
+  
+  .errorlist {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    text-align: center;
+    font-weight: bold;
+    }
+  </style>
+</head>
+
 <h2 class="header-title">Submit Paper</h2>
 
-<!-- Paper Form -->
 <form method="post" id="form-container" enctype="multipart/form-data">
   <fieldset>
     {% csrf_token %}
@@ -81,6 +81,4 @@
   </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="{% static 'workshops/script.js' %}"></script>
 {% endblock %}

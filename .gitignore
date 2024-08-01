@@ -7,7 +7,7 @@ ceur_ws_workshops/db.sqlite3
 ceur_ws_workshops/.env
 ceur_ws_workshops/media
 ceur_ws_workshops/workshop_metadata
-ceur_ws_workshops/zipped_agreements
+ceur_ws_workshops/zipped_*
 ceur_ws_workshops/djangoenv
 ceur_ws_workshops/build
 ceur_ws_workshops/ceur_ws_workshops.egg-info

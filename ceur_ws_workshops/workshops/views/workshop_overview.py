@@ -15,10 +15,9 @@ class WorkshopOverview(View):
         
         
         workshop = self.get_workshop()
-        # workshop.accepted_papers.all().order_by('order')
-        print("PAPERS", [paper for paper in workshop.accepted_papers.all()])
+        print("PAPERS", workshop.accepted_papers.all().order_by('order'))
         default_context = {
-            'papers' : [paper for paper in workshop.accepted_papers.all()],
+            'papers' : workshop.accepted_papers.all().order_by('order'),
             'workshop' : workshop,
             'workshop_form': WorkshopForm(instance=workshop, fields_not_required =True),
             'paper_forms': PaperFormset(queryset = workshop.accepted_papers.all(), prefix = "paper",  agreement_not_required = True, hide_agreement = True),
@@ -43,12 +42,12 @@ class WorkshopOverview(View):
 
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
-        # if workshop.submitted:
-        #     context = {
-        #         'workshop': workshop,
-        #         'already_submitted': True
-        #     }
-        #     return self.render_workshop(request, edit_mode=False, context=context)
+        if workshop.submitted:
+            context = {
+                'workshop': workshop,
+                'already_submitted': True
+            }
+            return self.render_workshop(request, edit_mode=False, context=context)
         
         workshop_data = get_workshop_data(workshop)
         add_editors_data(workshop, workshop_data)
@@ -114,21 +113,21 @@ class WorkshopOverview(View):
                 if 'paper_order' in request.POST:
                     paper_order = json.loads(request.POST['paper_order'])
                     
-                    if not isinstance(paper_order, int):
-                        for idx, paper_id in enumerate(paper_order):
-                            Paper.objects.filter(id=paper_id).update(order=idx + 1)
+                    # if not isinstance(paper_order, int):
+                    #     for idx, paper_id in enumerate(paper_order):
+                    #         Paper.objects.filter(id=paper_id).update(order=idx + 1)
 
-                    # for idx, item in enumerate(paper_order):
-                    #     paper_id = item['paperId']
-                    #     session_id = item['session']
-                    #     paper = Paper.objects.get(id=paper_id)
-                    #     paper.order = idx + 1
-                    #     if session_id != 'unassigned':
-                    #         session = get_object_or_404(Session, pk=session_id)
-                    #         paper.session = session
-                    #     else:
-                    #         paper.session = None
-                    #     paper.save()
+                    for idx, item in enumerate(paper_order):
+                        paper_id = item['paperId']
+                        session_id = item['session']
+                        paper = Paper.objects.get(id=paper_id)
+                        paper.order = idx + 1
+                        if session_id != 'unassigned':
+                            session = get_object_or_404(Session, pk=session_id)
+                            paper.session = session
+                        else:
+                            paper.session = None
+                        paper.save()
 
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":

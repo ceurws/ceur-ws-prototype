@@ -153,9 +153,7 @@
             <p><strong>Preface(s):</strong> <a href="{{workshop_form.preface.url}}">
                     {{ workshop.preface }}</a></p>
             {%endif%}
-            <div class="submit-container">
-                <input type="submit" name="submit_button" class="button-13" value="Confirm">
-            </div>
+
         </fieldset>
         <fieldset class="editor-details">
             <legend>Editor Details</legend>
@@ -176,13 +174,15 @@
                 </div>
             </li>
             {% endfor %}
-            <div class="submit-container">
-                <input type="submit" name="submit_button" class="button-13" value="Confirm">
-            </div>
         </fieldset>
+        <div class="submit-container">
+            <input type="submit" name="submit_button" class="button-13" value="Confirm">
+        </div>
     </form>
     {{% if session_title_list %}
+
     <form method="post" enctype="multipart/form-data" class="sortable" id="sortable-list">
+ 
         {% csrf_token %}
         <fieldset class="papers-list">
             <legend>Papers</legend>
@@ -554,8 +554,11 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
-        var nestedSortables = document.getElementById('nested-sortable');
+    var nestedSortables = document.getElementById('nested-sortable');
+    var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
 
+    // Initialize the Sortable for the single nested sortable if it exists
+    if (nestedSortables) {
         new Sortable(nestedSortables, {
             group: 'nested',
             animation: 150,
@@ -574,38 +577,92 @@
                 document.getElementById('sortable-list').appendChild(orderInput);
             }
         });
-    });
+    }
 
-    document.addEventListener('DOMContentLoaded', function () {
-    var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
-
-    sortableLists.forEach(function (nestedSortables) {
-        new Sortable(nestedSortables, {
-            group: 'nested',
-            animation: 150,
-            fallbackOnBody: true,
-            swapThreshold: 0.65,
-            handle: '.handle',
-            onEnd: function (evt) {
-                var order = [];
-                sortableLists.forEach(function (nestedSortable) {
-                    var sessionId = nestedSortable.getAttribute('data-session-id');
-                    nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
-                        order.push({
-                            paperId: item.getAttribute('data-paper-id'),
-                            session: sessionId
+    // Initialize the Sortable for multiple nested sortables if they exist
+    if (sortableLists.length > 0) {
+        sortableLists.forEach(function (nestedSortables) {
+            new Sortable(nestedSortables, {
+                group: 'nested',
+                animation: 150,
+                fallbackOnBody: true,
+                swapThreshold: 0.65,
+                handle: '.handle',
+                onEnd: function (evt) {
+                    var order = [];
+                    sortableLists.forEach(function (nestedSortable) {
+                        var sessionId = nestedSortable.getAttribute('data-session-id');
+                        nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
+                            order.push({
+                                paperId: item.getAttribute('data-paper-id'),
+                                session: sessionId
+                            });
                         });
                     });
-                });
-                var orderInput = document.createElement('input');
-                orderInput.type = 'hidden';
-                orderInput.name = 'paper_order';
-                orderInput.value = JSON.stringify(order);
-                document.getElementById('sortable-list').appendChild(orderInput);
-            }
+                    var orderInput = document.createElement('input');
+                    orderInput.type = 'hidden';
+                    orderInput.name = 'paper_order';
+                    orderInput.value = JSON.stringify(order);
+                    document.getElementById('sortable-list').appendChild(orderInput);
+                }
+            });
         });
-    });
+    }
 });
+
+    // document.addEventListener('DOMContentLoaded', function () {
+    //     var nestedSortables = document.getElementById('nested-sortable');
+
+    //     new Sortable(nestedSortables, {
+    //         group: 'nested',
+    //         animation: 150,
+    //         fallbackOnBody: true,
+    //         swapThreshold: 0.65,
+    //         handle: '.handle',
+    //         onEnd: function (evt) {
+    //             var order = [];
+    //             nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
+    //                 order.push(item.dataset.paperId);
+    //             });
+    //             var orderInput = document.createElement('input');
+    //             orderInput.type = 'hidden';
+    //             orderInput.name = 'paper_order';
+    //             orderInput.value = JSON.stringify(order);
+    //             document.getElementById('sortable-list').appendChild(orderInput);
+    //         }
+    //     });
+    // });
+
+//     document.addEventListener('DOMContentLoaded', function () {
+//     var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
+
+//     sortableLists.forEach(function (nestedSortables) {
+//         new Sortable(nestedSortables, {
+//             group: 'nested',
+//             animation: 150,
+//             fallbackOnBody: true,
+//             swapThreshold: 0.65,
+//             handle: '.handle',
+//             onEnd: function (evt) {
+//                 var order = [];
+//                 sortableLists.forEach(function (nestedSortable) {
+//                     var sessionId = nestedSortable.getAttribute('data-session-id');
+//                     nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
+//                         order.push({
+//                             paperId: item.getAttribute('data-paper-id'),
+//                             session: sessionId
+//                         });
+//                     });
+//                 });
+//                 var orderInput = document.createElement('input');
+//                 orderInput.type = 'hidden';
+//                 orderInput.name = 'paper_order';
+//                 orderInput.value = JSON.stringify(order);
+//                 document.getElementById('sortable-list').appendChild(orderInput);
+//             }
+//         });
+//     });
+// });
 </script>
 
 {% endblock %}

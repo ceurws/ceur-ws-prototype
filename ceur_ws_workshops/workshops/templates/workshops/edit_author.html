@@ -7,38 +7,40 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
+  <style>
+    .close-button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-size: 1.5rem; 
+    cursor: pointer;
+    color: #000; 
+  }
+  
+  .close-button:hover {
+    color: #f00; 
+  }
+  
+  .errorlist {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    position: relative;
+    padding: .75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    text-align: center;
+    font-weight: bold;
+    }
+  </style>
 </head>
 <p class="header-title">Are all the details correct?</p>
 <form id="validation-form" enctype="multipart/form-data" method="post">
   {% csrf_token %}
   <fieldset>
-  <style>
-    .errorlist {
-      color: #721c24;
-      background-color: #f8d7da;
-      border-color: #f5c6cb;
-      position: relative;
-      padding: .75rem 1.25rem;
-      margin-bottom: 1rem;
-      border: 1px solid transparent;
-      border-radius: .25rem;
-      text-align: center;
-      font-weight: bold;
-    }
-    .close-button {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  font-size: 1.5rem; /* Adjust the size as needed */
-  cursor: pointer;
-  color: #000; /* Adjust the color as needed */
-}
 
-.close-button:hover {
-  color: #f00; /* Optional: Change color on hover */
-}
-  </style>
     <legend>Paper Data</legend>
     Don't forget to download the agreement form in order to sign it. If any details are wrong, or missing, just go back. 
 

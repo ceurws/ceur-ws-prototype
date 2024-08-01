@@ -68,9 +68,11 @@ class AuthorUpload(View):
                 paper_instance.session = session_instance
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
-            print(paper_instance.secret_token)
+
+            print("EEEEEEEEE")
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, author_upload_secret_token = self.kwargs['author_upload_secret_token'])
         else:
+            
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
     
     def create_paper(self, request, author_formset, paper_form, author_upload_secret_token):
@@ -116,6 +118,7 @@ class AuthorUpload(View):
 
             return render(request, self.edit_path, context)
         else:
+            print(paper_form.errors)
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
 
     def get(self, request, author_upload_secret_token):
