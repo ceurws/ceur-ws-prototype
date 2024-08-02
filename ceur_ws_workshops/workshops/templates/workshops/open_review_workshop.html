@@ -1,14 +1,12 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search OpenReview</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
-</head>
-<body>
+{% extends 'workshops/index.html' %}
+
+{% block title %}
+Search OpenReview
+{% endblock %}
+
+{% block content %}
+
     Please type the OpenReview <b>URL</b> of your workshop in the search bar.
     <form method="GET" action="{% url 'workshops:open_review_workshop' %}">
         <input type="text" name="query" placeholder="Search OpenReview" value="{{ query }}" required>
@@ -24,8 +22,4 @@
     {% if error %}
     {{error}}
     {% endif %}
-
-    <p>
-
-</body>
-</html>
+{% endblock %}

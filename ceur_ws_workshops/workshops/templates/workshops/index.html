@@ -14,16 +14,11 @@
         <a href="{% url 'workshops:index' %}" style="color: inherit; text-decoration: none;">CEUR-WS Submission</a>
     </header>
 
-    <nav>
-        <!-- Navigation Links -->
-        
-    </nav>
-
     <main>
         {% block content %}
         <form action="{% url 'workshops:create_workshop' %}" method="get">
             <button type="submit" class="button-13">Create New Workshop</button>
-          </form>
+        </form>
           <form action="{% url 'workshops:open_review_workshop' %}" method="get">
             <button type="submit" class="button-13">Create New Worskhop with OpenReview</button>
           </form>
@@ -31,8 +26,5 @@
         {% endblock %}
     </main>
 
-    <footer>
-        <!-- Footer Content -->
-    </footer>
 </body>
 </html>
