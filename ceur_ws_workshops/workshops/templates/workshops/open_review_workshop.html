@@ -1,3 +1,4 @@
+
 {% extends 'workshops/index.html' %}
 
 {% block title %}
@@ -5,6 +6,7 @@ Search OpenReview
 {% endblock %}
 
 {% block content %}
+
     Please type the OpenReview <b>URL</b> of your workshop in the search bar.
     <form method="GET" action="{% url 'workshops:open_review_workshop' %}">
         <input type="text" name="query" placeholder="Search OpenReview" value="{{ query }}" required>

@@ -153,31 +153,31 @@
             <p><strong>Preface(s):</strong> <a href="{{workshop_form.preface.url}}">
                     {{ workshop.preface }}</a></p>
             {%endif%}
-
-        </fieldset>
-        <fieldset class="editor-details">
-            <legend>Editor Details</legend>
-            {{ editor_forms.management_form }}
-            {% for editor_form in editor_forms %}
-            <li class="paper-item">
-                <div class="paper-container">
-                    <div class="paper-summary">
-                        <span class="paper-title">{{ editor_form.instance.editor_name }}</span>
-                        <i class="arrow down toggle-details"></i>
+            <fieldset class="editor-details">
+                <legend>Editor Details</legend>
+                {{ editor_forms.management_form }}
+                {% for editor_form in editor_forms %}
+                <li class="paper-item">
+                    <div class="paper-container">
+                        <div class="paper-summary">
+                            <span class="paper-title">{{ editor_form.instance.editor_name }}</span>
+                            <i class="arrow down toggle-details"></i>
+                        </div>
+                        <div class="paper-details" style="display: none;">
+                            {{ editor_form|crispy }}
+                            {% if not forloop.last %}
+                            <hr>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="paper-details" style="display: none;">
-                        {{ editor_form|crispy }}
-                        {% if not forloop.last %}
-                        <hr>
-                        {% endif %}
-                    </div>
-                </div>
-            </li>
-            {% endfor %}
+                </li>
+                {% endfor %}
+            </fieldset>
+            <div class="submit-container">
+                <input type="submit" name="submit_button" class="button-13" value="Confirm">
+            </div>
         </fieldset>
-        <div class="submit-container">
-            <input type="submit" name="submit_button" class="button-13" value="Confirm">
-        </div>
+        
     </form>
     {% if session_title_list %}
 
@@ -275,9 +275,9 @@
     </form>
    
     {% else %}
+    <form method="post" enctype="multipart/form-data" class="sortable" id="sortable-list">
     <fieldset class="papers-list">
         <legend>Papers</legend>
-        <form method="post" enctype="multipart/form-data" class="sortable" id="sortable-list">
             {% csrf_token %}
             <input type="hidden" id="paper_id" name="paper_id" value="">
             {{ paper_forms.management_form }}
@@ -319,9 +319,9 @@
             <div class="submit-container">
                 <input type="submit" name="submit_button" class="button-13" value="Confirm">
             </div>
-        </form>
+        
     </fieldset>
-
+</form>
     {% endif %}
 
     {% else %}

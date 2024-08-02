@@ -15,7 +15,6 @@ class WorkshopOverview(View):
         
         
         workshop = self.get_workshop()
-        print("PAPERS", workshop.accepted_papers.all().order_by('order'))
         default_context = {
             'papers' : workshop.accepted_papers.all().order_by('order'),
             'workshop' : workshop,
@@ -113,21 +112,27 @@ class WorkshopOverview(View):
                 if 'paper_order' in request.POST:
                     paper_order = json.loads(request.POST['paper_order'])
                     
-                    # if not isinstance(paper_order, int):
-                    #     for idx, paper_id in enumerate(paper_order):
-                    #         Paper.objects.filter(id=paper_id).update(order=idx + 1)
+                    if not isinstance(paper_order, int):
+                        for idx, paper_id in enumerate(paper_order):
+                            Paper.objects.filter(id=paper_id).update(order=idx + 1)
 
-                    for idx, item in enumerate(paper_order):
-                        paper_id = item['paperId']
-                        session_id = item['session']
-                        paper = Paper.objects.get(id=paper_id)
-                        paper.order = idx + 1
-                        if session_id != 'unassigned':
-                            session = get_object_or_404(Session, pk=session_id)
-                            paper.session = session
-                        else:
-                            paper.session = None
-                        paper.save()
+                    # for idx, item in enumerate(paper_order):
+                    #     paper_id = item['paperId']
+                    #     session_id = item['session']
+                    #     paper = Paper.objects.get(id=paper_id)
+                    #     paper.order = idx + 1
+                    #     if session_id != 'unassigned':
+                    #         session = get_object_or_404(Session, pk=session_id)
+                    #         paper.session = session
+                    #     else:
+                    #         paper.session = None
+                    #     paper.save()
+            if not workshop_form.is_valid():
+                print(workshop_form.errors, "WORKSHOP FORM ERRORS")
+            if not paper_form.is_valid():
+                print(paper_form.errors, "PAPER FORM ERRORS")
+            if not editor_formset.is_valid():
+                print(editor_formset.errors, "EDITOR FORMSET ERRORS")
 
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
