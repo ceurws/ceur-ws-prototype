@@ -227,8 +227,10 @@ class PaperForm(forms.ModelForm):
         if pages is not None:
             self.fields['pages'].initial = pages
 
-        if self.agreement_not_required or self.hide_agreement:
+        if self.agreement_not_required:
             self.fields['agreement_file'].required = False
+            self.fields['agreement_file'].widget.attrs.pop('required', None)
+
             
         if self.hide_agreement:
             self.fields['agreement_file'].widget = forms.HiddenInput()
@@ -237,10 +239,7 @@ class PaperForm(forms.ModelForm):
         if hide_has_third_party_material:
             self.fields['has_third_party_material'].widget = forms.HiddenInput()
 
-        if not self.agreement_file:
-            self.fields['agreement_file'].label = 'Please Upload the hand signed agreement file'
-        else:
-            self.fields['agreement_file'].label = 'Upload agreement file'
+        self.fields['agreement_file'].label = 'Upload agreement file' if self.agreement_file else 'Please Upload the hand signed agreement file'
 
     class Meta:
         model = Paper
@@ -251,8 +250,8 @@ class PaperForm(forms.ModelForm):
             'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper', 'strip': True}),
             'pages': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
-            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html',
-            'required': 'True'}),
+            'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
+            # 'required': 'True'}),
             #  required: True is needed here for the __init__ to work in author_upload
         }
 

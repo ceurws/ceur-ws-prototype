@@ -39,10 +39,6 @@ class AuthorUpload(View):
         response['Content-Disposition'] = f'attachment; filename="{name}"'
         return name, html_content
     
-    def check_paper_exists(self, paper_form, workshop):
-        paper_title = paper_form.cleaned_data.get('paper_title')
-        return Paper.objects.filter(paper_title=paper_title, workshop=workshop).exists()
-    
     def submit_paper(self, request, author_formset, paper_form):
 
         author_instances = None
@@ -66,23 +62,20 @@ class AuthorUpload(View):
             if request.POST['session'] != '':
                 session_instance = Session.objects.get(pk=request.POST['session'])
                 paper_instance.session = session_instance
+
+            paper_instance.authors.clear()
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
 
             print("EEEEEEEEE")
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, author_upload_secret_token = self.kwargs['author_upload_secret_token'])
         else:
-            
+            print(paper_form.errors)
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
     
     def create_paper(self, request, author_formset, paper_form, author_upload_secret_token):
 
         if paper_form.is_valid() and author_formset.is_valid():
-# TODO FIX 
-
-            # if self.check_paper_exists(paper_form, self.get_workshop()):
-            #     print("Paper with this title already exists in the workshop.")
-            #     return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
             paper_instance = paper_form.save(commit=False) 
             paper_instance.workshop = self.get_workshop()
 
@@ -118,7 +111,8 @@ class AuthorUpload(View):
 
             return render(request, self.edit_path, context)
         else:
-            print(paper_form.errors)
+            print(paper_form.errors, "ERRORS")
+            print(author_formset.errors, "AUTHOR_FORMSET")
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
 
     def get(self, request, author_upload_secret_token):
