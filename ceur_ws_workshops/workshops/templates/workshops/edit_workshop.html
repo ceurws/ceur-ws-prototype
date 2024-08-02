@@ -37,7 +37,7 @@
     }
 
     </style>
-    {% crispy form %}
+    {{ form|crispy }}
     <input type="hidden" name="workshop_id" value="{{ workshop_instance.id }}">
     {%if form.instance.editor_agreement %}
     <i>Currently uploaded file: <a href ="{{form.instance.editor_agreement.url}}">{{ form.instance.editor_agreement.name }}</a></i>

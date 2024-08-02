@@ -40,16 +40,46 @@
 
 <h2 class="header-title">Submit Paper</h2>
 
+<fieldset>
+
+{% if paper_list %}
+<legend> Papers in OpenReview </legend>
+<i> If your paper is attached to the workshop in OpenReview, please select it from the dropdown menu below. If not, please fill in the details manually.</i>
+<br>
+<br>
+<label for="paper-select">Select your paper:</label>
+<select id="paper-select" style="width: 150px;">
+  <option value="" selected>-- Select Paper --</option>
+  {% for paper in paper_list %}
+  <option value="{{ paper.id }}" 
+          data-title="{{ paper.paper_title }}" 
+          data-session="{{ paper.session.id }}"
+          data-pdf="{{ paper.uploaded_file.url }}"
+          data-authors="{{ paper.authors.all }}">
+        {{ paper.paper_title }}
+  </option>
+  {% endfor %}
+</select>
+<button id="confirm-selection">Confirm</button>
+
+</fieldset>
+{% endif %}
+
 <form method="post" id="form-container" enctype="multipart/form-data">
+  {% csrf_token %}
+
   <fieldset>
-    {% csrf_token %}
     <legend>Paper Details</legend>
     {{ paper_form|crispy}}
+
     {% if paper_form.paper_title.errors %}
     <div class="errorlist">
       {{ paper_form.paper_title.errors }}
     </div>
   {% endif %}
+
+  <div id="current-file-info"></div>
+
   </fieldset>
   
   <fieldset id="author-fieldset">
@@ -80,5 +110,33 @@
     <hr>
   </div>
 </div>
+
+<script>
+  $('#confirm-selection').click(function() {
+    var selectedPaper = $('#paper-select option:selected');
+    var paperId = selectedPaper.val();
+    var paperTitle = selectedPaper.data('title');
+    var paperSession = selectedPaper.data('session'); 
+    var paperPdf = selectedPaper.data('pdf'); 
+    var authors = selectedPaper.data('authors');
+    
+    if (paperTitle) {
+    $('#id_paper_title').val(paperTitle);}
+
+    if (paperSession) { 
+      $('#id_session').val(paperSession);}
+
+    if (paperPdf) { 
+      $('#current-file-info').html('<i>Currently uploaded paper file: <a href="' + paperPdf + '" target="_blank">View PDF</a></i>');
+    
+    if (authors) {
+    
+      console.log(authors)
+    }
+    
+;}
+
+  });
+</script>
 
 {% endblock %}

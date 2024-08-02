@@ -69,7 +69,6 @@ class AuthorUpload(View):
             paper_instance.authors.add(*author_instances)
             self.get_workshop().accepted_papers.add(paper_instance)
 
-            print("EEEEEEEEE")
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, author_upload_secret_token = self.kwargs['author_upload_secret_token'])
         else:
             
@@ -133,6 +132,10 @@ class AuthorUpload(View):
                                hide_has_third_party_material = False)
 
         context = self.get_context(author_formset, paper_form)
+
+        if self.get_workshop().openreview_url:
+            context['paper_list'] = [paper for paper in self.get_workshop().accepted_papers.all()]
+
         return render(request, self.upload_path, context)
 
     def post(self, request, author_upload_secret_token):

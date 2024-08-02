@@ -244,7 +244,7 @@ class PaperForm(forms.ModelForm):
 
     class Meta:
         model = Paper
-        fields = ['paper_title', 'pages', 'session', 'uploaded_file', 'agreement_file', 'has_third_party_material']
+        fields = ['paper_title', 'pages', 'session', 'agreement_file', 'has_third_party_material','uploaded_file']
         help_texts = {'pages': '<br><i>Provide the length(number of pages) of the paper</i>.<br>',
                       'has_third_party_material': '<i>Check this box if the paper contains third-party material</i>'}
         widgets = {

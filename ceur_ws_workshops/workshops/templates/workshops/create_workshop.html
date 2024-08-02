@@ -1,7 +1,7 @@
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
-{%load crispy_forms_tags %} 
+{% load crispy_forms_tags %} 
 
 <style>
   .close-button {
@@ -18,8 +18,14 @@
   color: #f00;
 }
 </style>
+{% comment %} <form method="post" id="form-container" enctype="multipart/form-data">
+  {% csrf_token %}
 
-<form method="post" id="form-container" enctype="multipart/form-data">
+  <div class="submit-container">
+    <input type="submit" class="button-13" value="Save Workshop 1">
+  </div>
+</form> {% endcomment %}
+<form method="post" id="form-container" enctype="multipart/form-data" >
   <h1 class="header-title">Create Workshop Volume</h1>
   {% csrf_token %}
 
@@ -33,7 +39,7 @@
       <li>Optional fields can be left blank if they are not applicable.</li>
     </ul>
 
-    {% crispy form %}
+    {{ form|crispy }}
     <input type="hidden" name="openreview_url" value="{{ openreview_url }}">
     <input type="hidden" name="workshop_id" value="{{ form.instance.id }}">
 
@@ -90,7 +96,7 @@
   </fieldset>
   <br>
   <div class="submit-container">
-    <input type="submit" class="button-13" value="Save Workshop">
+    <input type="submit" class="button-13" value="Save Workshop 1">
   </div>
 </form>
 

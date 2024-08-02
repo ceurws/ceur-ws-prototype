@@ -33,7 +33,6 @@ class OpenReviewClass(View):
         return venue_id
 
     def post(self, request):
-
         if request.POST.get('paper_title', None):
             for i, paper_title in enumerate(request.POST.getlist('paper_title')):
 

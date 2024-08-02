@@ -132,7 +132,6 @@ class CreateWorkshop(View):
 
     def post(self, request):
         if 'submit_button' in request.POST: 
-               
             workshop_instance = self.get_workshop(request.POST.get('workshop_id')) if request.POST.get('workshop_id') else None
 
             editor_formset = EditorFormSet(queryset=Editor.objects.none(), data=request.POST, prefix="editor")
