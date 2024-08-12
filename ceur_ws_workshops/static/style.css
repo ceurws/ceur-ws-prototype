@@ -11,6 +11,14 @@ body {
   margin-right: auto; /* Center the fieldset */
 }
 
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px; /* Adjust the gap as needed */
+  padding: 20px; /* Optional: Add padding for better spacing */
+}
+
 fieldset {
 margin-bottom: 10px;
 border: 1px solid #ccc;

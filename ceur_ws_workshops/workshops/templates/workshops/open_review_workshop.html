@@ -5,7 +5,9 @@ Search OpenReview
 {% endblock %}
 
 {% block content %}
-    Please type the OpenReview <b>URL</b> of your workshop in the search bar.
+<h1> New Workshop Submission </h1> 
+<fieldset>
+    <i>Please copy and paste the OpenReview <b>URL</b> of your workshop in the search bar.</i>
     <form method="GET" action="{% url 'workshops:open_review_workshop' %}">
         <input type="text" name="query" placeholder="Search OpenReview" value="{{ query }}" required>
         <button type="submit" class="button-13">Search</button>
@@ -20,4 +22,5 @@ Search OpenReview
     {% if error %}
     {{error}}
     {% endif %}
+    </fieldset>
 {% endblock %}

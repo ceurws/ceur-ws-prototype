@@ -2,6 +2,7 @@
 {% load static %}
 {% block content %}
 {% load crispy_forms_tags %} 
+<h1> New Workshop Submission </h1> 
   <p class="header-title">Are all the details correct?</p>
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}

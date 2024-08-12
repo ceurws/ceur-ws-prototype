@@ -107,8 +107,10 @@
 {% load crispy_forms_tags %} 
 
 <fieldset>
-    <legend>Paper and Author Details</legend>
-    <i>These were the papers that were found in OpenReview associated with this workshop. Please edit any details still missing and
+<legend>Paper and Author Details</legend>
+
+{% if paper_author_combinations %}
+<i>These were the papers that were found in OpenReview associated with this workshop. Please edit any details still missing and
 add sessions for each paper if applicable.</i>
 <br>
 <br>
@@ -153,6 +155,18 @@ add sessions for each paper if applicable.</i>
 <input type="submit" name = "open_review_submit "class="button-13" value="Confirm">
 </fieldset>
 </form>
+
+{% else %}
+<i> No papers were found associated to this workshop on OpenReview. </i>
+<br>
+<br>
+<form id="validation-form" action="{% url 'workshops:open_review_workshop' %}" enctype="multipart/form-data" method="post">
+{% csrf_token %}
+<input type="hidden" name="workshop_id" value={{ workshop_id}} >
+<input type="hidden" name="no_papers" value="true">
+<input type="submit" name = "open_review_submit "class="button-13" value="Continue">
+</form>
+{% endif %}
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>

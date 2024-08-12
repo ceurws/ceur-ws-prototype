@@ -45,29 +45,41 @@ class AuthorUpload(View):
     
     def submit_paper(self, request, author_formset, paper_form):
 
-        author_instances = None
-
         if paper_form.is_valid() and author_formset.is_valid():
-
+            
+            # save paper and assign workshop
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = self.get_workshop()
             
+            # if any new files uploaded in the edit stage they get added here. Also amount of pages is added
             if request.FILES.get('uploaded_file', False):
                 paper_instance.uploaded_file = request.FILES['uploaded_file']
                 pdfReader = PyPDF2.PdfReader(paper_instance.uploaded_file)
                 paper_instance.pages = len(pdfReader.pages)
-        
+
+            # handling of agreement_file if it has been uploaded in the edit stage
             if request.FILES.get('agreement_file', False):
                 paper_instance.agreement_file = request.FILES['agreement_file']
-            paper_instance.save()
+            
+            # if the paper already has authors we remove them to replace them with existing authors. This is only the case if paper has been uploaded with openreview.
+            if paper_instance.authors.exists():
+                paper_instance.authors.clear()
 
-            author_instances = author_formset.save()
-
+            
+            # handles paper session if it has been added or changed.
             if request.POST['session'] != '':
                 session_instance = Session.objects.get(pk=request.POST['session'])
                 paper_instance.session = session_instance
+            
+            # saves and adds author instances from author formset.
+            author_instances = author_formset.save()
             paper_instance.authors.add(*author_instances)
+
+            # adds paper_instances to workshop
             self.get_workshop().accepted_papers.add(paper_instance)
+
+            # save paper
+            paper_instance.save()
 
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, author_upload_secret_token = self.kwargs['author_upload_secret_token'])
         else:
@@ -77,22 +89,25 @@ class AuthorUpload(View):
     def create_paper(self, request, author_formset, paper_form, author_upload_secret_token):
 
         if paper_form.is_valid() and author_formset.is_valid():
-# TODO FIX 
-
+            # TODO FIX 
             # if self.check_paper_exists(paper_form, self.get_workshop()):
             #     print("Paper with this title already exists in the workshop.")
             #     return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
             paper_instance = paper_form.save(commit=False) 
             paper_instance.workshop = self.get_workshop()
 
-            paper_instance.uploaded_file = request.FILES['uploaded_file']
+            # check to see if any files are uploaded. If not, they are already attached to the paper_instance from openreview.
+            if request.FILES:
+                paper_instance.uploaded_file = request.FILES['uploaded_file']
             
             paper_instance.save()  
             if request.POST['session'] != '':
                 session_instance = Session.objects.get(pk=request.POST['session'])
                 paper_instance.session = session_instance
 
+            # author_instances = author_formset.save()
             # paper_instance.authors.add(*author_instances)  
+
             self.get_workshop().accepted_papers.add(paper_instance)
             
             paper_form = PaperForm(file_uploaded=True, 
@@ -139,10 +154,28 @@ class AuthorUpload(View):
         return render(request, self.upload_path, context)
 
     def post(self, request, author_upload_secret_token):
-        
-        # if statement to check if request.FILES has any new files attached. 
 
-        if bool(request.FILES.get('uploaded_file', False)) == True:
+        # if statement to check if a paperID is included in the post data, which means a paper was selected from the openreview dropdown. This is checked because then the file has already been uploaded.
+        if request.POST.get('paper_id'):
+            paper_instance = Paper.objects.get(id=request.POST['paper_id'])
+
+            author_formset = get_author_formset()(queryset=paper_instance.authors.all(),
+                                                data=request.POST, 
+                                                prefix="author"
+                                                )
+
+
+            paper_form = PaperForm(request.POST,  
+                                   file_uploaded=True, 
+                                   instance = paper_instance,
+                                   workshop=self.get_workshop(), 
+                                   agreement_file = True, 
+                                   clean_enabled = True)
+            
+            # print(paper_form.uploaded_file)
+
+        # if statement to check if request.FILES has any new files attached. 
+        elif bool(request.FILES.get('uploaded_file', False)) == True:
             author_formset = get_author_formset()(queryset=Author.objects.none(), 
                                                   data = request.POST, 
                                                   prefix="author")
@@ -155,6 +188,7 @@ class AuthorUpload(View):
 
         # if no files are attached we extract the files uploaded 
         else:
+            print('fina round')
             author_formset = get_author_formset()(request.POST, prefix="author")
 
             paper_instance = Paper.objects.filter(secret_token=request.POST.get('secret_token'), workshop = self.get_workshop()).first()
