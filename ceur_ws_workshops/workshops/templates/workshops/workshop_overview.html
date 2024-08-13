@@ -17,7 +17,7 @@
     <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
 
     <p style="text-align: center;">Workshop id: <i>{{workshop.id}}</i></p>
-
+    <p style="text-align: center;"><i>If a paper is marked in green with a tick, it means that the author has  <span style = "color:green">completed all the corresponding details.</i> &#9989;</span></p>
     <style>
         .delete_object {
             color: red;
@@ -140,6 +140,7 @@
     </style>
     {% if edit_mode %}
     <h1>Edit workshop: <i>{{workshop.workshop_short_title}}</i></h1>
+
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <fieldset class="workshop-details">
@@ -199,7 +200,11 @@
                                     <div class="paper-container">
                                         <div class="handle">&#9776;</div>
                                         <div class="paper-summary">
+                                            {%if paperform.instance.complete%}
+                                            <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }}</span>
+                                            {%else%}
                                             <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                                            {%endif%}
                                             <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
                                         </div>
                                         <div class="paper-details" style="display: none;">
@@ -239,7 +244,11 @@
                                 <div class="paper-container">
                                     <div class="handle">&#9776;</div>
                                     <div class="paper-summary">
-                                        <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                                        {%if paperform.instance.complete%}
+                                            <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }}</span>
+                                            {%else%}
+                                            <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                                            {%endif%}
                                         <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
                                     </div>
                                     <div class="paper-details" style="display: none;">
@@ -287,7 +296,11 @@
                     <div class="paper-container">
                         <div class="handle">&#9776;</div>
                         <div class="paper-summary">
+                            {%if paperform.instance.complete%}
+                            <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }}</span>
+                            {%else%}
                             <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                            {%endif%}
                             <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
                         </div>
                         <div class="paper-details" style="display: none;">
@@ -420,11 +433,10 @@
                     <div class="paper-container">
                         <div class="paper-summary">
                             {% if paper.complete %}
-                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }} <p>(The paper is complete)</p></span>
+                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }}</span>
                             {%else%}
                             <span class="paper-title"> {{ paper.paper_title }}</span>
                             {%endif%}
-                            <span class="paper-title" >{{ paper.paper_title }}</span>
                             <span class="last_updated"> Last updated: 
                                 {{ paper.last_updated|date:"F j, Y, g:i a"}}</span>
                             <i class="arrow down toggle-details"></i>
