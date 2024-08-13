@@ -230,7 +230,6 @@ class PaperForm(forms.ModelForm):
         if self.agreement_not_required:
             self.fields['agreement_file'].required = False
             self.fields['agreement_file'].widget.attrs.pop('required', None)
-
             
         if self.hide_agreement:
             self.fields['agreement_file'].widget = forms.HiddenInput()

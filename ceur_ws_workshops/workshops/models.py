@@ -133,7 +133,7 @@ class Paper(models.Model):
     order = models.PositiveIntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
     sort_order = models.PositiveIntegerField(default=0, null=True, blank=True) 
-    complete = models.BooleanField(default = False)
+    complete = models.BooleanField(default = False, null = True, blank = True)
     # KEYS
     authors = models.ManyToManyField(Author)  
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, related_name='papers')

@@ -200,8 +200,8 @@
                                     <div class="paper-container">
                                         <div class="handle">&#9776;</div>
                                         <div class="paper-summary">
-                                            {%if paperform.instance.complete%}
-                                            <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }}</span>
+                                            {% if paperform.instance.complete %}
+                                            <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }} </span>
                                             {%else%}
                                             <span class="paper-title">{{ paperform.instance.paper_title }}</span>
                                             {%endif%}
@@ -244,7 +244,7 @@
                                 <div class="paper-container">
                                     <div class="handle">&#9776;</div>
                                     <div class="paper-summary">
-                                        {%if paperform.instance.complete%}
+                                        {% if paperform.instance.complete %}
                                             <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }}</span>
                                             {%else%}
                                             <span class="paper-title">{{ paperform.instance.paper_title }}</span>
@@ -433,7 +433,7 @@
                     <div class="paper-container">
                         <div class="paper-summary">
                             {% if paper.complete %}
-                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }}</span>
+                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }} {{paper.complete}}</span>
                             {%else%}
                             <span class="paper-title"> {{ paper.paper_title }}</span>
                             {%endif%}
@@ -476,9 +476,9 @@
                     <div class="paper-container">
                         <div class="paper-summary">
                             {% if paper.complete %}
-                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }}</span>
-                            {%else%}
-                            <span class="paper-title"> {{ paper.paper_title }}</span>
+                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }} </span>
+                            {% else %}
+                            <span class="paper-title"> {{ paper.paper_title }} </span>
                             {%endif%}
                             <span class="last_updated"> Last updated: 
                                 {{ paper.last_updated|date:"F j, Y, g:i a"}}</span>
