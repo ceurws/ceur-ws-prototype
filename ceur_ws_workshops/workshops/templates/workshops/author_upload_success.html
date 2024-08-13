@@ -227,7 +227,9 @@
           });
       });
   </script>
+  <div class="submit-container">
     <input type="submit" name="submit_button" class="button-13" value="Confirm">
+  </div>
   </form>
 
   <div id="empty_author_form" style="display:none">
@@ -253,6 +255,10 @@
   {% else %}
   <h1>Paper Submitted Correctly</h1>
   <p style = "text-align: center;">Your author and metadata have been successfully uploaded to <strong>{{ workshop.workshop_full_title }}</strong>.</p>
+
+  {% if paper.complete %}
+    <p style = "text-align: center;"><strong>The paper and details have been marked as complete.</strong></p>
+    {%endif%}
   <fieldset>
     <legend>Paper Details</legend>
     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
@@ -266,6 +272,10 @@
     {%else%}
     <p><strong>Session:</strong> {{ paper.session }}</p>
     {%endif%}
+    
+
+
+    
   </fieldset>
   <br>
   <fieldset>

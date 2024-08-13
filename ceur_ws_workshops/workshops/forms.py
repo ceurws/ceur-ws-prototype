@@ -243,7 +243,7 @@ class PaperForm(forms.ModelForm):
 
     class Meta:
         model = Paper
-        fields = ['paper_title', 'pages', 'session', 'agreement_file', 'has_third_party_material','uploaded_file']
+        fields = ['paper_title', 'pages', 'session', 'agreement_file', 'has_third_party_material','uploaded_file', 'complete']
         help_texts = {'pages': '<br><i>Provide the length(number of pages) of the paper</i>.<br>',
                       'has_third_party_material': '<i>Check this box if the paper contains third-party material</i>'}
         widgets = {
@@ -253,9 +253,14 @@ class PaperForm(forms.ModelForm):
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
             # 'required': 'True'}),
             #  required: True is needed here for the __init__ to work in author_upload
+            'complete' : CheckboxInput(attrs={}),
+        }
+        labels = {
+            'complete': 'Check this box if the details of this paper are complete and final',
         }
 
         paper_title = forms.CharField(strip=True)
+        
 
     def clean(self):
         cleaned_data = super().clean()
