@@ -36,6 +36,9 @@
     }
   </style>
 </head>
+
+
+
 <p class="header-title">Are all the details correct?</p>
 <form id="validation-form" enctype="multipart/form-data" method="post">
   {% csrf_token %}
@@ -57,7 +60,7 @@
     {%endcomment%}
 
     <input type="hidden" name="secret_token" value="{{ paper_instance.secret_token }}">
-
+  
   <p>Currently uploaded Paper: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a> </p>
   </fieldset>
   <fieldset id="author-fieldset">

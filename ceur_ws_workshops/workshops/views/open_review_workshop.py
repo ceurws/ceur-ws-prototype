@@ -54,7 +54,7 @@ class OpenReviewClass(View):
                         session = get_object_or_404(Session, pk=request.POST.getlist('session')[i])
                         paper_instance.session = session
 
-                    if request.POST.get('author0-TOTAL_FORMS', None):
+                    if request.POST.get(f'author{i}-TOTAL_FORMS', None):
                         author_formset = get_author_formset(extra=request.POST[f'author{i}-TOTAL_FORMS'])(queryset=Author.objects.none(), data = request.POST, prefix=f'author{i}')
                         if author_formset.is_valid():
                             author_instances = author_formset.save()
@@ -65,13 +65,18 @@ class OpenReviewClass(View):
                     print(paper_form.errors, "ERRORS")
             return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
 
+        elif 'no_papers' in request.POST:
+            workshop = get_object_or_404(Workshop, id = request.POST.get('workshop_id'))
+            return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
+
         else:
+            # removed these and repaced with what's above in the else statement, but not sure if I can
             create_workshop_view = CreateWorkshop.as_view(openreview_url = self.query)
             return create_workshop_view(request)
 
     def get(self, request):        
         # search function
-        query = request.GET.get('query')
+        query = request.GET.get('query','')
         if query:
             self.query = query
             self.venue_id = self.find_ws_id(query)
@@ -80,17 +85,11 @@ class OpenReviewClass(View):
                 try:
                     ORC = OpenReviewClient().openreview_object
                     venue_group = ORC.get_group(id=self.venue_id)
-                    # results = venue_group.members
-                    submission_name = venue_group.content['submission_name']['value']
-                    all_submissions = ORC.get_all_notes(invitation=f'{self.venue_id}/-/{submission_name}')
+                    all_submissions = ORC.get_all_notes(invitation=f'{self.venue_id}/-/Submission')
 
                 except Exception as e:
                     
-                    print('excepted', str(e))
-                    print(type(str(e)))
-                    print(dict(e))
-                    print(repr(e))
-                    context = {'query' : None, 'error' : e}
+                    context = {'query' : query, 'error' : f'No papers found on this webpage for {self.venue_id}.'}
                     return render(request, "workshops/open_review_workshop.html", context)
 
                 data = {
@@ -121,5 +120,4 @@ class OpenReviewClass(View):
         context = {
             'query' : query
         }
-        print('rendering')
         return render(request, "workshops/open_review_workshop.html", context)
