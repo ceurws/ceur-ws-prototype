@@ -14,6 +14,10 @@
     <h1>Operation Successful</h1>
     <p>The workshop is available at <a href="/media/Vol-{{workshop.id}}/index.html">media/Vol-{{workshop.id}}/</a>.</p>
 
+    <a id="organizer_url" href="{{ zipped_directory }}" download>Download the zipped directory</a>
+
+    <p>You can safely close the browser tab. </p>
+
     <div id="django-messages" style="display: none;">
       {% for message in messages %}
       <div data-message="{{ message|escapejs}}">{{ message }}</div>
@@ -30,4 +34,5 @@
     });
   </script>
 </body>
+
 </html>

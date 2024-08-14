@@ -3,6 +3,7 @@ from ..models import Workshop, Paper, Author, Session
 from django.views import View
 from ..forms import PaperForm, get_author_formset
 import  PyPDF2
+from PyPDF2.errors import PdfReadError
 from django.core.files.base import ContentFile
 from .util import *
 
@@ -42,11 +43,12 @@ class AuthorUpload(View):
     def submit_paper(self, request, author_formset, paper_form):
 
         if paper_form.is_valid() and author_formset.is_valid():
-            
             # save paper and assign workshop
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = self.get_workshop()
-            
+            print(paper_instance.uploaded_file)
+            print(paper_instance.agreement_file)
+            print("WHY WHY HWY ")
             # if any new files uploaded in the edit stage they get added here. Also amount of pages is added
             if request.FILES.get('uploaded_file', False):
                 paper_instance.uploaded_file = request.FILES['uploaded_file']
@@ -78,7 +80,8 @@ class AuthorUpload(View):
 
             return redirect('workshops:edit_author_post', paper_id = paper_instance.secret_token, author_upload_secret_token = self.kwargs['author_upload_secret_token'])
         else:
-            print(paper_form.errors)
+            print(paper_form.errors, "PAPERFORM ERRORS")
+            print(author_formset.errors, "AUTHOR FORMSET ERRROS")
             return render(request, self.edit_path, self.get_context(author_formset, paper_form, 'author'))
     
     def create_paper(self, request, author_formset, paper_form, author_upload_secret_token):
@@ -153,16 +156,14 @@ class AuthorUpload(View):
 
             author_formset = get_author_formset()(queryset=paper_instance.authors.all(),
                                                 data=request.POST, 
-                                                prefix="author"
-                                                )
+                                                prefix="author")
 
 
             paper_form = PaperForm(request.POST,  
                                    file_uploaded=True, 
                                    instance = paper_instance,
                                    workshop=self.get_workshop(), 
-                                   agreement_file = True, 
-                                   clean_enabled = True)
+                                   agreement_file = True)
             
             # print(paper_form.uploaded_file)
 
@@ -175,8 +176,7 @@ class AuthorUpload(View):
                                    request.FILES, 
                                    file_uploaded=True, 
                                    workshop=self.get_workshop(), 
-                                   agreement_file = True, 
-                                   clean_enabled = True)
+                                   agreement_file = True)
 
         # if no files are attached we extract the files uploaded 
         else:
@@ -189,8 +189,7 @@ class AuthorUpload(View):
                                    file_uploaded=True, 
                                    workshop=self.get_workshop(), 
                                    instance = paper_instance, 
-                                   agreement_file = True, 
-                                   clean_enabled = True)
+                                   agreement_file = True)
 
         if 'confirm_button' in request.POST:
             return self.submit_paper(request, author_formset, paper_form)

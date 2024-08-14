@@ -579,32 +579,35 @@
         }
         $('.toggle-details').on('click', toggleDetails);
     });
-
+    
     document.addEventListener('DOMContentLoaded', function () {
     var nestedSortables = document.getElementById('nested-sortable');
     var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
 
-    // Initialize the Sortable for the single nested sortable if it exists
-    if (nestedSortables) {
-        new Sortable(nestedSortables, {
-            group: 'nested',
-            animation: 150,
-            fallbackOnBody: true,
-            swapThreshold: 0.65,
-            handle: '.handle',
-            onEnd: function (evt) {
-                var order = [];
-                nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
-                    order.push(item.dataset.paperId);
+    function captureInitialState() {
+        var order = [];
+        sortableLists.forEach(function (nestedSortable) {
+            var sessionId = nestedSortable.getAttribute('data-session-id');
+            nestedSortable.querySelectorAll('.paper-item').forEach(function (item) {
+                order.push({
+                    paperId: item.getAttribute('data-paper-id'),
+                    session: sessionId
                 });
-                var orderInput = document.createElement('input');
-                orderInput.type = 'hidden';
-                orderInput.name = 'paper_order';
-                orderInput.value = JSON.stringify(order);
-                document.getElementById('sortable-list').appendChild(orderInput);
-            }
+            });
         });
+
+        if (order.length > 0) {
+            var orderInput = document.createElement('input');
+            orderInput.type = 'hidden';
+            orderInput.name = 'paper_order';
+            orderInput.value = JSON.stringify(order);
+            document.getElementById('sortable-list').appendChild(orderInput);
+        }
     }
+
+    // Capture initial state on form submit
+    var form = document.getElementById('sortable-list');
+    form.addEventListener('submit', captureInitialState);
 
     // Initialize the Sortable for multiple nested sortables if they exist
     if (sortableLists.length > 0) {
@@ -616,54 +619,19 @@
                 swapThreshold: 0.65,
                 handle: '.handle',
                 onEnd: function (evt) {
-                    var order = [];
-                    sortableLists.forEach(function (nestedSortable) {
-                        var sessionId = nestedSortable.getAttribute('data-session-id');
-                        nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
-                            order.push({
-                                paperId: item.getAttribute('data-paper-id'),
-                                session: sessionId
-                            });
-                        });
-                    });
-                    var orderInput = document.createElement('input');
-                    orderInput.type = 'hidden';
-                    orderInput.name = 'paper_order';
-                    orderInput.value = JSON.stringify(order);
-                    document.getElementById('sortable-list').appendChild(orderInput);
+                    captureInitialState(); // Also update state on drag and drop
                 }
             });
         });
     }
 });
 
-    // document.addEventListener('DOMContentLoaded', function () {
-    //     var nestedSortables = document.getElementById('nested-sortable');
-
-    //     new Sortable(nestedSortables, {
-    //         group: 'nested',
-    //         animation: 150,
-    //         fallbackOnBody: true,
-    //         swapThreshold: 0.65,
-    //         handle: '.handle',
-    //         onEnd: function (evt) {
-    //             var order = [];
-    //             nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
-    //                 order.push(item.dataset.paperId);
-    //             });
-    //             var orderInput = document.createElement('input');
-    //             orderInput.type = 'hidden';
-    //             orderInput.name = 'paper_order';
-    //             orderInput.value = JSON.stringify(order);
-    //             document.getElementById('sortable-list').appendChild(orderInput);
-    //         }
-    //     });
-    // });
-
 //     document.addEventListener('DOMContentLoaded', function () {
+//     var nestedSortables = document.getElementById('nested-sortable');
 //     var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
 
-//     sortableLists.forEach(function (nestedSortables) {
+//     // Initialize the Sortable for the single nested sortable if it exists
+//     if (nestedSortables) {
 //         new Sortable(nestedSortables, {
 //             group: 'nested',
 //             animation: 150,
@@ -672,14 +640,8 @@
 //             handle: '.handle',
 //             onEnd: function (evt) {
 //                 var order = [];
-//                 sortableLists.forEach(function (nestedSortable) {
-//                     var sessionId = nestedSortable.getAttribute('data-session-id');
-//                     nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
-//                         order.push({
-//                             paperId: item.getAttribute('data-paper-id'),
-//                             session: sessionId
-//                         });
-//                     });
+//                 nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
+//                     order.push(item.dataset.paperId);
 //                 });
 //                 var orderInput = document.createElement('input');
 //                 orderInput.type = 'hidden';
@@ -688,8 +650,41 @@
 //                 document.getElementById('sortable-list').appendChild(orderInput);
 //             }
 //         });
-//     });
+//     }
+
+//     // Initialize the Sortable for multiple nested sortables if they exist
+//     if (sortableLists.length > 0) {
+//         sortableLists.forEach(function (nestedSortables) {
+//             new Sortable(nestedSortables, {
+//                 group: 'nested',
+//                 animation: 150,
+//                 fallbackOnBody: true,
+//                 swapThreshold: 0.65,
+//                 handle: '.handle',
+//                 onEnd: function (evt) {
+//                     var order = [];
+//                     sortableLists.forEach(function (nestedSortable) {
+//                         var sessionId = nestedSortable.getAttribute('data-session-id');
+//                         nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
+//                             order.push({
+//                                 paperId: item.getAttribute('data-paper-id'),
+//                                 session: sessionId
+//                             });
+//                         });
+//                     });
+//                     if (order.length > 0) {
+//                         var orderInput = document.createElement('input');
+//                         orderInput.type = 'hidden';
+//                         orderInput.name = 'paper_order';
+//                         orderInput.value = JSON.stringify(order);
+//                         document.getElementById('sortable-list').appendChild(orderInput);
+//                     }
+//                 }
+//             });
+//         });
+//     }
 // });
+
 </script>
 
 {% endblock %}

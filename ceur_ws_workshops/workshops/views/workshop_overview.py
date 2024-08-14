@@ -5,14 +5,13 @@ from django.views import View
 from django.contrib import messages
 from ..forms import *
 from .util import *
-import hashlib
+import shutil
 class WorkshopOverview(View):
     def get_workshop(self):
         workshop = get_object_or_404(Workshop, secret_token=self.kwargs['secret_token'])
         return workshop
     
     def render_workshop(self, request, edit_mode = False, context=None):
-        
         
         workshop = self.get_workshop()
         default_context = {
@@ -38,44 +37,40 @@ class WorkshopOverview(View):
     
     def submit_workshop(self, request, secret_token):
         submit_path = 'workshops/submit_workshop.html'
-
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
-        if workshop.submitted:
-            context = {
-                'workshop': workshop,
-                'already_submitted': True
-            }
-            return self.render_workshop(request, edit_mode=False, context=context)
+        # if workshop.submitted:
+        #     context = {
+        #         'workshop': workshop,
+        #         'already_submitted': True
+        #     }
+        #     return self.render_workshop(request, edit_mode=False, context=context)
         
         workshop_data = get_workshop_data(workshop)
         add_editors_data(workshop, workshop_data)
         add_papers_data(workshop, workshop_data)   
         save_workshop_data(workshop_data, workshop)        
         request.session['json_saved'] = True
-        zip_agreement_files(workshop)
-        zip_paper_files(workshop)
+        html_dir = zip_files(workshop)
+        zipped_directory = zip_and_download_dir(workshop, html_dir)
         messages.success(request, 'Workshop submitted successfully.')
 
         workshop.submitted = True
         workshop.save()
-        
-        html_dir = os.path.join(settings.MEDIA_ROOT, f'Vol-{workshop.id}')
-        if not os.path.exists(html_dir):
-            os.makedirs(html_dir)
 
-        html_content = self.generate_html(workshop_data)
-        
+        self.generate_html(workshop_data, html_dir)
+        return render(request, submit_path, context = {
+            'workshop': workshop,
+            'zipped_directory': zipped_directory,
+        })
+    
+    def generate_html(self,  workshop_data, html_dir):
+
+        html_content =  render_to_string('workshops/generated_html_template.html', {'data': workshop_data})
+
         html_file_path = os.path.join(html_dir, 'index.html')
         with open(html_file_path, 'w') as html_file:
             html_file.write(html_content)
-       
-        return render(request, submit_path, context = {
-            'workshop': workshop,
-        })
-    
-    def generate_html(self,  workshop_data):
-        return render_to_string('workshops/generated_html_template.html', {'data': workshop_data})
     
     def post(self, request, secret_token, open_review = False):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
@@ -112,28 +107,25 @@ class WorkshopOverview(View):
                 if 'paper_order' in request.POST:
                     paper_order = json.loads(request.POST['paper_order'])
                     
-                    # if not isinstance(paper_order, int):
-                    #     for idx, paper_id in enumerate(paper_order):
-                    #         Paper.objects.filter(id=paper_id).update(order=idx + 1)
+                    if not isinstance(paper_order, int):
+                        for idx, paper_id in enumerate(paper_order):
+                            Paper.objects.filter(id=paper_id).update(order=idx + 1)
+
+                    print(paper_order, "PAPER ORDER")
                     if not isinstance(paper_order, int):
                         for idx, item in enumerate(paper_order):
                             paper_id = item['paperId']
                             session_id = item['session']
                             paper = Paper.objects.get(id=paper_id)
-                            paper.order = idx + 1
-                            if session_id != 'unassigned':
+
+                            if session_id != 'unassigned' and (not paper.session or str(paper.session.id) != session_id):
                                 session = get_object_or_404(Session, pk=session_id)
                                 paper.session = session
-                            else:
+                            elif session_id == 'unassigned':
                                 paper.session = None
-                            paper.save()
-            if not workshop_form.is_valid():
-                print(workshop_form.errors, "WORKSHOP FORM ERRORS")
-            if not paper_form.is_valid():
-                print(paper_form.errors, "PAPER FORM ERRORS")
-            if not editor_formset.is_valid():
-                print(editor_formset.errors, "EDITOR FORMSET ERRORS")
 
+                            paper.order = idx + 1
+                            paper.save()
             return self.render_workshop(request, edit_mode=False)
         elif request.POST["submit_button"] == "Submit Workshop":
             return self.submit_workshop(request, secret_token)
