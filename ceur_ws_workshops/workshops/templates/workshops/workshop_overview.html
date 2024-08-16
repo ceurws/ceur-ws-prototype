@@ -154,7 +154,7 @@
             <p><strong>Preface(s):</strong> <a href="{{workshop_form.preface.url}}">
                     {{ workshop.preface }}</a></p>
             {%endif%}
-            <fieldset class="editor-details">
+            <fieldset class="inner_fieldset">
                 <legend>Editor Details</legend>
                 {{ editor_forms.management_form }}
                 {% for editor_form in editor_forms %}
@@ -191,7 +191,7 @@
             {{ paper_forms.management_form }}
     
             {% for session in workshop.sessions.all %}
-                <fieldset class="papers-list">
+                <fieldset class="inner_fieldset">
                     <legend>{{ session.session_title }}</legend>
                     <ul id="nested-sortable-{{ forloop.counter }}" data-session-id="{{ session.id }}">
                         {% for paperform in paper_forms %}
@@ -235,7 +235,7 @@
             {% endfor %}
     
             <!-- Unassigned Papers -->
-            <fieldset class="papers-list">
+            <fieldset class="inner_fieldset">
                 <legend>Unassigned Papers</legend>
                 <ul id="nested-sortable-unassigned" data-session-id="unassigned">
                     {% for paperform in paper_forms %}
@@ -290,7 +290,7 @@
             {% csrf_token %}
             <input type="hidden" id="paper_id" name="paper_id" value="">
             {{ paper_forms.management_form }}
-            <ul id="nested-sortable">
+            <ul id="nested-sortable-{{ forloop.counter }}" data-session-id="{{ session.id }}">
                 {% for paperform in paper_forms %}
                 <li class="paper-item" data-paper-id="{{ paperform.instance.id }}">
                     <div class="paper-container">
@@ -618,72 +618,19 @@
                 fallbackOnBody: true,
                 swapThreshold: 0.65,
                 handle: '.handle',
+                scroll: true,
+                scrollSensitivity: 35, // px, how near the mouse must be to an edge to start scrolling.
+                scrollSpeed: 15, // px, speed of the scrolling
+                bubbleScroll: true,
+                forceAutoScrollFallback: true,
+                forceFallback: true, 
                 onEnd: function (evt) {
-                    captureInitialState(); // Also update state on drag and drop
+                    captureInitialState(); 
                 }
             });
         });
     }
 });
-
-//     document.addEventListener('DOMContentLoaded', function () {
-//     var nestedSortables = document.getElementById('nested-sortable');
-//     var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
-
-//     // Initialize the Sortable for the single nested sortable if it exists
-//     if (nestedSortables) {
-//         new Sortable(nestedSortables, {
-//             group: 'nested',
-//             animation: 150,
-//             fallbackOnBody: true,
-//             swapThreshold: 0.65,
-//             handle: '.handle',
-//             onEnd: function (evt) {
-//                 var order = [];
-//                 nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
-//                     order.push(item.dataset.paperId);
-//                 });
-//                 var orderInput = document.createElement('input');
-//                 orderInput.type = 'hidden';
-//                 orderInput.name = 'paper_order';
-//                 orderInput.value = JSON.stringify(order);
-//                 document.getElementById('sortable-list').appendChild(orderInput);
-//             }
-//         });
-//     }
-
-//     // Initialize the Sortable for multiple nested sortables if they exist
-//     if (sortableLists.length > 0) {
-//         sortableLists.forEach(function (nestedSortables) {
-//             new Sortable(nestedSortables, {
-//                 group: 'nested',
-//                 animation: 150,
-//                 fallbackOnBody: true,
-//                 swapThreshold: 0.65,
-//                 handle: '.handle',
-//                 onEnd: function (evt) {
-//                     var order = [];
-//                     sortableLists.forEach(function (nestedSortable) {
-//                         var sessionId = nestedSortable.getAttribute('data-session-id');
-//                         nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
-//                             order.push({
-//                                 paperId: item.getAttribute('data-paper-id'),
-//                                 session: sessionId
-//                             });
-//                         });
-//                     });
-//                     if (order.length > 0) {
-//                         var orderInput = document.createElement('input');
-//                         orderInput.type = 'hidden';
-//                         orderInput.name = 'paper_order';
-//                         orderInput.value = JSON.stringify(order);
-//                         document.getElementById('sortable-list').appendChild(orderInput);
-//                     }
-//                 }
-//             });
-//         });
-//     }
-// });
 
 </script>
 

@@ -107,21 +107,17 @@ class WorkshopOverview(View):
                 if 'paper_order' in request.POST:
                     paper_order = json.loads(request.POST['paper_order'])
                     
-                    if not isinstance(paper_order, int):
-                        for idx, paper_id in enumerate(paper_order):
-                            Paper.objects.filter(id=paper_id).update(order=idx + 1)
-
                     print(paper_order, "PAPER ORDER")
                     if not isinstance(paper_order, int):
                         for idx, item in enumerate(paper_order):
                             paper_id = item['paperId']
                             session_id = item['session']
-                            paper = Paper.objects.get(id=paper_id)
-
-                            if session_id != 'unassigned' and (not paper.session or str(paper.session.id) != session_id):
+                            print(session_id)
+                            paper = Paper.objects.get(id=paper_id) 
+                            if session_id != 'unassigned' and session_id != '' and (not paper.session or str(paper.session.id) != session_id):
                                 session = get_object_or_404(Session, pk=session_id)
                                 paper.session = session
-                            elif session_id == 'unassigned':
+                            else:
                                 paper.session = None
 
                             paper.order = idx + 1
