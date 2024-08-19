@@ -9,35 +9,6 @@
     
     <fieldset>
       <legend>Workshop Details</legend>
-      <style>
-        .errorlist {
-          color: #721c24;
-          background-color: #f8d7da;
-          border-color: #f5c6cb;
-          position: relative;
-          padding: .75rem 1.25rem;
-          margin-bottom: 1rem;
-          border: 1px solid transparent;
-          border-radius: .25rem;
-          text-align: center;
-          font-weight: bold;
-        }
-
-      .close-button {
-      background: none;
-      border: none;
-      padding: 0;
-      margin: 0;
-      font-size: 1.5rem; /* Adjust the size as needed */
-      cursor: pointer;
-      color: #000; /* Adjust the color as needed */
-    }
-
-    .close-button:hover {
-      color: #f00; /* Optional: Change color on hover */
-    }
-
-    </style>
     {{ form|crispy }}
     <input type="hidden" name="workshop_id" value="{{ workshop_instance.id }}">
     {%if form.instance.editor_agreement %}

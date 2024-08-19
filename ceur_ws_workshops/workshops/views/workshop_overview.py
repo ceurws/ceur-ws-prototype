@@ -114,6 +114,7 @@ class WorkshopOverview(View):
                             session_id = item['session']
                             print(session_id)
                             paper = Paper.objects.get(id=paper_id) 
+                            # change logic 
                             if session_id != 'unassigned' and session_id != '' and (not paper.session or str(paper.session.id) != session_id):
                                 session = get_object_or_404(Session, pk=session_id)
                                 paper.session = session

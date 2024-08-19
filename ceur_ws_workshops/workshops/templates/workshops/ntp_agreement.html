@@ -5,6 +5,7 @@
 <head>
     <title>Non-Third Party Agreement</title>
     <link href="https://fonts.cdnfonts.com/css/liberation-serif" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
     <style>
         .header{
             display: flex;
@@ -50,7 +51,6 @@
     <div class="center">
         <p>Version 1.05-ntp</p>
         <p>{% now "j-n-Y" %}</p>
-        
     </div>
     <div class="right">
         <p>CEUR Workshop Proceedings</p>
@@ -62,7 +62,6 @@
     <h1 style="text-align: center;">Author Agreement to Publish a Contribution as Open-Access on CEUR-WS.org</h1>
 </div>
 <div class="content">
-    <h1>Author Agreement to Publish a Contribution as Open-Access on CEUR-WS.org</h1>
     <p>Herewith I/we (the author(s) resp. the copyright holders) agree that my/our contribution:</p>
     <p>Paper Title: {{ paper.paper_title }}</p>
     <p>Number of Pages: {{ paper.pages }}</p>
