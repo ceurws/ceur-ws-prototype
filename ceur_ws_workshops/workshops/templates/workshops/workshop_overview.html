@@ -15,58 +15,85 @@
 
 <body>
     <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
-
     <p style="text-align: center;">Workshop id: <i>{{workshop.id}}</i></p>
     <p style="text-align: center;"><i>If a paper is marked in green with a tick, it means that the author has  <span style = "color:green">completed all the corresponding details.</i> &#9989;</span></p>
     {% if edit_mode %}
     <h1>Edit workshop: <i>{{workshop.workshop_short_title}}</i></h1>
+    <style>
+    .dropdown-container {
+        border: 1px solid #ccc;
+        padding: 10px;
+        width: auto;
+        cursor: pointer;
+    }
+    </style>
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <fieldset class="workshop-details">
-            <legend>Workshop Details</legend>
-            {{workshop_form.as_p}}
-            {% if workshop_form.editor_agreement %}
-            <p><strong>Editor agreement:</strong> <a href="{{workshop_form.editor_agreement.url}}">
-                    {{ workshop.editor_agreement }}</a></p>
-            {%endif%}
-            {% if workshop_form.preface %}
-            <p><strong>Preface(s):</strong> <a href="{{workshop_form.preface.url}}">
-                    {{ workshop.preface }}</a></p>
-            {%endif%}
-            <fieldset class="inner_fieldset">
-                <legend>Editor Details</legend>
-                {{ editor_forms.management_form }}
-                {% for editor_form in editor_forms %}
-                <li class="paper-item">
-                    <div class="paper-container">
-                        <div class="paper-summary">
-                            <span class="paper-title">{{ editor_form.instance.editor_name }}</span>
-                            <i class="arrow down toggle-details"></i>
-                        </div>
-                        <div class="paper-details" style="display: none;">
-                            {{ editor_form|crispy }}
-                            {% if not forloop.last %}
-                            <hr>
-                            {% endif %}
-                        </div>
-                    </div>
-                </li>
-                {% endfor %}
-            </fieldset>
-            <div class="submit-container">
-                <input type="submit" name="submit_button" class="button-13" value="Confirm">
-            </div>
-        </fieldset>
-        
-    </form>
+    <div class="dropdown-container">
+        <div class="paper-summary dropdown-trigger">
+            <span class="paper-title">Edit Workshop & Editor Details</span>
+            <i class="arrow down toggle-details"></i>
+        </div>
+        <div class="paper-details" style="display: none;">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <fieldset class="inner_fieldset">
+                    <legend>Workshop Details</legend>
+                    {{ workshop_form.as_p }}
+                    {% if workshop_form.editor_agreement %}
+                    <p><strong>Editor agreement:</strong> 
+                       <a href="{{ workshop_form.editor_agreement.url }}">
+                           {{ workshop.editor_agreement }}
+                       </a>
+                    </p>
+                    {% endif %}
+                    {% if workshop_form.preface %}
+                    <p><strong>Preface(s):</strong> 
+                       <a href="{{ workshop_form.preface.url }}">
+                           {{ workshop.preface }}
+                       </a>
+                    </p>
+                    {% endif %}
+                    <fieldset class="inner_fieldset">
+                        <legend>Editor Details</legend>
+                        {{ editor_forms.management_form }}
+                        {% for editor_form in editor_forms %}
+                        <li class="paper-item">
+                            <div class="paper-container">
+                                <div class="paper-summary">
+                                    <span class="paper-title">{{ editor_form.instance.editor_name }}</span>
+                                    <i class="arrow down toggle-details"></i>
+                                </div>
+                                <div class="paper-details" style="display: none;">
+                                    {{ editor_form|crispy }}
+                                    {% if not forloop.last %}
+                                    <hr>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </fieldset>
+                </fieldset>
+                <div class="submit-container">
+                    <input type="submit" name="submit_button" class="button-13" value="Confirm">
+                </div>
+            </form>
+        </div>
+    </div>
+    <br>
+
     {% if session_title_list %}
-
     <form method="post" enctype="multipart/form-data" class="sortable" id="sortable-list">
  
         {% csrf_token %}
-        <fieldset class="papers-list">
-            <legend>Papers</legend>
+        <!-- <fieldset class="papers-list">
+            <legend>Papers</legend> -->
+            <div class="dropdown-container">
+                <div class="paper-summary dropdown-trigger">
+                    <span class="paper-title">Edit Papers</span>
+                    <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
+                </div>
+                <div class="paper-details" style="display: none;">
             <input type="hidden" id="paper_id" name="paper_id" value="">
             {{ paper_forms.management_form }}
     
@@ -156,11 +183,14 @@
                     {% endfor %}
                 </ul>
             </fieldset>
-        </fieldset>
-    
-        <div class="submit-container">
-            <input type="submit" name="submit_button" class="button-13" value="Confirm">
+            <div class="submit-container">
+                <input type="submit" name="submit_button" class="button-13" value="Confirm">
+            </div>
         </div>
+        
+        </div>
+    
+        
     </form>
    
     {% else %}

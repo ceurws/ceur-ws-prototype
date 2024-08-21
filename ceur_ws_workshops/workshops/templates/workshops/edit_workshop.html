@@ -4,9 +4,9 @@
 {% load crispy_forms_tags %} 
 <h1> New Workshop Submission </h1> 
   <p class="header-title">Are all the details correct?</p>
+  
   <form id="validation-form" enctype="multipart/form-data" method="post">
     {% csrf_token %}
-    
     <fieldset>
       <legend>Workshop Details</legend>
     {{ form|crispy }}
@@ -56,7 +56,6 @@
           {{ form|crispy }}
           <hr>
       {% endfor %}
-
 
         </div>
    <input type="button" value="Add Editor" class="button-13" id="add_editor">
