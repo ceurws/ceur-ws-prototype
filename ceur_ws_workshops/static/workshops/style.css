@@ -7,11 +7,8 @@ body {
   border: 1px solid #ccc;
   padding: 10px;
   width: 95%;
-  /* Ensure all fieldsets have the same width */
   margin-left: auto;
-  /* Center the fieldset */
   margin-right: auto;
-  /* Center the fieldset */
 }
 
 fieldset {
@@ -19,11 +16,8 @@ fieldset {
   border: 1px solid #ccc;
   padding: 10px;
   width: 50%;
-  /* Ensure all fieldsets have the same width */
   margin-left: auto;
-  /* Center the fieldset */
   margin-right: auto;
-  /* Center the fieldset */
 }
 
 .header-title {
@@ -261,35 +255,6 @@ h1 {
   margin-top:10px;
 }
 
-.delete_object input[type="checkbox"] {
-  margin-right: 0.5rem;
-}
-
-.delete_object label {
-  margin: 0;
-}
-
-.paper-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.toggle-details {
-  cursor: pointer;
-  border: solid black;
-  border-width: 0 3px 3px 0;
-  display: inline-block;
-  padding: 3px;
-}
-
-.handle {
-  display: inline-block;
-  border-top: 3px solid var(--dark);
-  width: 30px;
-  padding-top: 5px;
-  cursor: grab;
-}
 .handle:after, .handle:before {
   display: block;
   content: "";
@@ -303,31 +268,12 @@ h1 {
   cursor: grabbing;
 }
 
-.delete_object {
-  color: red;
-  border-color: #f5c6cb;
-  position: relative;
-  padding: .75rem 1.25rem;
-  border: 1px solid transparent;
-  font-weight: bold;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
-}
-
 .delete_object input[type="checkbox"] {
   margin-right: 0.5rem;
 }
 
 .delete_object label {
   margin: 0;
-}
-
-.paper-summary {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .toggle-details {
@@ -357,26 +303,6 @@ h1 {
   padding: 0 10px;
   font-size: 2em;
   color: #666;
-}
-
-.handle:after,
-.handle:before {
-  display: block;
-  content: "";
-  padding-top: 5px;
-  border-top: 3px solid var(--dark);
-}
-
-.handle:hover,
-.handle:hover:before,
-.handle:hover:after {
-  border-color: var(--primary);
-}
-
-.handle:active,
-.handle:active:before,
-.handle:active:after {
-  cursor: grabbing;
 }
 
 .paper-item {
@@ -409,10 +335,6 @@ h1 {
   margin-right: 10px;
 }
 
-.toggle-details {
-  cursor: pointer;
-}
-
 .paper-details {
   display: none;
   padding: 10px 0 0 30px;
@@ -429,11 +351,6 @@ h1 {
   align-items: center;
   margin-bottom: 10px;
   list-style: none;
-}
-
-.author-container {
-  display: flex;
-  align-items: center;
   width: 100%;
   background: #f9f9f9;
   padding: 10px;
@@ -480,38 +397,15 @@ h1 {
   color: #f00;
 }
 
-.header{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
 .content {
   margin: 20px;
 }
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.header .left {
-  flex: 1;
-  text-align: left;
-}
-.header .center {
-  flex: 2;
-  text-align: center;
-}
-.header .right {
-  flex: 1;
-  text-align: left;
-}
-h1 {
-  font-size: 1.5em;
-  margin: 10px 0;
-}
-p {
-  margin: 5px 0;
+
+.dropdown-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: auto;
+  cursor: pointer;
 }
 
 

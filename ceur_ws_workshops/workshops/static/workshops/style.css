@@ -397,38 +397,15 @@ h1 {
   color: #f00;
 }
 
-.header{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
 .content {
   margin: 20px;
 }
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.header .left {
-  flex: 1;
-  text-align: left;
-}
-.header .center {
-  flex: 2;
-  text-align: center;
-}
-.header .right {
-  flex: 1;
-  text-align: left;
-}
-h1 {
-  font-size: 1.5em;
-  margin: 10px 0;
-}
-p {
-  margin: 5px 0;
+
+.dropdown-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: auto;
+  cursor: pointer;
 }
 
 

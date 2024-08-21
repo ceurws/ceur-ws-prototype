@@ -10,7 +10,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workshop Overview</title>
-    <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'workshops/style.css' %}"> -->
 </head>
 
 <body>
@@ -20,14 +20,13 @@
     {% if edit_mode %}
     <h1>Edit workshop: <i>{{workshop.workshop_short_title}}</i></h1>
     <style>
-    .dropdown-container {
-        border: 1px solid #ccc;
-        padding: 10px;
-        width: auto;
-        cursor: pointer;
-    }
+        .dropdown-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: auto;
+  cursor: pointer;
+}
     </style>
-
     <div class="dropdown-container">
         <div class="paper-summary dropdown-trigger">
             <span class="paper-title">Edit Workshop & Editor Details</span>
