@@ -14,8 +14,9 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
         'author_formset': None,
         'edit_mode': False
     }
+
     if request.method == "POST":
-        paper_form = PaperForm(data=request.POST, instance=paper, workshop=workshop, agreement_not_required=True, hide_agreement=True)
+        paper_form = PaperForm(data=request.POST, files=request.FILES, instance=paper, workshop=workshop, agreement_not_required=True)
         author_formset = get_author_formset()(data=request.POST, queryset=Author.objects.filter(paper=paper), prefix='author')
 
         if 'edit_button' in request.POST:
@@ -49,8 +50,8 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
             print(author_formset.errors, "AUTHOR FORMSET ERRORS")
             print(paper_form.errors, "PAPER FORM ERRORS")
     else:
-        paper_form = PaperForm(instance=paper, hide_agreement=True, agreement_not_required=True)
+        paper_form = PaperForm(instance=paper, workshop=workshop, agreement_not_required=True)
         author_formset = get_author_formset()(queryset=paper.authors.all())
 
+    context.update({'paper_form': paper_form, 'author_formset': author_formset})
     return render(request, 'workshops/author_upload_success.html', context)
-

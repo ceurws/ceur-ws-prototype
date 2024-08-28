@@ -6,6 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from ..models import *
+from urllib.parse import urljoin
 
 def get_workshop_data(workshop):
     '''
@@ -113,25 +114,48 @@ def save_workshop_data(workshop_data, workshop):
         with open(file_path, 'w') as file:
             json.dump(workshop_data, file, cls=DjangoJSONEncoder, indent=4)
 
-def zip_agreement_files(workshop):
-        agreement_path = os.path.join(settings.MEDIA_ROOT, 'agreement', f'Vol-{workshop.id}', )
-        os.makedirs('zipped_agreements', exist_ok=True)
-        zip_filename = os.path.join(settings.BASE_DIR, 'zipped_agreements', f'AGREEMENTS-Vol-{workshop.id}.zip')
-    
-        with zipfile.ZipFile(zip_filename, 'w') as zipf:
-            for root, _, files in os.walk(agreement_path):
-                for file in files:
-                    zipf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), agreement_path))
+def zip_files(workshop):
+    html_dir = os.path.join(settings.MEDIA_ROOT, f'Vol-{workshop.id}')
 
-def zip_paper_files(workshop):
-        file_path = os.path.join(settings.MEDIA_ROOT, 'papers', f'Vol-{workshop.id}', )
-        os.makedirs('zipped_papers', exist_ok=True)
-        zip_filename = os.path.join(settings.BASE_DIR, 'zipped_papers', f'PAPERS-Vol-{workshop.id}.zip')
+    if not os.path.exists(html_dir):
+        os.makedirs(html_dir)
     
-        with zipfile.ZipFile(zip_filename, 'w') as zipf:
-            for root, _, files in os.walk(file_path):
-                for file in files:
-                    zipf.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), file_path))
+    for file_type in ['agreement', 'papers']:
+        file_path = os.path.join(settings.MEDIA_ROOT, file_type, f'Vol-{workshop.id}')
+        zip_filename = os.path.join(html_dir, f'{file_type.upper()}-Vol-{workshop.id}.zip')
+        print(f"Creating zip file: {zip_filename}")
+
+        # Check if the directory exists and contains files
+        if os.path.exists(file_path) and os.listdir(file_path):
+            with zipfile.ZipFile(zip_filename, 'w') as zipf:
+                for root, _, files in os.walk(file_path):
+                    for file in files:
+                        file_full_path = os.path.join(root, file)
+                        arcname = os.path.relpath(file_full_path, file_path)
+                        print(f"Adding {file_full_path} as {arcname}")
+                        zipf.write(file_full_path, arcname)
+        else:
+            print(f"No files found in {file_path}")
+    
+    return html_dir
+
+def zip_and_download_dir(workshop, html_dir):
+    complete_zip_filename = os.path.join(settings.MEDIA_ROOT, f'Vol-{workshop.id}.zip')
+    print(f"Creating complete zip file: {complete_zip_filename}")
+
+    with zipfile.ZipFile(complete_zip_filename, 'w') as zipf:
+        for root, _, files in os.walk(html_dir):
+            for file in files:
+                file_full_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_full_path, settings.MEDIA_ROOT)
+                print(f"Adding {file_full_path} as {arcname}")
+                zipf.write(file_full_path, arcname)
+
+    relative_path = os.path.relpath(complete_zip_filename, settings.MEDIA_ROOT)
+    download_url = urljoin(settings.MEDIA_URL, relative_path)
+    
+    print(f"Download URL: {download_url}")
+    return download_url
 
 def get_agreement_filename(paper_instance, original_filename):
     paper_title = paper_instance.paper_title.replace(' ', '')
