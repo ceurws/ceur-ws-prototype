@@ -8,34 +8,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Paper Submitted Correctly</title>
   <link rel="stylesheet" href="{% static 'workshops/styles.css' %}">
-  <style>
-    .close-button {
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font-size: 1.5rem; 
-    cursor: pointer;
-    color: #000; 
-  }
-  
-  .close-button:hover {
-    color: #f00; 
-  }
-  
-  .errorlist {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-    position: relative;
-    padding: .75rem 1.25rem;
-    margin-bottom: 1rem;
-    border: 1px solid transparent;
-    border-radius: .25rem;
-    text-align: center;
-    font-weight: bold;
-    }
-  </style>
 </head>
 
 <h2 class="header-title">Submit Paper</h2>
@@ -52,12 +24,22 @@
   <option value="" selected>-- Select Paper --</option>
   {% for paper in paper_list %}
   <option value="{{ paper.id }}" 
-          data-title="{{ paper.paper_title }}" 
-          data-session="{{ paper.session.id }}"
-          data-pdf="{{ paper.uploaded_file.url }}"
-          data-authors="{{ paper.authors.all }}">
-        {{ paper.paper_title }}
-  </option>
+        data-title="{{ paper.paper_title }}" 
+        data-id="{{paper.id}}"
+        data-session="{{ paper.session.id }}"
+        data-pdf="{{ paper.uploaded_file.url }}"
+        data-authors='[
+          {% for author in paper.authors.all %}
+            {
+              "name": "{{ author.author_name }}",
+              "university": "{{ author.author_university }}",
+              "uni_url": "{{ author.author_uni_url }}",
+              "email": "{{ author.author_email }}"
+            }{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        ]'>
+  {{ paper.paper_title }}
+</option>
   {% endfor %}
 </select>
 <button id="confirm-selection">Confirm</button>
@@ -70,8 +52,8 @@
 
   <fieldset>
     <legend>Paper Details</legend>
+    <input type="hidden" id="id_paper_id" name="paper_id" value="">
     {{ paper_form|crispy}}
-
     {% if paper_form.paper_title.errors %}
     <div class="errorlist">
       {{ paper_form.paper_title.errors }}
@@ -112,31 +94,77 @@
 </div>
 
 <script>
+  var totalFormsInput = document.querySelector('input[name="author-TOTAL_FORMS"]');
+
+  function updateTotalForms() {
+      var authorForms = document.querySelectorAll('#author-form .author-form');
+      totalFormsInput.value = authorForms.length;
+  }
+  
   $('#confirm-selection').click(function() {
-    var selectedPaper = $('#paper-select option:selected');
-    var paperId = selectedPaper.val();
-    var paperTitle = selectedPaper.data('title');
-    var paperSession = selectedPaper.data('session'); 
-    var paperPdf = selectedPaper.data('pdf'); 
-    var authors = selectedPaper.data('authors');
-    
-    if (paperTitle) {
-    $('#id_paper_title').val(paperTitle);}
-
-    if (paperSession) { 
-      $('#id_session').val(paperSession);}
-
-    if (paperPdf) { 
-      $('#current-file-info').html('<i>Currently uploaded paper file: <a href="' + paperPdf + '" target="_blank">View PDF</a></i>');
-    
-    if (authors) {
-    
-      console.log(authors)
-    }
-    
-;}
-
+      var selectedPaper = $('#paper-select option:selected');
+      var paperId = selectedPaper.data('id');
+      var paperTitle = selectedPaper.data('title');
+      var paperSession = selectedPaper.data('session'); 
+      var paperPdf = selectedPaper.data('pdf'); 
+      var paperAuthors = selectedPaper.data('authors'); // Get the authors data
+  
+      if (paperId) {
+          $('#id_paper_id').val(paperId);
+      }
+  
+      if (paperTitle) {
+          $('#id_paper_title').val(paperTitle);
+      }
+  
+      if (paperSession) {
+          $('#id_session').val(paperSession);
+      }
+  
+      if (paperPdf) {
+          $('#current-file-info').html('<i>Currently uploaded paper file: <a href="' + paperPdf + '" target="_blank">View PDF</a></i>');
+      }
+  
+      // Clear existing author forms
+      $('#author-form').empty();
+  
+      // Add new author forms
+      if (paperAuthors && paperAuthors.length > 0) {
+          for (var i = 0; i < paperAuthors.length; i++) {
+              var authorFormHtml = $('#empty_author_form').html();
+              $('#author-form').append(authorFormHtml);
+  
+              var newAuthorForm = $('#author-form .author-form').last();
+  
+              // Correctly index the form fields
+              newAuthorForm.find(':input').each(function() {
+                  var name = $(this).attr('name');
+                  if (name) {
+                      var newName = name.replace('__prefix__', i);
+                      $(this).attr('name', newName);
+                  }
+                  var id = $(this).attr('id');
+                  if (id) {
+                      var newId = id.replace('__prefix__', i);
+                      $(this).attr('id', newId);
+                  }
+              });
+  
+              newAuthorForm.find('input[name$="-author_name"]').val(paperAuthors[i].name === "None" || paperAuthors[i].name === null ? '' : paperAuthors[i].name);
+              newAuthorForm.find('input[name$="-author_university"]').val(paperAuthors[i].university === "None" || paperAuthors[i].university === null ? '' : paperAuthors[i].university);
+              newAuthorForm.find('input[name$="-author_uni_url"]').val(paperAuthors[i].uni_url === "None" || paperAuthors[i].uni_url === null ? '' : paperAuthors[i].uni_url);
+              newAuthorForm.find('input[name$="-author_email"]').val(paperAuthors[i].email === "None" || paperAuthors[i].email === null ? '' : paperAuthors[i].email);
+          }
+      }
+  
+      // Update the total number of forms
+      updateTotalForms();
   });
+  
+  $(document).ready(function() {
+      updateTotalForms();
+  });
+  
 </script>
 
 {% endblock %}

@@ -24,24 +24,24 @@ class DateInput(forms.DateInput):
         kwargs["format"] = "%Y-%m-%d"
         super().__init__(**kwargs)
 
-def _detect_signature_in_image(file_path):
-        loader = Loader()
-        extractor = Extractor()
-        cropper = Cropper(border_ratio=0)
-        judger = Judger()
+# def _detect_signature_in_image(file_path):
+#         loader = Loader()
+#         extractor = Extractor()
+#         cropper = Cropper(border_ratio=0)
+#         judger = Judger()
 
-        masks = loader.get_masks(file_path)
-        is_signed = False
-        for mask in masks:
-            labeled_mask = extractor.extract(mask)
-            results = cropper.run(labeled_mask)
-            for result in results.values():
-                is_signed = judger.judge(result["cropped_mask"])
-                if is_signed:
-                    break
-            if is_signed:
-                break
-        return is_signed
+#         masks = loader.get_masks(file_path)
+#         is_signed = False
+#         for mask in masks:
+#             labeled_mask = extractor.extract(mask)
+#             results = cropper.run(labeled_mask)
+#             for result in results.values():
+#                 is_signed = judger.judge(result["cropped_mask"])
+#                 if is_signed:
+#                     break
+#             if is_signed:
+#                 break
+#         return is_signed
 
 class WorkshopForm(forms.ModelForm):
     workshop_language_iso = forms.ChoiceField(label="Language", choices=[], required=False)
@@ -180,23 +180,6 @@ class WorkshopForm(forms.ModelForm):
                 return False
             
         return True
-    def clean(self):
-        cleaned_data = super().clean()
-
-        # if not editor_agreement:
-        #     raise ValidationError("Please upload the agreement file.")
-        # if editor_agreement:
-            # pass
-            # editor_agreement_file_path = os.path.join(settings.MEDIA_ROOT, editor_agreement.name)
-            # default_storage.save(editor_agreement.name, ContentFile(editor_agreement.read()))
-
-            
-            # cleaned_data['editor_agreement'] = editor_agreement_file_path   
-        
-    #         if not self._detect_signature_in_image(editor_agreement_file_path):
-    #             raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
-
-        return cleaned_data
 
 class PaperForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -210,16 +193,12 @@ class PaperForm(forms.ModelForm):
         self.clean_enabled = kwargs.pop('clean_enabled', False)
         self.agreement_not_required = kwargs.pop('agreement_not_required', False)
         super(PaperForm, self).__init__(*args, **kwargs)
+ 
+        self.fields['session'].queryset = self.workshop.sessions.all() if self.workshop else Session.objects.none()
 
-        if self.workshop:
-            self.fields['session'].queryset = self.workshop.sessions.all()
-        else:
-            self.fields['session'].queryset = Session.objects.none()
+        self.fields['uploaded_file'].label = 'Change current file' if file_uploaded else 'Upload file'
 
-        if file_uploaded:
-            self.fields['uploaded_file'].label = 'Change current file'
-        else:
-            self.fields['uploaded_file'].label = 'Upload file'
+        self.fields['agreement_file'].label = 'Upload agreement file' if self.agreement_file else 'Please Upload the hand signed agreement file'
 
         if hide_pages:
             self.fields['pages'].widget = forms.HiddenInput()
@@ -230,7 +209,6 @@ class PaperForm(forms.ModelForm):
         if self.agreement_not_required:
             self.fields['agreement_file'].required = False
             self.fields['agreement_file'].widget.attrs.pop('required', None)
-
             
         if self.hide_agreement:
             self.fields['agreement_file'].widget = forms.HiddenInput()
@@ -239,11 +217,9 @@ class PaperForm(forms.ModelForm):
         if hide_has_third_party_material:
             self.fields['has_third_party_material'].widget = forms.HiddenInput()
 
-        self.fields['agreement_file'].label = 'Upload agreement file' if self.agreement_file else 'Please Upload the hand signed agreement file'
-
     class Meta:
         model = Paper
-        fields = ['paper_title', 'pages', 'session', 'agreement_file', 'has_third_party_material','uploaded_file']
+        fields = ['paper_title', 'pages', 'session', 'agreement_file', 'has_third_party_material','uploaded_file', 'complete']
         help_texts = {'pages': '<br><i>Provide the length(number of pages) of the paper</i>.<br>',
                       'has_third_party_material': '<i>Check this box if the paper contains third-party material</i>'}
         widgets = {
@@ -253,33 +229,23 @@ class PaperForm(forms.ModelForm):
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
             # 'required': 'True'}),
             #  required: True is needed here for the __init__ to work in author_upload
+            'complete' : CheckboxInput(attrs={}),
+        }
+        labels = {
+            'complete': 'Check this box if the details of this paper are complete and final',
         }
 
         paper_title = forms.CharField(strip=True)
 
     def clean(self):
         cleaned_data = super().clean()
-        agreement_file = cleaned_data.get('agreement_file')
         uploaded_file = cleaned_data.get('uploaded_file')
 
         if self.clean_enabled:
             pdfReader = PyPDF2.PdfReader(uploaded_file)
             num_pages = len(pdfReader.pages)
             cleaned_data['pages'] = num_pages
-
-        # if not self.agreement_not_required and not cleaned_data.get('agreement_file'):
-        #     self.add_error('agreement_file', 'This field is required.')
-
         return cleaned_data
-
-        # if uploaded_file and agreement_file and self.workshop:
-        # if agreement_file: 
-        #     directory_path = os.path.join('agreement', f'Vol-{self.workshop.id}')
-        #     agreement_file_name = os.path.join(directory_path, agreement_file.name)
-        #     agreement_file_path = os.path.join(settings.MEDIA_ROOT, agreement_file.name)
-        #     default_storage.save(agreement_file.name, ContentFile(agreement_file.read()))
-
-        # self.instance.agreement_file = agreement_file.name
         
         # if not self._detect_signature_in_image(agreement_file_path):
         #     print("Agreement file is not signed. Please upload a hand-signed agreement file.")
@@ -321,7 +287,7 @@ def get_author_formset(extra=0):
                                             'strip':True,}),
             'author_university': TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the university of the author',
-                                            'strip':True,}),
+                                            'strip':True}),
             'author_uni_url': TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the URL of the university which the author is affiliated to',
                                             'strip':True,}),
@@ -367,7 +333,6 @@ SessionFormSet = modelformset_factory(
     widgets = {
         'session_title': TextInput(attrs={'size': 70, 
                                             'placeholder': '(optional) Title of the session'}),
-
     }
 )
 class WorkshopPrefaceForm(forms.ModelForm):

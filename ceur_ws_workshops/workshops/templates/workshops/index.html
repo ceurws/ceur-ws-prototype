@@ -16,6 +16,11 @@
 
     <main>
         {% block content %}
+        <h1> New Workshop Submission </h1> 
+        <fieldset>
+        <i> If your workshop is on OpenReview you can use the OpenReview feature to find it and download its metadata. </i>
+        <div class="button-group">
+
         <form action="{% url 'workshops:create_workshop' %}" method="get">
             <button type="submit" class="button-13">Create New Workshop</button>
         </form>
@@ -24,6 +29,8 @@
           </form>
 
         {% endblock %}
+        </fieldset>
+    </div>
     </main>
 
 </body>

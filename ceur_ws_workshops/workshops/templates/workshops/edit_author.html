@@ -7,35 +7,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
-  <style>
-    .close-button {
-    background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
-    font-size: 1.5rem; 
-    cursor: pointer;
-    color: #000; 
-  }
   
-  .close-button:hover {
-    color: #f00; 
-  }
-  
-  .errorlist {
-    color: #721c24;
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-    position: relative;
-    padding: .75rem 1.25rem;
-    margin-bottom: 1rem;
-    border: 1px solid transparent;
-    border-radius: .25rem;
-    text-align: center;
-    font-weight: bold;
-    }
-  </style>
 </head>
+
 <p class="header-title">Are all the details correct?</p>
 <form id="validation-form" enctype="multipart/form-data" method="post">
   {% csrf_token %}
@@ -57,7 +31,7 @@
     {%endcomment%}
 
     <input type="hidden" name="secret_token" value="{{ paper_instance.secret_token }}">
-
+  
   <p>Currently uploaded Paper: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a> </p>
   </fieldset>
   <fieldset id="author-fieldset">
@@ -89,8 +63,6 @@
   </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="{% static 'workshops/script.js' %}"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     let messages = Array.from(document.querySelectorAll('#django-messages [data-message]')).map(el => el.getAttribute('data-message'));

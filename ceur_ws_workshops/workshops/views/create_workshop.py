@@ -37,17 +37,15 @@ class CreateWorkshop(View):
         if venue_id:
             try:
                 venue_group = ORC_instance.get_group(id=venue_id)
-                print(venue_group)
-                submission_name = venue_group.content['submission_name']['value']
-                all_submissions = ORC_instance.get_all_notes(invitation=f'{venue_id}/-/{submission_name}')
+                all_submissions = ORC_instance.get_all_notes(invitation=f'{venue_id}/-/Submission')
 
             except:
                 pass 
 
         paper_form_list = []
         author_form_list = []
-        print(all_submissions)
-        if all_submissions is not None:
+
+        if all_submissions != []:
             for i,submission in enumerate(all_submissions):
                 paper_title = submission.content['title']['value']
 
@@ -99,11 +97,12 @@ class CreateWorkshop(View):
                     author_formset = get_author_formset(extra=len(data))(queryset=Author.objects.none(), initial = data, prefix=f"author{i}")
                     author_form_list.append(author_formset)
                 except:
-                    author_form_list = ['' for _ in range(len(paper_form_list))]
-                    pass
+                    author_form_list.append('') 
+                
+            paper_author_combinations = zip(paper_form_list, author_form_list)             
 
-                        
-        paper_author_combinations = zip(paper_form_list, author_form_list)             
+        else:
+            paper_author_combinations = None                                
 
         return paper_author_combinations
 
@@ -140,9 +139,9 @@ class CreateWorkshop(View):
             workshop_form = WorkshopForm(data=request.POST, files=request.FILES, instance=workshop_instance)
             preface_formset = PrefaceFormset(data = request.POST, files = request.FILES, instance = workshop_instance, prefix = "preface")
             # Once forms have been bound (either using old or new editor agreement), we validate and save to the database.
+
             if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()
                     , preface_formset.is_valid]):
-
                 workshop = workshop_form.save()  
 
                 editor_instances = editor_formset.save()
@@ -155,7 +154,7 @@ class CreateWorkshop(View):
                     
                 workshop.editors.add(*editor_instances)
                 workshop.sessions.add(*session_instances)
-                
+                print('url:',workshop.openreview_url)
                 # if we have a linked open review page we extract the openreview papers and display them on a page where they can be reviewed
                 if workshop.openreview_url:
                     paper_author_combinations = self.add_papers_openreview(workshop)

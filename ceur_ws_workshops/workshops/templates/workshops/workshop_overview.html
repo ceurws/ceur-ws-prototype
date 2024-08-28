@@ -10,187 +10,94 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workshop Overview</title>
-    <link rel="stylesheet" href="{% static 'workshops/style.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'workshops/style.css' %}"> -->
 </head>
 
 <body>
     <h1>Workshop Overview for workshop: <i>{{workshop.workshop_short_title}}</i></h1>
-
     <p style="text-align: center;">Workshop id: <i>{{workshop.id}}</i></p>
-
-    <style>
-        .delete_object {
-            color: red;
-            border-color: #f5c6cb;
-            position: relative;
-            padding: .75rem 1.25rem;
-            border: 1px solid transparent;
-            font-weight: bold;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .delete_object input[type="checkbox"] {
-            margin-right: 0.5rem;
-        }
-
-        .delete_object label {
-            margin: 0;
-        }
-
-        .paper-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .toggle-details {
-            cursor: pointer;
-            border: solid black;
-            border-width: 0 3px 3px 0;
-            display: inline-block;
-            padding: 3px;
-        }
-
-        .down {
-            transform: rotate(45deg);
-            -webkit-transform: rotate(45deg);
-        }
-
-        .up {
-            transform: rotate(-135deg);
-            -webkit-transform: rotate(-135deg);
-        }
-
-        .handle {
-            display: inline-block;
-            border-top: 3px solid var(--dark);
-            width: 30px;
-            padding-top: 5px;
-            cursor: grab;
-        }
-
-        .handle:after,
-        .handle:before {
-            display: block;
-            content: "";
-            padding-top: 5px;
-            border-top: 3px solid var(--dark);
-        }
-
-        .handle:hover,
-        .handle:hover:before,
-        .handle:hover:after {
-            border-color: var(--primary);
-        }
-
-        .handle:active,
-        .handle:active:before,
-        .handle:active:after {
-            cursor: grabbing;
-        }
-
-        .paper-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            list-style: none;
-        }
-
-        .paper-container {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            background: #f9f9f9;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .handle {
-            cursor: grab;
-            padding: 0 10px;
-            font-size: 1.5em;
-            color: #666;
-        }
-
-        .paper-summary {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .paper-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .toggle-details {
-            cursor: pointer;
-        }
-
-        .paper-details {
-            display: none;
-            padding: 10px 0 0 30px;
-        }
-    </style>
+    <p style="text-align: center;"><i>If a paper is marked in green with a tick, it means that the author has  <span style = "color:green">completed all the corresponding details.</i> &#9989;</span></p>
     {% if edit_mode %}
     <h1>Edit workshop: <i>{{workshop.workshop_short_title}}</i></h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <fieldset class="workshop-details">
-            <legend>Workshop Details</legend>
-            {{workshop_form.as_p}}
-            {% if workshop_form.editor_agreement %}
-            <p><strong>Editor agreement:</strong> <a href="{{workshop_form.editor_agreement.url}}">
-                    {{ workshop.editor_agreement }}</a></p>
-            {%endif%}
-            {% if workshop_form.preface %}
-            <p><strong>Preface(s):</strong> <a href="{{workshop_form.preface.url}}">
-                    {{ workshop.preface }}</a></p>
-            {%endif%}
-            <fieldset class="editor-details">
-                <legend>Editor Details</legend>
-                {{ editor_forms.management_form }}
-                {% for editor_form in editor_forms %}
-                <li class="paper-item">
-                    <div class="paper-container">
-                        <div class="paper-summary">
-                            <span class="paper-title">{{ editor_form.instance.editor_name }}</span>
-                            <i class="arrow down toggle-details"></i>
-                        </div>
-                        <div class="paper-details" style="display: none;">
-                            {{ editor_form|crispy }}
-                            {% if not forloop.last %}
-                            <hr>
-                            {% endif %}
-                        </div>
-                    </div>
-                </li>
-                {% endfor %}
-            </fieldset>
-            <div class="submit-container">
-                <input type="submit" name="submit_button" class="button-13" value="Confirm">
-            </div>
-        </fieldset>
-        
-    </form>
-    {% if session_title_list %}
+    <style>
+        .dropdown-container {
+  border: 1px solid #ccc;
+  padding: 10px;
+  width: auto;
+  cursor: pointer;
+}
+    </style>
+    <div class="dropdown-container">
+        <div class="paper-summary dropdown-trigger">
+            <span class="paper-title">Edit Workshop & Editor Details</span>
+            <i class="arrow down toggle-details"></i>
+        </div>
+        <div class="paper-details" style="display: none;">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <fieldset class="inner_fieldset">
+                    <legend>Workshop Details</legend>
+                    {{ workshop_form.as_p }}
+                    {% if workshop_form.editor_agreement %}
+                    <p><strong>Editor agreement:</strong> 
+                       <a href="{{ workshop_form.editor_agreement.url }}">
+                           {{ workshop.editor_agreement }}
+                       </a>
+                    </p>
+                    {% endif %}
+                    {% if workshop_form.preface %}
+                    <p><strong>Preface(s):</strong> 
+                       <a href="{{ workshop_form.preface.url }}">
+                           {{ workshop.preface }}
+                       </a>
+                    </p>
+                    {% endif %}
+                    <fieldset class="inner_fieldset">
+                        <legend>Editor Details</legend>
+                        {{ editor_forms.management_form }}
+                        {% for editor_form in editor_forms %}
+                        <li class="paper-item">
+                            <div class="paper-container">
+                                <div class="paper-summary">
+                                    <span class="paper-title">{{ editor_form.instance.editor_name }}</span>
+                                    <i class="arrow down toggle-details"></i>
+                                </div>
+                                <div class="paper-details" style="display: none;">
+                                    {{ editor_form|crispy }}
+                                    {% if not forloop.last %}
+                                    <hr>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </fieldset>
+                </fieldset>
+                <div class="submit-container">
+                    <input type="submit" name="submit_button" class="button-13" value="Confirm">
+                </div>
+            </form>
+        </div>
+    </div>
+    <br>
 
+    {% if session_title_list %}
     <form method="post" enctype="multipart/form-data" class="sortable" id="sortable-list">
  
         {% csrf_token %}
-        <fieldset class="papers-list">
-            <legend>Papers</legend>
+        <!-- <fieldset class="papers-list">
+            <legend>Papers</legend> -->
+            <div class="dropdown-container">
+                <div class="paper-summary dropdown-trigger">
+                    <span class="paper-title">Edit Papers</span>
+                    <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
+                </div>
+                <div class="paper-details" style="display: none;">
             <input type="hidden" id="paper_id" name="paper_id" value="">
             {{ paper_forms.management_form }}
     
             {% for session in workshop.sessions.all %}
-                <fieldset class="papers-list">
+                <fieldset class="inner_fieldset">
                     <legend>{{ session.session_title }}</legend>
                     <ul id="nested-sortable-{{ forloop.counter }}" data-session-id="{{ session.id }}">
                         {% for paperform in paper_forms %}
@@ -199,7 +106,11 @@
                                     <div class="paper-container">
                                         <div class="handle">&#9776;</div>
                                         <div class="paper-summary">
+                                            {% if paperform.instance.complete %}
+                                            <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }} </span>
+                                            {%else%}
                                             <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                                            {%endif%}
                                             <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
                                         </div>
                                         <div class="paper-details" style="display: none;">
@@ -230,7 +141,7 @@
             {% endfor %}
     
             <!-- Unassigned Papers -->
-            <fieldset class="papers-list">
+            <fieldset class="inner_fieldset">
                 <legend>Unassigned Papers</legend>
                 <ul id="nested-sortable-unassigned" data-session-id="unassigned">
                     {% for paperform in paper_forms %}
@@ -239,7 +150,11 @@
                                 <div class="paper-container">
                                     <div class="handle">&#9776;</div>
                                     <div class="paper-summary">
-                                        <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                                        {% if paperform.instance.complete %}
+                                            <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }}</span>
+                                            {%else%}
+                                            <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                                            {%endif%}
                                         <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
                                     </div>
                                     <div class="paper-details" style="display: none;">
@@ -267,11 +182,14 @@
                     {% endfor %}
                 </ul>
             </fieldset>
-        </fieldset>
-    
-        <div class="submit-container">
-            <input type="submit" name="submit_button" class="button-13" value="Confirm">
+            <div class="submit-container">
+                <input type="submit" name="submit_button" class="button-13" value="Confirm">
+            </div>
         </div>
+        
+        </div>
+    
+        
     </form>
    
     {% else %}
@@ -281,13 +199,17 @@
             {% csrf_token %}
             <input type="hidden" id="paper_id" name="paper_id" value="">
             {{ paper_forms.management_form }}
-            <ul id="nested-sortable">
+            <ul id="nested-sortable-{{ forloop.counter }}" data-session-id="{{ session.id }}">
                 {% for paperform in paper_forms %}
                 <li class="paper-item" data-paper-id="{{ paperform.instance.id }}">
                     <div class="paper-container">
                         <div class="handle">&#9776;</div>
                         <div class="paper-summary">
+                            {%if paperform.instance.complete%}
+                            <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }}</span>
+                            {%else%}
                             <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                            {%endif%}
                             <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
                         </div>
                         <div class="paper-details" style="display: none;">
@@ -419,7 +341,11 @@
                 <li class="paper-item">
                     <div class="paper-container">
                         <div class="paper-summary">
-                            <span class="paper-title">{{ paper.paper_title }}</span>
+                            {% if paper.complete %}
+                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }} {{paper.complete}}</span>
+                            {%else%}
+                            <span class="paper-title"> {{ paper.paper_title }}</span>
+                            {%endif%}
                             <span class="last_updated"> Last updated: 
                                 {{ paper.last_updated|date:"F j, Y, g:i a"}}</span>
                             <i class="arrow down toggle-details"></i>
@@ -452,13 +378,17 @@
         {% endfor %}
 
         <fieldset class="inner_fieldset">
-            <legend> Papers yet to be reviewed by authors </legend>
+            <legend> Papers not assigned a session </legend>
             <ul>
                 {% for paper in paper_forms_no_session %}
                 <li class="paper-item">
                     <div class="paper-container">
                         <div class="paper-summary">
-                            <span class="paper-title">{{ paper.paper_title }}</span>
+                            {% if paper.complete %}
+                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }} </span>
+                            {% else %}
+                            <span class="paper-title"> {{ paper.paper_title }} </span>
+                            {%endif%}
                             <span class="last_updated"> Last updated: 
                                 {{ paper.last_updated|date:"F j, Y, g:i a"}}</span>
                             <i class="arrow down toggle-details"></i>
@@ -490,7 +420,11 @@
                 <li class="paper-item">
                     <div class="paper-container">
                         <div class="paper-summary">
-                            <span class="paper-title">{{ paper.paper_title }}</span>
+                            {% if paper.complete %}
+                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }}</span>
+                            {%else%}
+                            <span class="paper-title"> {{ paper.paper_title }}</span>
+                            {%endif%}
                             <span class="last_updated"> Last updated: 
                                 {{ paper.last_updated|date:"F j, Y, g:i a"}}</span>
                             <i class="arrow down toggle-details"></i>
@@ -554,32 +488,35 @@
         }
         $('.toggle-details').on('click', toggleDetails);
     });
-
+    
     document.addEventListener('DOMContentLoaded', function () {
     var nestedSortables = document.getElementById('nested-sortable');
     var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
 
-    // Initialize the Sortable for the single nested sortable if it exists
-    if (nestedSortables) {
-        new Sortable(nestedSortables, {
-            group: 'nested',
-            animation: 150,
-            fallbackOnBody: true,
-            swapThreshold: 0.65,
-            handle: '.handle',
-            onEnd: function (evt) {
-                var order = [];
-                nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
-                    order.push(item.dataset.paperId);
+    function captureInitialState() {
+        var order = [];
+        sortableLists.forEach(function (nestedSortable) {
+            var sessionId = nestedSortable.getAttribute('data-session-id');
+            nestedSortable.querySelectorAll('.paper-item').forEach(function (item) {
+                order.push({
+                    paperId: item.getAttribute('data-paper-id'),
+                    session: sessionId
                 });
-                var orderInput = document.createElement('input');
-                orderInput.type = 'hidden';
-                orderInput.name = 'paper_order';
-                orderInput.value = JSON.stringify(order);
-                document.getElementById('sortable-list').appendChild(orderInput);
-            }
+            });
         });
+
+        if (order.length > 0) {
+            var orderInput = document.createElement('input');
+            orderInput.type = 'hidden';
+            orderInput.name = 'paper_order';
+            orderInput.value = JSON.stringify(order);
+            document.getElementById('sortable-list').appendChild(orderInput);
+        }
     }
+
+    // Capture initial state on form submit
+    var form = document.getElementById('sortable-list');
+    form.addEventListener('submit', captureInitialState);
 
     // Initialize the Sortable for multiple nested sortables if they exist
     if (sortableLists.length > 0) {
@@ -590,81 +527,20 @@
                 fallbackOnBody: true,
                 swapThreshold: 0.65,
                 handle: '.handle',
+                scroll: true,
+                scrollSensitivity: 35, // px, how near the mouse must be to an edge to start scrolling.
+                scrollSpeed: 15, // px, speed of the scrolling
+                bubbleScroll: true,
+                forceAutoScrollFallback: true,
+                forceFallback: true, 
                 onEnd: function (evt) {
-                    var order = [];
-                    sortableLists.forEach(function (nestedSortable) {
-                        var sessionId = nestedSortable.getAttribute('data-session-id');
-                        nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
-                            order.push({
-                                paperId: item.getAttribute('data-paper-id'),
-                                session: sessionId
-                            });
-                        });
-                    });
-                    var orderInput = document.createElement('input');
-                    orderInput.type = 'hidden';
-                    orderInput.name = 'paper_order';
-                    orderInput.value = JSON.stringify(order);
-                    document.getElementById('sortable-list').appendChild(orderInput);
+                    captureInitialState(); 
                 }
             });
         });
     }
 });
 
-    // document.addEventListener('DOMContentLoaded', function () {
-    //     var nestedSortables = document.getElementById('nested-sortable');
-
-    //     new Sortable(nestedSortables, {
-    //         group: 'nested',
-    //         animation: 150,
-    //         fallbackOnBody: true,
-    //         swapThreshold: 0.65,
-    //         handle: '.handle',
-    //         onEnd: function (evt) {
-    //             var order = [];
-    //             nestedSortables.querySelectorAll('.paper-item').forEach(function (item, index) {
-    //                 order.push(item.dataset.paperId);
-    //             });
-    //             var orderInput = document.createElement('input');
-    //             orderInput.type = 'hidden';
-    //             orderInput.name = 'paper_order';
-    //             orderInput.value = JSON.stringify(order);
-    //             document.getElementById('sortable-list').appendChild(orderInput);
-    //         }
-    //     });
-    // });
-
-//     document.addEventListener('DOMContentLoaded', function () {
-//     var sortableLists = document.querySelectorAll('ul[id^="nested-sortable-"], ul[id="nested-sortable-unassigned"]');
-
-//     sortableLists.forEach(function (nestedSortables) {
-//         new Sortable(nestedSortables, {
-//             group: 'nested',
-//             animation: 150,
-//             fallbackOnBody: true,
-//             swapThreshold: 0.65,
-//             handle: '.handle',
-//             onEnd: function (evt) {
-//                 var order = [];
-//                 sortableLists.forEach(function (nestedSortable) {
-//                     var sessionId = nestedSortable.getAttribute('data-session-id');
-//                     nestedSortable.querySelectorAll('.paper-item').forEach(function (item, index) {
-//                         order.push({
-//                             paperId: item.getAttribute('data-paper-id'),
-//                             session: sessionId
-//                         });
-//                     });
-//                 });
-//                 var orderInput = document.createElement('input');
-//                 orderInput.type = 'hidden';
-//                 orderInput.name = 'paper_order';
-//                 orderInput.value = JSON.stringify(order);
-//                 document.getElementById('sortable-list').appendChild(orderInput);
-//             }
-//         });
-//     });
-// });
 </script>
 
 {% endblock %}
