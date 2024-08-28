@@ -14,6 +14,7 @@ class WorkshopOverview(View):
     def render_workshop(self, request, edit_mode = False, context=None):
         
         workshop = self.get_workshop()
+
         default_context = {
             'papers' : workshop.accepted_papers.all().order_by('order'),
             'workshop' : workshop,
@@ -74,7 +75,7 @@ class WorkshopOverview(View):
     
     def post(self, request, secret_token, open_review = False):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
-        
+        print(request.POST)
         # not sure if following if statement is necessary
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)

@@ -51,6 +51,7 @@ class AuthorUpload(View):
             # save paper and assign workshop
             paper_instance = paper_form.save(commit=False)
             paper_instance.workshop = self.get_workshop()
+
             # if any new files uploaded in the edit stage they get added here. Also amount of pages is added
             if request.FILES.get('uploaded_file', False):
                 paper_instance.uploaded_file = request.FILES['uploaded_file']
@@ -67,6 +68,7 @@ class AuthorUpload(View):
 
             # handles paper session if it has been added or changed.
             self.get_session(request, paper_instance)
+
             
             # saves and adds author instances from author formset.
             author_instances = author_formset.save()
@@ -87,6 +89,7 @@ class AuthorUpload(View):
     def create_paper(self, request, author_formset, paper_form, author_upload_secret_token):
 
         if paper_form.is_valid() and author_formset.is_valid():
+
             paper_instance = paper_form.save(commit=False) 
             paper_instance.workshop = self.get_workshop()
 
@@ -151,7 +154,8 @@ class AuthorUpload(View):
 
             author_formset = get_author_formset()(queryset=paper_instance.authors.all(),
                                                 data=request.POST, 
-                                                prefix="author")
+                                                 prefix="author")
+
 
             paper_form = PaperForm(request.POST,  
                                    file_uploaded=True, 
@@ -159,7 +163,7 @@ class AuthorUpload(View):
                                    workshop=self.get_workshop(), 
                                    agreement_file = True, 
                                    clean_enabled = True)
-            
+
         # if statement to check if request.FILES has any new files attached. 
         elif bool(request.FILES.get('uploaded_file', False)) == True:
             author_formset = get_author_formset()(queryset=Author.objects.none(), 
@@ -174,7 +178,7 @@ class AuthorUpload(View):
 
         # if no files are attached we extract the files uploaded 
         else:
-            print('fina round')
+            print('final round')
             author_formset = get_author_formset()(request.POST, prefix="author")
 
             paper_instance = Paper.objects.filter(secret_token=request.POST.get('secret_token'), workshop = self.get_workshop()).first()

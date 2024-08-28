@@ -227,7 +227,7 @@ class PaperForm(forms.ModelForm):
             'pages': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the number of pages'}),
             'uploaded_file': forms.FileInput(attrs={'accept': '.pdf'}),
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
-            # 'required': 'True'}),
+
             #  required: True is needed here for the __init__ to work in author_upload
             'complete' : CheckboxInput(attrs={}),
         }
