@@ -2,6 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from ..models import Workshop, Paper, Editor, Author, Session, Preface
 from django.urls import reverse
 from django.views import View
+from django.http import HttpResponse
+
 
 from ..forms import WorkshopForm, EditorFormSet, PaperForm, SessionFormSet, get_author_formset, PrefaceFormset
 from urllib.parse import urlparse, parse_qs
@@ -131,7 +133,19 @@ class CreateWorkshop(View):
 
     def post(self, request):
         if 'submit_button' in request.POST: 
+
             workshop_instance = self.get_workshop(request.POST.get('workshop_id')) if request.POST.get('workshop_id') else None
+
+            if workshop_instance.submitted:
+                # If the workshop is already submitted, show a pop-up and redirect to the workshop overview
+                return HttpResponse(
+                    f"""
+                    <script type="text/javascript">
+                        alert("This workshop has already been submitted.");
+                        window.location.href = "{request.build_absolute_uri(redirect('workshops:workshop_overview', secret_token=workshop_instance.secret_token).url)}";
+                    </script>
+                    """
+                )
 
             editor_formset = EditorFormSet(queryset=Editor.objects.none(), data=request.POST, prefix="editor")
             session_formset = SessionFormSet(queryset=Session.objects.none(), data=request.POST, prefix="session")
@@ -154,7 +168,7 @@ class CreateWorkshop(View):
                     
                 workshop.editors.add(*editor_instances)
                 workshop.sessions.add(*session_instances)
-                print('url:',workshop.openreview_url)
+
                 # if we have a linked open review page we extract the openreview papers and display them on a page where they can be reviewed
                 if workshop.openreview_url:
                     paper_author_combinations = self.add_papers_openreview(workshop)
@@ -163,7 +177,10 @@ class CreateWorkshop(View):
                         'paper_author_combinations' : paper_author_combinations,
                     }
                     return render(request, 'workshops/open_review_editpage.html', context)
-                    
+
+                workshop.submitted = True
+                workshop.save()
+                
                 return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
 
 

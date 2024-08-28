@@ -81,6 +81,7 @@ class Workshop(models.Model):
     total_short_acc_papers = models.IntegerField(null=True, blank=True)
     openreview_url = models.URLField(max_length=200,null=True, blank=True)
     
+    
     # Filled in by CEUR
     volume_number = models.IntegerField(null=True, blank=True)
     submission_date = models.DateField(null=True, blank=True) # date the submit button is clicked by volume owner
