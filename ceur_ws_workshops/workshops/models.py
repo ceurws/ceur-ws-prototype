@@ -54,8 +54,6 @@ class Preface(models.Model):
 class Workshop(models.Model):
     
     def workshop_agreement_file_path(instance, filename):
-        # acronym = instance.workshop_acronym
-        # filename = f"EDITOR-AGREEMENT-{acronym}.pdf"
         editor_agreement_count = Workshop.objects.filter(id=instance.id).count() + 1
         filename = f"editor_agreement{editor_agreement_count}.pdf"
         workshop_id = instance.id
@@ -110,8 +108,6 @@ class Language(models.Model):
     def __str__(self):
         return self.name
 
-import re
-from django.db.models import Max
 
 class Paper(models.Model):
     def paper_upload_path(instance, filename):
@@ -120,33 +116,13 @@ class Paper(models.Model):
         return f"papers/Vol-{instance.workshop.id}/{filename}"
 
     def agreement_file_path(instance, filename):
-        pattern = r'agreement(\d+)\.html'
-    
-        # Get the highest agreement number currently in use
-        max_agreement_number = Paper.objects.filter(workshop=instance.workshop).aggregate(
-            max_number=Max('agreement_file')
-        )['max_number']
-        
-        # Extract the number from the filename if it exists
-        if max_agreement_number:
-            match = re.search(pattern, max_agreement_number)
-            if match:
-                agreement_count = int(match.group(1)) + 1
-            else:
-                agreement_count = 1
-        else:
-            agreement_count = 1
-        
-        # Generate the new filename
+        agreement_count = instance.order or Paper.objects.filter(workshop=instance.workshop).count() + 1
+        print(agreement_count)
         filename = f'agreement{agreement_count}.html'
-        return f"agreement/Vol-{instance.workshop.id}/{filename}"
-        # agreement_count = Paper.objects.filter(workshop=instance.workshop).count() + 1
-        # print(agreement_count)
-        # filename = f'agreement{agreement_count}.html'
     
-        # # if not filename.lower().endswith('.html'):
-        # #     filename += '.html'
-        # return f"agreement/Vol-{instance.workshop.id}/{filename}"
+        # if not filename.lower().endswith('.html'):
+        #     filename += '.html'
+        return f"agreement/Vol-{instance.workshop.id}/{filename}"
     
     paper_title = models.CharField(max_length=200)
     pages = models.CharField(max_length=10, blank = True)

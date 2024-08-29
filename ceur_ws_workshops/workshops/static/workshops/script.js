@@ -70,3 +70,4 @@ function outFunc(tooltipId) {
   var tooltip = document.getElementById(tooltipId);
   tooltip.innerHTML = "Copy to clipboard";
 }
+

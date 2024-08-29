@@ -80,7 +80,7 @@ class WorkshopOverview(View):
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
         
-        elif request.POST["submit_button"] == "Confirm":
+        elif request.POST["submit_button"] == "Confirm" or request.POST["submit_button"] == "Confirm Paper Details" or request.POST["submit_button"] == "Confirm Editor and Workshop Details" :
             workshop_form = WorkshopForm(instance=self.get_workshop(), data=request.POST, files = request.FILES, fields_not_required = True)
             editor_formset = EditorFormSet(request.POST, request.FILES, queryset=workshop.editors.all(), prefix="editor")
             paper_form = PaperFormset(data = request.POST, files = request.FILES, queryset = workshop.accepted_papers.all(), prefix="paper", agreement_not_required = True)
