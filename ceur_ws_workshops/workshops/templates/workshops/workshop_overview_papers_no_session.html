@@ -1,51 +1,55 @@
 <form method="post" enctype="multipart/form-data" class="sortable" id="sortable-list">
-    <fieldset class="papers-list">
-        <legend>Papers</legend>
-            {% csrf_token %}
-            <input type="hidden" id="paper_id" name="paper_id" value="">
-            {{ paper_forms.management_form }}
-            <ul id="nested-sortable-{{ forloop.counter }}" data-session-id="{{ session.id }}">
-                {% for paperform in paper_forms %}
-                <li class="paper-item" data-paper-id="{{ paperform.instance.id }}">
-                    <div class="paper-container">
-                        <div class="handle">&#9776;</div>
-                        <div class="paper-summary">
-                            {%if paperform.instance.complete%}
-                            <span class="paper-title" style = "color:green;">&#9989; {{ paperform.instance.paper_title }}</span>
-                            {%else%}
-                            <span class="paper-title">{{ paperform.instance.paper_title }}</span>
-                            {%endif%}
-                            <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
-                        </div>
-                        <div class="paper-details" style="display: none;">
-                            <div>
-                                <input type='hidden' name='paper_order' value="{{ paperform.instance.order }}">
-                                {{ paperform.as_p }}
-                                {%comment%}
-                                {% if paperform.instance.uploaded_file %}
-                                <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{
-                                        paperform.instance.uploaded_file.name }}</a></p>
-                                {% endif %}
-                                {% if paperform.instance.agreement_file %}
-                                <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{
-                                        paperform.instance.agreement_file.name }}</a></p>
-                                {% endif %}
-                                {%endcomment%}
-                                <div class="delete_object">
-                                    <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
-                                    <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper
-                                        also deletes the uploaded file and agreement.</label>
-                                </div>
-                            </div>
-                            <hr>
+    {% csrf_token %}
+    <div class="dropdown-container">
+    <div class="paper-summary dropdown-trigger">
+        <span class="paper-title">Edit Papers</span>
+        <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
+    </div>
+    <div class="paper-details" style="display: none;">
+    <input type="hidden" id="paper_id" name="paper_id" value="">
+    {{ paper_forms.management_form }}
+    <ul id="nested-sortable-{{ forloop.counter }}" data-session-id="{{ session.id }}">
+        {% for paperform in paper_forms %}
+        <li class="paper-item" data-paper-id="{{ paperform.instance.id }}">
+            <div class="paper-container">
+                <div class="handle">&#9776;</div>
+                <div class="paper-summary">
+                    {%if paperform.instance.complete%}
+                    <span class="paper-title" style="color:green;">&#9989; {{ paperform.instance.paper_title }}</span>
+                    {%else%}
+                    <span class="paper-title">{{ paperform.instance.paper_title }}</span>
+                    {%endif%}
+                    <i class="arrow down toggle-details" title="{{ paperform.instance.id }}"></i>
+                </div>
+                <div class="paper-details" style="display: none;">
+                    <div>
+                        <input type='hidden' name='paper_order' value="{{ paperform.instance.order }}">
+                        {{ paperform.as_p }}
+                        {%comment%}
+                        {% if paperform.instance.uploaded_file %}
+                        <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{
+                                paperform.instance.uploaded_file.name }}</a></p>
+                        {% endif %}
+                        {% if paperform.instance.agreement_file %}
+                        <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{
+                                paperform.instance.agreement_file.name }}</a></p>
+                        {% endif %}
+                        {%endcomment%}
+                        <div class="delete_object">
+                            <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
+                            <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper
+                                also deletes the uploaded file and agreement.</label>
                         </div>
                     </div>
-                </li>
-                {% endfor %}
-            </ul>
-            <div class="submit-container">
-                <input type="submit" name="submit_button" class="button-13" value="Confirm Paper Details">
+                    <hr>
+                </div>
             </div>
-        
-    </fieldset>
+        </li>
+        {% endfor %}
+    </ul>
+    <div class="submit-container">
+        <input type="submit" name="submit_button" class="button-13" value="Confirm Paper Details">
+    </div>
+</div>
+</div>
 </form>

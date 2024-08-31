@@ -242,9 +242,12 @@ class PaperForm(forms.ModelForm):
         uploaded_file = cleaned_data.get('uploaded_file')
 
         if self.clean_enabled:
-            pdfReader = PyPDF2.PdfReader(uploaded_file)
-            num_pages = len(pdfReader.pages)
-            cleaned_data['pages'] = num_pages
+            if uploaded_file is not None:
+                pdfReader = PyPDF2.PdfReader(uploaded_file)
+                num_pages = len(pdfReader.pages)
+                cleaned_data['pages'] = num_pages
+            else:
+                del(uploaded_file)
         return cleaned_data
         
         # if not self._detect_signature_in_image(agreement_file_path):

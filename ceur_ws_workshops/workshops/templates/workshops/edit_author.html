@@ -31,8 +31,9 @@
     {%endcomment%}
 
     <input type="hidden" name="secret_token" value="{{ paper_instance.secret_token }}">
-  
+  {% if paper_form.instance.uploaded_file%}
   <p>Currently uploaded Paper: <a href ="{{paper_form.instance.uploaded_file.url}}">{{ paper_form.instance.uploaded_file.name }}</a> </p>
+  {%endif%}
   </fieldset>
   <fieldset id="author-fieldset">
     {{ author_formset.management_form }}
