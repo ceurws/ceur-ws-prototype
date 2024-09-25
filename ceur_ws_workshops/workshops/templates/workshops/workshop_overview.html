@@ -22,17 +22,18 @@
 
     {% include 'workshops/workshop_overview_details_editor.html' %}
 
-    {% if session_title_list %}
+        {% if session_title_list %}
 
-    {% include 'workshops/workshop_papers_with_sessions.html' %}
+            {% include 'workshops/workshop_papers_with_sessions.html' %}
+
+            {% else %}
+
+            {% include 'workshops/workshop_overview_papers_no_session.html' %}
+
+        {% endif %}
 
     {% else %}
-
-    {% include 'workshops/workshop_overview_papers_no_session.html' %}
-
-    {% endif %}
-
-    {% else %}
+    
     {% include 'workshops/workshop_overview_base.html' %}
 
     {% endif %}

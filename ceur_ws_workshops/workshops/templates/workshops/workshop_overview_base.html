@@ -65,6 +65,7 @@
         <p><strong>Editors:</strong></p>
         <ul class="editors-list">
             {% for editor in workshop.editors.all %}
+            {{editor.editor_url}}
             <li> <a href="{{editor.editor_url}}">{{ editor.editor_name}}</a>
                 (<i> <a href="{{editor.institution_url }}"> {{ editor.institution}}</a>,
                     {{editor.institution_country}}</i>)

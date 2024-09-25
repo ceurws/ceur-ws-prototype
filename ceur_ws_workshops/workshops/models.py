@@ -20,6 +20,18 @@ class Editor(models.Model):
     def __str__(self):
         # return self.name
         return f"{self.editor_name}, {self.institution}, {self.institution_country}"
+    
+    def save(self, *args, **kwargs):
+        # Check if editor_url starts with either http:// or https://
+        if not (self.editor_url.startswith("http://") or self.editor_url.startswith("https://")):
+            self.editor_url = "http://" + self.editor_url
+
+        # Check if institution_url starts with either http:// or https://
+        if not (self.institution_url.startswith("http://") or self.institution_url.startswith("https://")):
+            self.institution_url = "http://" + self.institution_url
+
+        # Call the parent class's save method
+        super().save(*args, **kwargs)
 
 class Author(models.Model):
     author_name = models.CharField(max_length=100)
