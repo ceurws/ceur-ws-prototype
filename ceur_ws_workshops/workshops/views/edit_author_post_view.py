@@ -47,8 +47,8 @@ def edit_author_post_view(request, paper_id, author_upload_secret_token):
 
             context.update({'paper_form': paper_form, 'paper': paper, 'edit_mode': False})
         else:
-            print(author_formset.errors, "AUTHOR FORMSET ERRORS")
-            print(paper_form.errors, "PAPER FORM ERRORS")
+            # print validation errors here
+            pass
     else:
         paper_form = PaperForm(instance=paper, workshop=workshop, agreement_not_required=True)
         author_formset = get_author_formset()(queryset=paper.authors.all())

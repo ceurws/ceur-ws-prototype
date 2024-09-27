@@ -20,8 +20,18 @@
     <fieldset>
       <legend>Paper Details</legend> 
       {{ paper_form|crispy }}
+      {% if paper_form.instance.uploaded_file%}
       <p>Uploaded File: <a href="{{ paper_form.instance.uploaded_file.url }}">{{ paper_form.instance.uploaded_file.name }}</a></p>
+      {% else %}
+      No file uploaded.
+      {% endif %}
+
+      {% if paper_form.instance.agreement_file%}
       <p>Agreement File: <a href="{{ paper_form.instance.agreement_file.url }}">{{ paper_form.instance.agreement_file.name }}</a></p>
+      {% else %}
+      No agreement file uploaded.
+      {% endif %}
+
     </fieldset>
     
    <fieldset id="author-fieldset">
@@ -133,18 +143,23 @@
     <legend>Paper Details</legend>
     <p><strong>Paper Title:</strong> {{ paper.paper_title }}</p>
     <p><strong>Pages:</strong> {{ paper.pages }}</p>
-    <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">{{ paper.uploaded_file.name }}</a></p>
+    {% if paper_form.instance.uploaded_file%}
+      <p>Uploaded File: <a href="{{ paper_form.instance.uploaded_file.url }}">{{ paper_form.instance.uploaded_file.name }}</a></p>
+    {% else %}
+      No file uploaded.
+    {% endif %}
 
-    <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}" target="_blank">{{ paper.agreement_file.name }}</a></p>
-   
+    {% if paper_form.instance.agreement_file%}
+      <p>Agreement File: <a href="{{ paper_form.instance.agreement_file.url }}">{{ paper_form.instance.agreement_file.name }}</a></p>
+    {% else %}
+     No agreement file uploaded.
+    {% endif %}   
+
     {%if not paper.session%}
     <i>The paper has not yet been assigned to a session.</i>
     {%else%}
     <p><strong>Session:</strong> {{ paper.session }}</p>
     {%endif%}
-    
-
-
     
   </fieldset>
   <br>

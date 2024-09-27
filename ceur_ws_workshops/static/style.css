@@ -11,14 +11,6 @@ body {
   margin-right: auto;
 }
 
-.button-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px; /* Adjust the gap as needed */
-  padding: 20px; /* Optional: Add padding for better spacing */
-}
-
 fieldset {
   margin-bottom: 10px;
   border: 1px solid #ccc;
@@ -53,6 +45,10 @@ fieldset {
   width: 100%;
   box-shadow: none;
   transition: border-color 300ms, box-shadow 300ms;
+}
+
+.not_displayed {
+  display: none;
 }
 
 .input-field:focus,

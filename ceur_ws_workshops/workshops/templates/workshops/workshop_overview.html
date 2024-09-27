@@ -1,7 +1,7 @@
 {% extends 'workshops/index.html' %}
 {% load static %}
 {% block content %}
-{%load crispy_forms_tags %}
+{% load crispy_forms_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -33,7 +33,7 @@
         {% endif %}
 
     {% else %}
-    
+
     {% include 'workshops/workshop_overview_base.html' %}
 
     {% endif %}
@@ -50,6 +50,14 @@
             $('#paper_id').val(paper_id);
         }
         $('.toggle-details').on('click', toggleDetails);
+
+        function toggleDetails_dropdown() {
+            const $detailsDiv = $(this).next('.paper-details');
+            $detailsDiv.toggle();
+            $(this).find('.toggle-details').toggleClass('down up');
+        }
+        // Bind the click event to the entire dropdown-trigger container
+        $('.dropdown-trigger').on('click', toggleDetails_dropdown);
     });
 
     document.addEventListener('DOMContentLoaded', function () {

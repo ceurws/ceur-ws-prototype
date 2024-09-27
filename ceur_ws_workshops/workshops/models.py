@@ -22,15 +22,12 @@ class Editor(models.Model):
         return f"{self.editor_name}, {self.institution}, {self.institution_country}"
     
     def save(self, *args, **kwargs):
-        # Check if editor_url starts with either http:// or https://
         if not (self.editor_url.startswith("http://") or self.editor_url.startswith("https://")):
             self.editor_url = "http://" + self.editor_url
 
-        # Check if institution_url starts with either http:// or https://
         if not (self.institution_url.startswith("http://") or self.institution_url.startswith("https://")):
             self.institution_url = "http://" + self.institution_url
 
-        # Call the parent class's save method
         super().save(*args, **kwargs)
 
 class Author(models.Model):
@@ -129,11 +126,8 @@ class Paper(models.Model):
 
     def agreement_file_path(instance, filename):
         agreement_count = instance.order or Paper.objects.filter(workshop=instance.workshop).count() + 1
-        print(agreement_count)
         filename = f'agreement{agreement_count}.html'
     
-        # if not filename.lower().endswith('.html'):
-        #     filename += '.html'
         return f"agreement/Vol-{instance.workshop.id}/{filename}"
     
     paper_title = models.CharField(max_length=200)

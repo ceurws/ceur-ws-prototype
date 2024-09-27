@@ -32,9 +32,8 @@
                       <i>Currently uploaded preface: <a href="{{ form.instance.preface.url }}">{{ form.instance.preface.name }}</a></i>
                       <br>
                   {% endif %}
-                  <input type="button" value="&times;" class="delete-preface close-button" style="position: absolute; top: 0; right: 0;">
-                  {{ form.DELETE }}
               </div>
+              <hr>
           {% endfor %}
       </div>
       <br>
@@ -45,6 +44,7 @@
       <div class="session-form" id="session-form">
         {% for form in session_form%}
           {{ form.as_p }}
+          <hr>
           {% endfor %}
         </div>
    <input type="button" value="Add Session" class="button-13" id="add_session">
@@ -69,8 +69,8 @@
 <div id="empty_preface_form" style="display:none">
   <div class="preface-form" style="position: relative;">
       {{ preface_formset.empty_form.as_p }}
-      <input type="button" value = "&times;" class="delete-preface close-button" style="position: absolute; top: 0; right: 0;">
-      {{ preface_formset.empty_form.DELETE }} 
+      {% comment %} <input type="button" value = "&times;" class="delete-preface close-button" style="position: absolute; top: 0; right: 0;">
+      {{ preface_formset.empty_form.DELETE }}  {% endcomment %}
       <hr>
   </div>
 <div id="empty_session_form" style="display:none">
