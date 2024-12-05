@@ -20,6 +20,15 @@ class Editor(models.Model):
     def __str__(self):
         # return self.name
         return f"{self.editor_name}, {self.institution}, {self.institution_country}"
+    
+    def save(self, *args, **kwargs):
+        if not (self.editor_url.startswith("http://") or self.editor_url.startswith("https://")):
+            self.editor_url = "http://" + self.editor_url
+
+        if not (self.institution_url.startswith("http://") or self.institution_url.startswith("https://")):
+            self.institution_url = "http://" + self.institution_url
+
+        super().save(*args, **kwargs)
 
 class Author(models.Model):
     author_name = models.CharField(max_length=100)
@@ -117,11 +126,8 @@ class Paper(models.Model):
 
     def agreement_file_path(instance, filename):
         agreement_count = instance.order or Paper.objects.filter(workshop=instance.workshop).count() + 1
-        print(agreement_count)
         filename = f'agreement{agreement_count}.html'
     
-        # if not filename.lower().endswith('.html'):
-        #     filename += '.html'
         return f"agreement/Vol-{instance.workshop.id}/{filename}"
     
     paper_title = models.CharField(max_length=200)

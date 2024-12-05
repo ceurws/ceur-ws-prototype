@@ -25,16 +25,6 @@
                     <div>
                         <input type='hidden' name='paper_order' value="{{ paperform.instance.order }}">
                         {{ paperform.as_p }}
-                        {%comment%}
-                        {% if paperform.instance.uploaded_file %}
-                        <p>Uploaded File: <a href="{{ paperform.instance.uploaded_file.url }}">{{
-                                paperform.instance.uploaded_file.name }}</a></p>
-                        {% endif %}
-                        {% if paperform.instance.agreement_file %}
-                        <p>Uploaded Agreement: <a href="{{ paperform.instance.agreement_file.url }}">{{
-                                paperform.instance.agreement_file.name }}</a></p>
-                        {% endif %}
-                        {%endcomment%}
                         <div class="delete_object">
                             <input type="checkbox" name="papers_to_delete" value="{{ paperform.instance.id }}">
                             <label for="papers_to_delete">Select to delete. Keep in mind that deleting the paper

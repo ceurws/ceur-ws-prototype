@@ -96,7 +96,7 @@
                     <div class="paper-container">
                         <div class="paper-summary">
                             {% if paper.complete %}
-                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }} {{paper.complete}}</span>
+                            <span class="paper-title" style = "color:green;"> &#9989; {{ paper.paper_title }}</span>
                             {%else%}
                             <span class="paper-title"> {{ paper.paper_title }}</span>
                             {%endif%}
@@ -115,8 +115,16 @@
                             </p>
                             <p><strong>Session:</strong> {{ paper.session.session_title }}</p>
                             <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                            <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
-                                    {{ paper.uploaded_file.name }}</a></p>
+                            
+                            <p><strong>Uploaded File:</strong> 
+                                {% if paper.uploaded_file %}
+                                    <a href="{{ paper.uploaded_file.url }}" target="_blank">
+                                        {{ paper.uploaded_file.name }}
+                                    </a>
+                                {% else %}
+                                    No file uploaded.
+                                {% endif %}
+                            </p>
                             {% if paper.agreement_file %}
                             <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}"
                                     target="_blank">
@@ -157,8 +165,15 @@
                             </p>
                             <p><strong>Session:</strong> {{ paper.session.session_title }}</p>
                             <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                            <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}" target="_blank">
-                                    {{ paper.uploaded_file.name }}</a></p>
+                            <p><strong>Uploaded File:</strong> 
+                                {% if paper.uploaded_file %}
+                                    <a href="{{ paper.uploaded_file.url }}" target="_blank">
+                                        {{ paper.uploaded_file.name }}
+                                    </a>
+                                {% else %}
+                                    No file uploaded.
+                                {% endif %}
+                            </p>
                         </div>
 
                     </div>
@@ -194,9 +209,15 @@
                                     {% endfor %}
                                 </p>
                                 <p><strong>Pages:</strong> {{ paper.pages }}</p>
-                                <p><strong>Uploaded File:</strong> <a href="{{ paper.uploaded_file.url }}"
-                                        target="_blank">
-                                        {{paper.uploaded_file.name }}</a></p>
+                                <p><strong>Uploaded File:</strong> 
+                                    {% if paper.uploaded_file %}
+                                        <a href="{{ paper.uploaded_file.url }}" target="_blank">
+                                            {{ paper.uploaded_file.name }}
+                                        </a>
+                                    {% else %}
+                                        No file uploaded.
+                                    {% endif %}
+                                </p>
                                 {% if paper.agreement_file %}
                                 <p><strong>Uploaded Agreement:</strong> <a href="{{ paper.agreement_file.url }}"
                                         target="_blank">

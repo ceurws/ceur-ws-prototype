@@ -38,7 +38,6 @@ class CreateWorkshop(View):
         all_submissions = None
         if venue_id:
             try:
-                venue_group = ORC_instance.get_group(id=venue_id)
                 all_submissions = ORC_instance.get_all_notes(invitation=f'{venue_id}/-/Submission')
 
             except:
@@ -75,7 +74,6 @@ class CreateWorkshop(View):
                     )
                     form_data['pages'] = len(PdfReader(pdf_io).pages)
                     form_files['uploaded_file'] = in_memory_pdf
-                    # add agreement file here
                 except:
                     # if a pdf isn't connected to the paper title it's probably a desk rejected paper.
                     pass
@@ -89,7 +87,8 @@ class CreateWorkshop(View):
                     paper_instance.save()
                     paper_form_list.append(paper_form)
                 else:
-                    print(paper_form.errors)
+                    # validation errors can be printed here
+                    pass
                 
                 # add the authors
                 try:
@@ -109,20 +108,17 @@ class CreateWorkshop(View):
         return paper_author_combinations
 
     def get(self, request):
-        # form = WorkshopForm()
         editor_form = EditorFormSet(queryset=Editor.objects.none(), 
                                     prefix='editor')
         session_form = SessionFormSet(queryset=Session.objects.none(), 
                                       prefix='session')
+
         preface_formset = PrefaceFormset(queryset=Preface.objects.none(),
                                         prefix = 'preface')
         workshop_id = request.GET.get('workshop_id')
         workshop_instance = self.get_workshop(workshop_id) if workshop_id else None
 
         form = WorkshopForm(instance=workshop_instance)
-        # editor_form = EditorFormSet(queryset=workshop_instance.editors.all(), prefix='editor')
-        # session_form = SessionFormSet(queryset=workshop_instance.sessions.all(), prefix='session')
-        # preface_formset = PrefaceFormset(queryset=workshop_instance.prefaces.all(), prefix='preface')
 
         context = {'form':form, 
                    'editor_form':editor_form, 
@@ -133,10 +129,10 @@ class CreateWorkshop(View):
 
     def post(self, request):
         if 'submit_button' in request.POST: 
-
             workshop_instance = self.get_workshop(request.POST.get('workshop_id')) if request.POST.get('workshop_id') else None
 
             if workshop_instance.submitted:
+
                 # If the workshop is already submitted, show a pop-up and redirect to the workshop overview
                 return HttpResponse(
                     f"""
@@ -149,23 +145,32 @@ class CreateWorkshop(View):
 
             editor_formset = EditorFormSet(queryset=Editor.objects.none(), data=request.POST, prefix="editor")
             session_formset = SessionFormSet(queryset=Session.objects.none(), data=request.POST, prefix="session")
-
+            
             workshop_form = WorkshopForm(data=request.POST, files=request.FILES, instance=workshop_instance)
             preface_formset = PrefaceFormset(data = request.POST, files = request.FILES, instance = workshop_instance, prefix = "preface")
+            
             # Once forms have been bound (either using old or new editor agreement), we validate and save to the database.
-
             if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()
-                    , preface_formset.is_valid]):
+                    , preface_formset.is_valid()]):
                 workshop = workshop_form.save()  
 
                 editor_instances = editor_formset.save()
                 session_instances = session_formset.save()
 
+                # Save the formset, but don't commit to the database yet
                 prefaces = preface_formset.save(commit=False)
+
+                # Loop over deleted objects and delete them from the database
+                for deleted_obj in preface_formset.deleted_objects:
+                    deleted_obj.delete()
+
+                # Save each preface that is not marked for deletion
                 for preface in prefaces:
-                    preface.workshop = workshop
-                    preface.save()
-                    
+                    if preface not in preface_formset.deleted_objects:
+                        preface.workshop = workshop
+                        preface.save()
+
+                # Add related editors and sessions
                 workshop.editors.add(*editor_instances)
                 workshop.sessions.add(*session_instances)
 
@@ -209,6 +214,7 @@ class CreateWorkshop(View):
                                            prefix="editor")
             session_formset = SessionFormSet(queryset=Session.objects.none(),data = request.POST, prefix="session")
             preface_formset = PrefaceFormset(data = request.POST, files = request.FILES, prefix = "preface")
+            
             # before rendering we check if the bound forms are valid and we save a workshop instance so that the editor agreement can be extracted in a later stage
             if all([workshop_form.is_valid(), editor_formset.is_valid(), session_formset.is_valid()
                     , preface_formset.is_valid()]):

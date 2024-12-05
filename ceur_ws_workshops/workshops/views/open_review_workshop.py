@@ -17,7 +17,6 @@ class OpenReviewClient:
                 password='MxFNF93fXpGZ*3.'
             )
         except Exception as e:
-            print('error creating openreview object',e)
             self.error = e
             self.openreview_object = None
     
@@ -62,7 +61,9 @@ class OpenReviewClass(View):
                     instance = paper_form.save()
                     workshop.accepted_papers.add(instance)
                 else:
-                    print(paper_form.errors, "ERRORS")
+                    # print validation errors here
+                    pass
+
             return redirect('workshops:workshop_overview', secret_token=workshop.secret_token)
 
         elif 'no_papers' in request.POST:

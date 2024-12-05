@@ -123,7 +123,6 @@ def zip_files(workshop):
     for file_type in ['agreement', 'papers']:
         file_path = os.path.join(settings.MEDIA_ROOT, file_type, f'Vol-{workshop.id}')
         zip_filename = os.path.join(html_dir, f'{file_type.upper()}-Vol-{workshop.id}.zip')
-        print(f"Creating zip file: {zip_filename}")
 
         # Check if the directory exists and contains files
         if os.path.exists(file_path) and os.listdir(file_path):
@@ -132,29 +131,26 @@ def zip_files(workshop):
                     for file in files:
                         file_full_path = os.path.join(root, file)
                         arcname = os.path.relpath(file_full_path, file_path)
-                        print(f"Adding {file_full_path} as {arcname}")
                         zipf.write(file_full_path, arcname)
         else:
-            print(f"No files found in {file_path}")
+            # no files found in file path
+            pass
     
     return html_dir
 
 def zip_and_download_dir(workshop, html_dir):
     complete_zip_filename = os.path.join(settings.MEDIA_ROOT, f'Vol-{workshop.id}.zip')
-    print(f"Creating complete zip file: {complete_zip_filename}")
 
     with zipfile.ZipFile(complete_zip_filename, 'w') as zipf:
         for root, _, files in os.walk(html_dir):
             for file in files:
                 file_full_path = os.path.join(root, file)
                 arcname = os.path.relpath(file_full_path, settings.MEDIA_ROOT)
-                print(f"Adding {file_full_path} as {arcname}")
                 zipf.write(file_full_path, arcname)
 
     relative_path = os.path.relpath(complete_zip_filename, settings.MEDIA_ROOT)
     download_url = urljoin(settings.MEDIA_URL, relative_path)
     
-    print(f"Download URL: {download_url}")
     return download_url
 
 def get_agreement_filename(paper_instance, original_filename):

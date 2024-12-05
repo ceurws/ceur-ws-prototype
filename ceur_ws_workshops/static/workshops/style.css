@@ -47,6 +47,10 @@ fieldset {
   transition: border-color 300ms, box-shadow 300ms;
 }
 
+.not_displayed {
+  display: none;
+}
+
 .input-field:focus,
 .preview-field:focus {
   outline: none;

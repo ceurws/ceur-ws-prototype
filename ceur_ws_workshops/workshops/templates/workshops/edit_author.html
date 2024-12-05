@@ -16,19 +16,15 @@
   <fieldset>
 
     <legend>Paper Data</legend>
-    Don't forget to download the agreement form in order to sign it. If any details are wrong, or missing, just go back. 
-
+    Please make sure all details are correct.
+    <ul>
+      <li> Download the agreement file below and <b> sign </b> it. You can subsequently upload it below.</li>
+      <li> If any details are missing or incorrect on the agreement file please return to the previous page. </li>
+    </ul>
     <br><br> 
     <a id = "organizer_url" href="{{download_url.url}}" download> Download the agreement form</a>
     <br><br>
     {{ paper_form|crispy }}
-    {%comment%}
-    {% if paper_form.paper_title.errors %}
-      <div class="errorlist">
-        {{ paper_form.paper_title.errors }}
-      </div>
-    {% endif %}
-    {%endcomment%}
 
     <input type="hidden" name="secret_token" value="{{ paper_instance.secret_token }}">
   {% if paper_form.instance.uploaded_file%}
@@ -41,8 +37,7 @@
       {% for form in author_formset %}
         <div class="author-form" style="position: relative;">
           {{ form|crispy }}
-          <input type="button" value="&times;" class="delete-author close-button" style="position: absolute; top: 0; right: 0;">
-          {{ form.DELETE }}
+          {% comment %} <input type="button" value="&times;" class="delete-author close-button" style="position: absolute; top: 0; right: 0;"> {% endcomment %}
           <hr>
         </div>
       {% endfor %}
@@ -58,8 +53,7 @@
 <div id="empty_author_form" style="display:none">
   <div class="author-form" style="position: relative;">
     {{ author_formset.empty_form|crispy }}
-    <input type="button" value="&times;" class="delete-author close-button" style="position: absolute; top: 0; right: 0;">
-    {{ author_formset.empty_form.DELETE }} 
+    {% comment %} <input type="button" value="&times;" class="delete-author close-button" style="position: absolute; top: 0; right: 0;"> {% endcomment %}
     <hr>
   </div>
 </div>

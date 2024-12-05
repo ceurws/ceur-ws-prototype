@@ -5,10 +5,6 @@ from django.forms import modelformset_factory, inlineformset_factory, TextInput,
 from django_countries.widgets import CountrySelectWidget
 import os, json
 from django.core.exceptions import ValidationError
-# from signature_detect.loader import Loader
-# from signature_detect.extractor import Extractor
-# from signature_detect.cropper import Cropper
-# from signature_detect.judger import Judger
 from django.conf import settings
 from django.core.files.storage import default_storage
 from crispy_forms.helper import FormHelper
@@ -24,24 +20,6 @@ class DateInput(forms.DateInput):
         kwargs["format"] = "%Y-%m-%d"
         super().__init__(**kwargs)
 
-# def _detect_signature_in_image(file_path):
-#         loader = Loader()
-#         extractor = Extractor()
-#         cropper = Cropper(border_ratio=0)
-#         judger = Judger()
-
-#         masks = loader.get_masks(file_path)
-#         is_signed = False
-#         for mask in masks:
-#             labeled_mask = extractor.extract(mask)
-#             results = cropper.run(labeled_mask)
-#             for result in results.values():
-#                 is_signed = judger.judge(result["cropped_mask"])
-#                 if is_signed:
-#                     break
-#             if is_signed:
-#                 break
-#         return is_signed
 
 class WorkshopForm(forms.ModelForm):
     workshop_language_iso = forms.ChoiceField(label="Language", choices=[], required=False)
@@ -133,7 +111,6 @@ class WorkshopForm(forms.ModelForm):
         # Populate dropdown choices from JSON data
         choices = [(data['639-2'], data['name']) for code, data in languages.items()]
         self.fields['workshop_language_iso'].choices = choices
-        # default language 
         self.fields['workshop_language_iso'].initial = 'eng'
         self.fields['workshop_country'].initial = 'NL'
         email = kwargs.pop('volume_owner_email', None)
@@ -193,7 +170,8 @@ class PaperForm(forms.ModelForm):
         self.clean_enabled = kwargs.pop('clean_enabled', False)
         self.agreement_not_required = kwargs.pop('agreement_not_required', False)
         super(PaperForm, self).__init__(*args, **kwargs)
- 
+        # self.fields['complete'].required = True
+
         self.fields['session'].queryset = self.workshop.sessions.all() if self.workshop else Session.objects.none()
 
         self.fields['uploaded_file'].label = 'Change current file' if file_uploaded else 'Upload file'
@@ -221,7 +199,8 @@ class PaperForm(forms.ModelForm):
         model = Paper
         fields = ['paper_title', 'pages', 'session', 'agreement_file', 'has_third_party_material','uploaded_file', 'complete']
         help_texts = {'pages': '<br><i>Provide the length(number of pages) of the paper</i>.<br>',
-                      'has_third_party_material': '<i>Check this box if the paper contains third-party material</i>'}
+                      'has_third_party_material': '<i>Check this box if the paper contains third-party material</i>',
+                      'complete': '<i>Tick this box if all documents are uploaded and any documents that need to be signed are signed.</i>'}
         widgets = {
             'paper_title': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the title of the paper', 'strip': True}),
             'pages': forms.TextInput(attrs={'size': 70, 'placeholder': 'Enter the number of pages'}),
@@ -229,10 +208,10 @@ class PaperForm(forms.ModelForm):
             'agreement_file': forms.FileInput(attrs={'accept': '.pdf, .html'}),
 
             #  required: True is needed here for the __init__ to work in author_upload
-            'complete' : CheckboxInput(attrs={}),
+            'complete' : CheckboxInput(),
         }
         labels = {
-            'complete': 'Check this box if the details of this paper are complete and final',
+            'complete': 'Completed',
         }
 
         paper_title = forms.CharField(strip=True)
@@ -249,11 +228,7 @@ class PaperForm(forms.ModelForm):
             else:
                 del(uploaded_file)
         return cleaned_data
-        
-        # if not self._detect_signature_in_image(agreement_file_path):
-        #     print("Agreement file is not signed. Please upload a hand-signed agreement file.")
-        #     raise ValidationError("Agreement file is not signed. Please upload a hand-signed agreement file.")
-        
+
 class CustomBaseModelFormSet(BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         self.agreement_not_required = kwargs.pop('agreement_not_required', False)
@@ -283,7 +258,7 @@ PaperFormset = modelformset_factory(
 # function to generate formsets, so the extra parameter can be set dynamically in case of initial data.
 def get_author_formset(extra=0):
     return modelformset_factory(
-        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=extra,
+        Author, fields=('author_name', 'author_university', 'author_uni_url', 'author_email'), extra=extra, can_delete=True,
         widgets={
             'author_name': TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the name of the author',
@@ -294,9 +269,9 @@ def get_author_formset(extra=0):
             'author_uni_url': TextInput(attrs={'size': 70, 
                                             'placeholder': 'Enter the URL of the university which the author is affiliated to',
                                             'strip':True,}),
-            'author_email': TextInput(attrs={'size': 50,
+            'author_email': TextInput(attrs={'size': 70,
                                             'placeholder': 'Enter the email of the author',
-                                            'strip':True,}),
+                                            'strip':True,})
         },
         labels={
             'author_uni_url': "University URL",
@@ -328,11 +303,11 @@ class EditorForm(forms.ModelForm):
         }
 
 EditorFormSet = modelformset_factory(
-    Editor, form=EditorForm, extra=0,
+    Editor, form=EditorForm, extra=0, can_delete=True
 )
 
 SessionFormSet = modelformset_factory(
-    Session, fields=('session_title',), extra=0,
+    Session, fields=('session_title',), extra=0, can_delete=True,
     widgets = {
         'session_title': TextInput(attrs={'size': 70, 
                                             'placeholder': '(optional) Title of the session'}),
@@ -343,4 +318,4 @@ class WorkshopPrefaceForm(forms.ModelForm):
         model = Preface
         fields = ['preface']
 
-PrefaceFormset = inlineformset_factory(Workshop, Preface, form=WorkshopPrefaceForm, extra=0, can_delete=False)
+PrefaceFormset = inlineformset_factory(Workshop, Preface, form=WorkshopPrefaceForm, extra=0, can_delete=True)
