@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/ceur-beta/media/"
 
+
 # Application definition
 
 INSTALLED_APPS = [
