@@ -40,12 +40,12 @@ class WorkshopOverview(View):
         submit_path = 'workshops/submit_workshop.html'
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
 
-        # if workshop.submitted:
-        #     context = {
-        #         'workshop': workshop,
-        #         'already_submitted': True
-        #     }
-        #     return self.render_workshop(request, edit_mode=False, context=context)
+        if workshop.submitted:
+            context = {
+                'workshop': workshop,
+                'already_submitted': True
+            }
+            return self.render_workshop(request, edit_mode=False, context=context)
         
         workshop_data = get_workshop_data(workshop)
         add_editors_data(workshop, workshop_data)
@@ -55,7 +55,7 @@ class WorkshopOverview(View):
         html_dir = zip_files(workshop)
         zipped_directory = zip_and_download_dir(workshop, html_dir)
         messages.success(request, 'Workshop submitted successfully.')
-
+        print("HERE", zipped_directory)
         workshop.submitted = True
         workshop.save()
 
@@ -75,8 +75,7 @@ class WorkshopOverview(View):
     
     def post(self, request, secret_token, open_review = False):
         workshop = get_object_or_404(Workshop, secret_token=secret_token)
-        print(request.POST)
-        # not sure if following if statement is necessary
+
         if request.POST["submit_button"] == "Edit":
             return self.render_workshop(request, edit_mode = True)
         
@@ -108,13 +107,15 @@ class WorkshopOverview(View):
                 if 'paper_order' in request.POST:
                     paper_order = json.loads(request.POST['paper_order'])
                     
-                    print(paper_order, "PAPER ORDER")
                     if not isinstance(paper_order, int):
                         for idx, item in enumerate(paper_order):
                             paper_id = item['paperId']
                             session_id = item['session']
-                            print(session_id)
-                            paper = Paper.objects.get(id=paper_id) 
+                            try:
+                                paper = Paper.objects.get(id=paper_id) 
+
+                            except:
+                                return self.render_workshop(request, edit_mode=False)
                             # change logic 
                             if session_id != 'unassigned' and session_id != '' and (not paper.session or str(paper.session.id) != session_id):
                                 session = get_object_or_404(Session, pk=session_id)

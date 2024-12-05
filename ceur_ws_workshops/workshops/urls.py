@@ -3,9 +3,7 @@ from django.urls import path
 # from . import views
 from .views import index, CreateWorkshop, AuthorUpload, WorkshopOverview, edit_author_post_view, GenerateHtml, OpenReviewClass
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.conf.urls import include
-from django.urls import re_path
-from django.views.static import serve
+from django.conf.urls.static import static
 from django.conf import settings
 app_name = "workshops"
 
@@ -20,4 +18,7 @@ urlpatterns = [
 ]
 
 urlpatterns += staticfiles_urlpatterns()
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
